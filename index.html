@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Les Expériences numériques du Dr John</title>
+    <meta name="description" content="Les Expériences numériques du Dr John — un espace d’outils, de prototypes et d’explorations du quotidien." />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+      :root {
+        --bg: #ffffff;
+        --fg: #121212;
+        --muted: #5a5a5a;
+        --card: #f4f4f5;
+        --accent: #0d6efd;
+        --border: #e5e7eb;
+        --shadow: 0 1px 2px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+      }
+      html[data-theme="dark"] {
+        --bg: #0b0b0c;
+        --fg: #ececec;
+        --muted: #b3b3b3;
+        --card: #151518;
+        --accent: #7aa2ff;
+        --border: #22242a;
+        --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.25);
+      }
+      body {
+        background: var(--bg);
+        color: var(--fg);
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, sans-serif;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+      header {
+        text-align: center;
+        padding: 3rem 1rem 1.5rem;
+      }
+      header h1 {
+        font-weight: 800;
+        font-size: 2.2rem;
+        letter-spacing: .5px;
+      }
+      header p {
+        color: var(--muted);
+        font-size: 1rem;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      .theme-toggle {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: .6rem;
+        padding: .4rem .8rem;
+        cursor: pointer;
+        box-shadow: var(--shadow);
+      }
+      main {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        padding: 2rem;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: .9rem;
+        box-shadow: var(--shadow);
+        width: 280px;
+        padding: 1.4rem;
+        text-align: center;
+        transition: transform .2s ease, box-shadow .2s ease;
+      }
+      .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 2px 6px rgba(0,0,0,.1), 0 10px 24px rgba(0,0,0,.15);
+      }
+      .card h2 {
+        font-size: 1.25rem;
+        margin-bottom: .6rem;
+      }
+      .card p {
+        font-size: .9rem;
+        color: var(--muted);
+        margin-bottom: 1rem;
+      }
+      .btn {
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: .5rem;
+        padding: .6rem 1rem;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .btn:hover {
+        opacity: .9;
+      }
+      footer {
+        text-align: center;
+        font-size: .85rem;
+        color: var(--muted);
+        padding: 1.2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <button class="theme-toggle" id="themeToggle">🌙</button>
+      <h1>🧪 Les Expériences numériques du Dr John</h1>
+      <p>Portail personnel de prototypes et webapps — petit laboratoire numérique où tout peut arriver.</p>
+    </header>
+
+    <main>
+      <div class="card">
+        <h2>Vite un V'Lille !</h2>
+        <p>Disponibilité en temps réel des stations V'Lille, avec favoris, tri et géolocalisation.</p>
+        <a href="ViteVlille.html" class="btn">Ouvrir l’app 🚲</a>
+      </div>
+    </main>
+
+    <footer>
+      © 2025 Dr. John — hébergé sur GitHub Pages
+    </footer>
+    <script>
+      const themeToggle = document.getElementById('themeToggle');
+      const currentTheme = localStorage.getItem('drjohn_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', currentTheme);
+      themeToggle.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+      themeToggle.addEventListener('click', () => {
+        const newTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('drjohn_theme', newTheme);
+        themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+      });
+    </script>
+  </body>
+</html>

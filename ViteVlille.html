@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vite un V'Lille !</title>
+  <meta name="description" content="Disponibilité en temps réel des stations V'Lille — favoris, recherche, thème sombre, sans rechargement." />
+  <style>
+    :root {
+      --bg: #ffffff;
+      --fg: #121212;
+      --muted: #5a5a5a;
+      --card: #f4f4f5;
+      --accent: #0d6efd;
+      --ok: #16a34a;   /* vert */
+      --warn: #f59e0b; /* orange */
+      --bad: #ef4444;  /* rouge */
+      --border: #e5e7eb;
+      --shadow: 0 1px 2px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+    }
+    html[data-theme="dark"] {
+      --bg: #0b0b0c;
+      --fg: #ececec;
+      --muted: #b3b3b3;
+      --card: #151518;
+      --accent: #7aa2ff;
+      --border: #22242a;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.25);
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji", "Segoe UI Emoji"; background: var(--bg); color: var(--fg); }
+
+    header {
+      position: sticky; top: 0; z-index: 10;
+      backdrop-filter: blur(6px);
+      background: color-mix(in oklab, var(--bg) 85%, transparent);
+      border-bottom: 1px solid var(--border);
+    }
+    .bar { max-width: 900px; margin: 0 auto; padding: .8rem 1rem; display: flex; align-items: center; gap: .75rem; }
+    .logoBike { 
+      width: 24px; 
+      height: 24px; 
+      margin-right: .4rem; 
+      display: inline-block; 
+      stroke: var(--fg); 
+      fill: none; 
+      stroke-width: 1.8; 
+      stroke-linecap: round; 
+      stroke-linejoin: round;
+    }
+
+    .title { font-weight: 800; letter-spacing: .2px; }
+    .spacer { flex: 1; }
+    .pill { display: inline-flex; align-items: center; gap: .4rem; font-size: .9rem; padding: .35rem .6rem; border: 1px solid var(--border); border-radius: 999px; background: var(--card); }
+    .btn { appearance: none; border: 1px solid var(--border); padding: .55rem .8rem; background: var(--card); color: var(--fg); border-radius: .7rem; box-shadow: var(--shadow); cursor: pointer; }
+    .btn[aria-current="page"]{ outline: 2px solid var(--accent); }
+    .settings { position: relative; }
+    .gear { font-size: 1rem; }
+    .panel { position: absolute; right: 0; top: calc(100% + .4rem); min-width: 220px; background: var(--card); border: 1px solid var(--border); border-radius: .7rem; box-shadow: var(--shadow); padding: .5rem; display: none; z-index: 15; }
+    .panel.open { display: block; }
+    .panel h3 { margin: .2rem .4rem .4rem; font-size: .9rem; font-weight: 700; }
+    .panel .row { display: flex; align-items: center; gap: .5rem; padding: .35rem .5rem; border-radius: .5rem; }
+    .panel .row:hover { background: color-mix(in oklab, var(--card) 85%, var(--accent) 15%); }
+    .panel label { flex: 1; cursor: pointer; }
+
+    .banner { display: none; background: color-mix(in oklab, var(--bad) 18%, var(--bg)); color: var(--fg); border-bottom: 1px solid var(--border); }
+    .banner .wrap { max-width: 900px; margin: 0 auto; padding: .5rem 1rem; display: flex; align-items: center; gap: .6rem; }
+    .ptr { display:none; background: color-mix(in oklab, var(--accent) 12%, var(--bg)); border-bottom: 1px solid var(--border); }
+    .ptr .wrap { max-width: 900px; margin: 0 auto; padding: .4rem 1rem; font-size: .9rem; }
+    .ptr.show { display:block; }
+
+    main { max-width: 900px; margin: 0 auto; padding: 1rem; }
+
+    /* Search */
+    .search { position: sticky; top: 3.25rem; z-index: 5; background: var(--bg); padding: .6rem 0 .8rem; }
+    .search .wrap { position: relative; }
+    .suggestions { position: absolute; left: 0; right: 0; top: 100%; margin-top: .25rem; background: var(--card); border: 1px solid var(--border); border-radius: .7rem; box-shadow: var(--shadow); list-style: none; padding: .25rem 0; max-height: 280px; overflow: auto; }
+    .suggestions[hidden] { display: none; }
+    .suggestions li { padding: .55rem .9rem; cursor: pointer; }
+    .suggestions li:hover { background: color-mix(in oklab, var(--card) 80%, var(--accent) 20%); }
+
+    .nearby { margin-bottom: 1rem; }
+    .nearby h2 { margin: 0 0 .5rem 0; font-size: 1rem; font-weight: 700; }
+    .distance { margin-left: .35rem; font-size: .85rem; color: var(--muted); }
+    .search input { width: 100%; padding: .8rem 1rem; border-radius: .7rem; border: 1px solid var(--border); background: var(--card); color: var(--fg); font-size: 1rem; }
+
+    /* Cards list */
+    .list { display: grid; grid-template-columns: 1fr; gap: .8rem; }
+    @media (min-width: 640px){ .list { grid-template-columns: 1fr 1fr; } }
+
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: .9rem; padding: .9rem; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: .5rem; }
+    .card-head { display:flex; align-items: center; gap:.6rem; }
+    .station-name { font-weight: 700; line-height: 1.2; }
+    .star { margin-left: auto; font-size: 1.2rem; cursor: pointer; user-select: none; }
+    .star[aria-pressed="true"] { filter: drop-shadow(0 0 6px color-mix(in oklab, var(--accent) 80%, transparent)); }
+
+    .stats { display: flex; gap: .6rem; flex-wrap: wrap; }
+    .chip { display: inline-flex; align-items: center; gap: .45rem; padding: .45rem .6rem; border-radius: .6rem; border: 1px solid var(--border); background: color-mix(in oklab, var(--card) 90%, transparent); font-variant-numeric: tabular-nums; }
+    .chip.ok { border-color: color-mix(in oklab, var(--ok) 45%, var(--border)); }
+    .chip.warn { border-color: color-mix(in oklab, var(--warn) 55%, var(--border)); }
+    .chip.bad { border-color: color-mix(in oklab, var(--bad) 55%, var(--border)); }
+
+    .updated { color: var(--muted); font-size: .85rem; }
+    .addr { color: var(--muted); font-size: .9rem; }
+    .actions { display: inline-flex; gap: .6rem; flex-wrap: wrap; margin-top: .2rem; }
+    .btn-link { display: inline-flex; align-items: center; gap: .35rem; padding: .35rem .55rem; border-radius: .55rem; border: 1px solid var(--border); background: color-mix(in oklab, var(--card) 92%, transparent); text-decoration: none; color: var(--fg); box-shadow: var(--shadow); font-size: .92rem; }
+    .btn-link:hover { filter: brightness(1.02); }
+    .empty { padding: 1rem; border: 1px dashed var(--border); border-radius: .9rem; background: var(--card); }
+
+    /* View toggling */
+    [data-view] { display: none; }
+    [data-view].active { display: block; }
+
+    footer { max-width: 900px; margin: 1rem auto 3rem; padding: 0 1rem; color: var(--muted); font-size: .85rem; }
+    a { color: var(--accent); }
+
+    /* Switch */
+    .switch { display:inline-flex; align-items:center; gap:.5rem; cursor:pointer; user-select:none; }
+    .switch input { appearance: none; width: 40px; height: 24px; border-radius: 999px; background: #bdbdbd; position: relative; outline: none; border: 1px solid var(--border); }
+    .switch input::after{ content:""; position:absolute; top:1px; left:1px; width:20px; height:20px; border-radius: 50%; background: #fff; transition: transform .2s ease; box-shadow: var(--shadow); }
+    .switch input:checked{ background: color-mix(in oklab, var(--accent) 60%, #bdbdbd); }
+    .switch input:checked::after{ transform: translateX(16px); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="bar">
+      <svg class="logoBike" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <circle cx="6" cy="17" r="4"></circle>
+        <circle cx="18" cy="17" r="4"></circle>
+        <path d="M6 17 L10 9 L12 13 L18 13"></path>
+        <path d="M12 13 L14 17"></path>
+      </svg>
+      <div class="title">Vite un V'Lille&nbsp;!</div>
+      <a href="index.html" class="btn" title="Retour au portail d’accueil">🏠 Accueil</a>
+      <span id="lastUpdate" class="pill" aria-live="polite">⏱︎ Maj — …</span>
+      <button id="btnLocate" class="btn" title="Stations proches">📍 Autour de moi</button>
+      <div class="spacer"></div>
+      <button id="btnHome" class="btn" aria-current="page">Mes stations</button>
+      <button id="btnBrowse" class="btn">Gérer mes stations</button>
+      <div class="settings">
+        <button id="btnSettings" class="btn gear" aria-haspopup="true" aria-expanded="false" title="Tri & filtres">⚙︎</button>
+        <div id="settingsPanel" class="panel" role="dialog" aria-label="Tri & filtres">
+          <h3>Tri des stations</h3>
+          <div class="row"><input type="radio" name="sort" id="sort-bikes" value="bikes"><label for="sort-bikes">Par vélos disponibles</label></div>
+          <div class="row"><input type="radio" name="sort" id="sort-docks" value="docks"><label for="sort-docks">Par places disponibles</label></div>
+          <div class="row"><input type="radio" name="sort" id="sort-distance" value="distance"><label for="sort-distance">Par distance</label></div>
+          <div class="row"><input type="checkbox" id="sort-auto"><label for="sort-auto">Tri auto par proximité (si géoloc)</label></div>
+          <h3>Badges d’état</h3>
+          <div class="row"><label for="thr-empty">Seuil “bientôt vide”</label><input type="number" id="thr-empty" min="0" max="10" style="width:64px;"></div>
+          <div class="row"><label for="thr-full">Seuil “bientôt plein”</label><input type="number" id="thr-full" min="0" max="10" style="width:64px;"></div>
+        </div>
+      </div>
+      <label class="switch" title="Basculer le thème">
+        <span>🌙</span>
+        <input id="themeToggle" type="checkbox" aria-label="Activer le thème sombre" />
+      </label>
+    </div>
+  </header>
+
+  <div id="ptr" class="ptr" role="status" aria-live="polite"><div class="wrap">↻ Glisse vers le bas pour actualiser</div></div>
+
+  <div id="errorBanner" class="banner" role="status" aria-live="polite">
+    <div class="wrap">⚠️ Impossible d’actualiser les données pour le moment. Dernières infos affichées.</div>
+  </div>
+
+  <main>
+    <!-- Vue 1 : Favoris -->
+    <section id="view-fav" data-view class="active" aria-labelledby="btnHome">
+      <section id="nearby" class="nearby" hidden>
+        <h2>À proximité</h2>
+        <div id="nearList" class="list" role="list"></div>
+      </section>
+      <div id="favList" class="list" role="list"></div>
+      <div id="favEmpty" class="empty" hidden>
+        Aucune station en favori pour l'instant. Ouvre « Gérer mes stations » pour en ajouter ⭐.
+      </div>
+    </section>
+
+    <!-- Vue 2 : Recherche / Ajout -->
+    <section id="view-browse" data-view aria-labelledby="btnBrowse">
+      <div class="search">
+        <div class="wrap">
+          <input id="search" type="search" placeholder="Rechercher une station… (filtre en direct)" aria-label="Rechercher une station" autocomplete="off" />
+          <ul id="suggestions" class="suggestions" role="listbox" hidden></ul>
+        </div>
+      </div>
+      <div id="allList" class="list" role="list" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer>
+    <div>Source données : <a href="https://transport.data.gouv.fr/datasets/vlille-disponibilite-en-temps-reel-3" target="_blank" rel="noopener">GBFS Ilévia (V'Lille)</a>. Actualisation ~ 60 s. | Auteur : Dr. John</div>
+  </footer>
+
+  <script>
+    // ====== Constantes & état ======
+    const GBFS_INDEX = 'https://media.ilevia.fr/opendata/gbfs.json';
+    const GBFS_LANG = 'fr'; // fallback to first available if missing
+
+    const LS_KEYS = { fav: 'vlille_favorites', theme: 'vlille_theme' };
+
+    const state = {
+      stations: /** @type {Array<Station>} */([]),
+      favorites: new Set(JSON.parse(localStorage.getItem(LS_KEYS.fav) || '[]')),
+      theme: localStorage.getItem(LS_KEYS.theme) || 'light',
+      timer: null,
+      lastFetch: null,
+      userLoc: null,
+      sort: localStorage.getItem('vlille_sort') || 'bikes',
+      thr: JSON.parse(localStorage.getItem('vlille_thr') || '{"empty":2,"full":2}'),
+      sortAuto: JSON.parse(localStorage.getItem('vlille_sort_auto') || 'true'),
+      trend: {},
+    };
+
+    /** @typedef {{ id:string, name:string, bikes:number, docks:number, updatedAt:string, lat?:number, lon?:number, address?:string }} Station */
+
+    // ====== Utilitaires ======
+    const el = (sel, root=document) => root.querySelector(sel);
+    const els = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+    const fmtTime = (iso) => {
+      try { const d = new Date(iso); return new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' }).format(d); } catch { return '—'; }
+    };
+
+    function saveFavorites(){ localStorage.setItem(LS_KEYS.fav, JSON.stringify([...state.favorites])); }
+    function saveTheme(){ localStorage.setItem(LS_KEYS.theme, state.theme); }
+    function saveSort(){ localStorage.setItem('vlille_sort', state.sort); }
+    function saveThr(){ localStorage.setItem('vlille_thr', JSON.stringify(state.thr)); }
+    function saveSortAuto(){ localStorage.setItem('vlille_sort_auto', JSON.stringify(state.sortAuto)); }
+    function loadHistory(){
+      try { return JSON.parse(localStorage.getItem('vlille_hist') || '{"ts":0,"data":{}}'); } catch { return { ts:0, data:{} }; }
+    }
+    function saveHistory(snapshot){ localStorage.setItem('vlille_hist', JSON.stringify(snapshot)); }
+
+    function qtyClass(n){
+      if (n >= 5) return 'ok';
+      if (n >= 1) return 'warn';
+      return 'bad';
+    }
+
+    function unit(n, singular, plural){
+      // Spécifique demandé : 0 utilise le singulier
+      return (n === 0 || n === 1) ? singular : plural;
+    }
+
+    function toRad(d){ return d * Math.PI / 180; }
+    function haversine(a, b){
+      if (!a || !b) return Infinity;
+      const R = 6371; // km
+      const dLat = toRad((b.lat||0) - (a.lat||0));
+      const dLon = toRad((b.lon||0) - (a.lon||0));
+      const la1 = toRad(a.lat||0); const la2 = toRad(b.lat||0);
+      const x = Math.sin(dLat/2)**2 + Math.cos(la1)*Math.cos(la2)*Math.sin(dLon/2)**2;
+      return 2 * R * Math.asin(Math.min(1, Math.sqrt(x)));
+    }
+
+    function sortStations(arr){
+      const auto = state.sortAuto && state.userLoc;
+      const mode = auto ? 'distance' : state.sort;
+      if (mode === 'bikes') return [...arr].sort((a,b)=> b.bikes - a.bikes || a.name.localeCompare(b.name,'fr'));
+      if (mode === 'docks') return [...arr].sort((a,b)=> b.docks - a.docks || a.name.localeCompare(b.name,'fr'));
+      if (mode === 'distance' && state.userLoc) return [...arr].sort((a,b)=> haversine(state.userLoc, {lat:a.lat,lon:a.lon}) - haversine(state.userLoc, {lat:b.lat,lon:b.lon}));
+      return [...arr].sort((a,b)=> a.name.localeCompare(b.name,'fr'));
+    }
+
+    function updateTrends(newStations){
+      const prev = loadHistory();
+      const now = Date.now();
+      const within = (now - (prev.ts||0)) <= 60*60*1000; // 60 min
+      const prevMap = within ? (prev.data || {}) : {};
+      const trend = {};
+      for (const s of newStations){
+        const p = prevMap[s.id];
+        if (p){
+          trend[s.id] = {
+            bikes: Math.sign((s.bikes||0) - (p.bikes||0)),
+            docks: Math.sign((s.docks||0) - (p.docks||0))
+          };
+        }
+      }
+      state.trend = trend;
+      // Save current snapshot
+      const snap = { ts: now, data: Object.fromEntries(newStations.map(s=> [s.id, { bikes: s.bikes, docks: s.docks }])) };
+      saveHistory(snap);
+    }
+
+    // ====== Rendu ======
+    function render(){
+      // Thème
+      document.documentElement.setAttribute('data-theme', state.theme);
+      el('#themeToggle').checked = state.theme === 'dark';
+
+      // Dernière maj (header)
+      el('#lastUpdate').textContent = `⏱︎ Maj — ${state.lastFetch ? fmtTime(state.lastFetch) : '—'}`;
+
+      // Vue Favoris
+      const favContainer = el('#favList');
+      favContainer.innerHTML = '';
+      const favs = state.stations.filter(s => state.favorites.has(s.id));
+
+      // Nearby section
+      const nearWrap = el('#nearby');
+      const nearList = el('#nearList');
+      if (state.userLoc) {
+        const withGeo = state.stations.filter(s => Number.isFinite(s.lat) && Number.isFinite(s.lon));
+        const nearby = withGeo
+          .map(s => ({ s, d: haversine(state.userLoc, {lat:s.lat, lon:s.lon}) }))
+          .sort((a,b)=> a.d - b.d)
+          .slice(0, 6)
+          .map(x => x.s);
+        nearList.innerHTML = '';
+        nearby.forEach(s => nearList.appendChild(stationCard(s)));
+        nearWrap.hidden = nearby.length === 0;
+      } else {
+        nearWrap.hidden = true;
+      }
+
+      if (favs.length === 0) {
+        el('#favEmpty').hidden = false;
+      } else {
+        el('#favEmpty').hidden = true;
+        sortStations(favs).forEach(s => favContainer.appendChild(stationCard(s)));
+      }
+
+      // Vue Parcourir (filtrée)
+      const allContainer = el('#allList');
+      const q = el('#search').value.trim().toLowerCase();
+      const filtered = q ? state.stations.filter(s => s.name.toLowerCase().includes(q)) : state.stations;
+      allContainer.innerHTML = '';
+      sortStations(filtered).forEach(s => allContainer.appendChild(stationCard(s)));
+    }
+
+    function stationCard(s){
+      const card = document.createElement('article');
+      card.className = 'card';
+      card.setAttribute('role','listitem');
+
+      const head = document.createElement('div');
+      head.className = 'card-head';
+      const name = document.createElement('div');
+      name.className = 'station-name';
+      name.textContent = s.name;
+      if (state.userLoc && Number.isFinite(s.lat) && Number.isFinite(s.lon)){
+        const distKm = haversine(state.userLoc, {lat: s.lat, lon: s.lon});
+        const d = document.createElement('span');
+        d.className = 'distance';
+        d.textContent = `· ${distKm.toFixed(1)} km`;
+        name.appendChild(d);
+      }
+
+      const star = document.createElement('button');
+      star.className = 'star';
+      star.type = 'button';
+      const isFav = state.favorites.has(s.id);
+      star.setAttribute('aria-pressed', String(isFav));
+      star.setAttribute('aria-label', isFav ? 'Retirer des favoris' : 'Ajouter aux favoris');
+      star.textContent = isFav ? '★' : '☆';
+      star.addEventListener('click', () => {
+        if (state.favorites.has(s.id)) state.favorites.delete(s.id); else state.favorites.add(s.id);
+        saveFavorites();
+        render();
+      });
+
+      head.append(name, star);
+
+      // Adresse (si disponible)
+      if (s.address) {
+        const addr = document.createElement('div');
+        addr.className = 'addr';
+        addr.textContent = s.address;
+        card.appendChild(addr);
+      }
+
+      // Badges d’état
+      const badges = [];
+      // Fermée / Hors service d’après GBFS
+      if (s.is_installed === 0) badges.push(badge('Hors service'));
+      else if (s.is_renting === 0 && s.is_returning === 0) badges.push(badge('Fermée'));
+
+      // Plein / Bientôt plein
+      if (s.docks === 0) badges.push(badge('Plein'));
+      else if (s.docks <= state.thr.full) badges.push(badge('Bientôt plein'));
+
+      // Vide / Bientôt vide
+      if (s.bikes === 0) badges.push(badge('Vide'));
+      else if (s.bikes <= state.thr.empty) badges.push(badge('Bientôt vide'));
+
+      function badge(txt){ const b=document.createElement('span'); b.className='chip'; b.textContent=txt; return b; }
+
+      if (badges.length){ const row=document.createElement('div'); row.className='stats'; badges.forEach(x=>row.appendChild(x)); card.appendChild(row); }
+
+      // Lien d'itinéraire uniquement (Google Maps)
+      if (Number.isFinite(s.lat) && Number.isFinite(s.lon)){
+        const actions = document.createElement('div');
+        actions.className = 'actions';
+        const origin = (state.userLoc && Number.isFinite(state.userLoc.lat)) ? `&origin=${state.userLoc.lat},${state.userLoc.lon}` : '';
+        const dest = `${s.lat},${s.lon}`;
+        const gmaps = `https://www.google.com/maps/dir/?api=1&destination=${dest}${origin}&travelmode=walking`;
+        const a1 = document.createElement('a'); a1.href = gmaps; a1.target = '_blank'; a1.rel = 'noopener'; a1.className = 'btn-link'; a1.textContent = '🧭 Itinéraire';
+        actions.append(a1);
+        card.appendChild(actions);
+      }
+
+      const stats = document.createElement('div');
+      stats.className = 'stats';
+
+      const bikes = document.createElement('span');
+      bikes.className = `chip ${qtyClass(s.bikes)}`;
+      bikes.innerHTML = `🚲 <strong>${s.bikes}</strong> ${unit(s.bikes,'vélo','vélos')}`;
+      const tb = state.trend[s.id]?.bikes || 0;
+      if (tb !== 0){
+        const arrow = document.createElement('span');
+        arrow.style.marginLeft = '.25rem';
+        arrow.textContent = tb > 0 ? '↑' : '↓';
+        bikes.appendChild(arrow);
+      }
+
+      const docks = document.createElement('span');
+      docks.className = `chip ${qtyClass(s.docks)}`;
+      docks.innerHTML = `🅿️ <strong>${s.docks}</strong> ${unit(s.docks,'place','places')}`;
+      const td = state.trend[s.id]?.docks || 0;
+      if (td !== 0){
+        const arrow = document.createElement('span');
+        arrow.style.marginLeft = '.25rem';
+        arrow.textContent = td > 0 ? '↑' : '↓';
+        docks.appendChild(arrow);
+      }
+
+      const upd = document.createElement('div');
+      upd.className = 'updated';
+      upd.textContent = `Dernière mise à jour: ${fmtTime(s.updatedAt)}`;
+
+      card.append(head, stats, bikes, docks, upd);
+      return card;
+    }
+
+    // ====== Navigation de vues ======
+    function setView(which){
+      const isFavView = which === 'fav';
+      el('#view-fav').classList.toggle('active', isFavView);
+      el('#view-browse').classList.toggle('active', !isFavView);
+      el('#btnHome').setAttribute('aria-current', isFavView ? 'page' : 'false');
+      el('#btnBrowse').setAttribute('aria-current', !isFavView ? 'page' : 'false');
+      if (!isFavView) el('#search').focus({ preventScroll: true });
+    }
+
+    // ====== GBFS: récupération fusionnée ======
+    async function fetchStations(){
+      try {
+        // 1) Resolve localized GBFS feeds from index
+        const idxRes = await fetch(GBFS_INDEX, { cache: 'no-store' });
+        const idx = await idxRes.json();
+        const feeds = (idx.data?.[GBFS_LANG]?.feeds)
+          || idx.data?.[Object.keys(idx.data || {})[0]]?.feeds
+          || [];
+        const infoUrl   = feeds.find(f => f.name === 'station_information')?.url;
+        const statusUrl = feeds.find(f => f.name === 'station_status')?.url;
+        if (!infoUrl || !statusUrl) throw new Error('Flux GBFS manquants');
+
+        // 2) Fetch station_information & station_status in parallel
+        const [infoRes, statusRes] = await Promise.all([
+          fetch(infoUrl, { cache: 'no-store' }),
+          fetch(statusUrl, { cache: 'no-store' })
+        ]);
+        const [info, status] = await Promise.all([infoRes.json(), statusRes.json()]);
+
+        // 3) Merge by station_id
+        const infoById = new Map();
+        for (const s of (info.data?.stations || [])) infoById.set(String(s.station_id), s);
+
+        const out = [];
+        for (const st of (status.data?.stations || [])){
+          const id = String(st.station_id);
+          const i = infoById.get(id) || {};
+          out.push({
+            id,
+            name: i.name || `Station ${id}`,
+            bikes: Number(st.num_bikes_available ?? 0),
+            docks: Number(st.num_docks_available ?? 0),
+            updatedAt: (status?.last_updated ? new Date(status.last_updated*1000).toISOString() : new Date().toISOString()),
+            lat: Number(i.lat),
+            lon: Number(i.lon),
+            is_installed: Number(st.is_installed ?? 1),
+            is_renting: Number(st.is_renting ?? 1),
+            is_returning: Number(st.is_returning ?? 1),
+            address: String(i.address || i.adresse || i.street_address || i.rue || '')
+          });
+        }
+
+        out.sort((a,b)=> a.name.localeCompare(b.name, 'fr'));
+        state.stations = out;
+        updateTrends(out);
+        state.lastFetch = new Date().toISOString();
+        el('#errorBanner').style.display = 'none';
+        render();
+      } catch (err){
+        console.error('Erreur GBFS', err);
+        el('#errorBanner').style.display = 'block';
+      }
+    }
+
+    // ====== Auto-refresh ======
+    function startAutoRefresh(){
+      if (state.timer) clearInterval(state.timer);
+      state.timer = setInterval(fetchStations, 60_000); // 60s
+    }
+
+    // ====== Init ======
+    let ptrStartY = 0, ptrActive = false, ptrTriggered = false;
+    const PTR_THRESHOLD = 70;
+    function showPTR(msg){ const b=el('#ptr'); if(!b) return; b.querySelector('.wrap').textContent = msg; b.classList.add('show'); }
+    function hidePTR(){ const b=el('#ptr'); if(!b) return; b.classList.remove('show'); }
+
+    (function init(){
+      // Thème
+      state.theme = (state.theme === 'dark') ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', state.theme);
+      el('#themeToggle').checked = state.theme === 'dark';
+      el('#themeToggle').addEventListener('change', (e)=>{
+        state.theme = e.target.checked ? 'dark' : 'light';
+        saveTheme();
+        render();
+      });
+
+      // Nav
+      el('#btnHome').addEventListener('click', ()=> setView('fav'));
+      el('#btnBrowse').addEventListener('click', ()=> setView('browse'));
+
+      // Settings (tri & seuils)
+      const panel = el('#settingsPanel');
+      const btnSettings = el('#btnSettings');
+      const radios = ['bikes','docks','distance'];
+      const applySortUI = ()=>{
+        const id = 'sort-' + (radios.includes(state.sort)? state.sort : 'bikes');
+        const r = el('#'+id);
+        if (r) r.checked = true;
+        el('#thr-empty').value = state.thr.empty;
+        el('#thr-full').value  = state.thr.full;
+        el('#sort-auto').checked = !!state.sortAuto;
+      };
+      btnSettings.addEventListener('click', ()=>{
+        const open = !panel.classList.contains('open');
+        panel.classList.toggle('open', open);
+        btnSettings.setAttribute('aria-expanded', String(open));
+        if (open) applySortUI();
+      });
+      document.addEventListener('click', (e)=>{
+        if (!panel.contains(e.target) && e.target !== btnSettings) {
+          panel.classList.remove('open');
+          btnSettings.setAttribute('aria-expanded','false');
+        }
+      });
+      ['sort-bikes','sort-docks','sort-distance'].forEach(id => {
+        el('#'+id).addEventListener('change', (e)=>{
+          state.sort = e.target.value;
+          saveSort();
+          render();
+        });
+      });
+      el('#thr-empty').addEventListener('change', (e)=>{ state.thr.empty = Math.max(0, Number(e.target.value||0)); saveThr(); render(); });
+      el('#thr-full').addEventListener('change', (e)=>{ state.thr.full  = Math.max(0, Number(e.target.value||0)); saveThr(); render(); });
+      el('#sort-auto').addEventListener('change', (e)=>{ state.sortAuto = !!e.target.checked; saveSortAuto(); render(); });
+
+      // Géolocalisation
+      el('#btnLocate').addEventListener('click', ()=>{
+        if (!('geolocation' in navigator)) return alert("Géolocalisation non disponible sur cet appareil.");
+        navigator.geolocation.getCurrentPosition((pos)=>{
+          state.userLoc = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+          setView('fav');
+          render();
+        }, (err)=>{
+          console.warn('Geoloc error', err);
+          alert("Impossible de récupérer la position.");
+        }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 30_000 });
+      });
+
+      // Recherche
+      el('#search').addEventListener('input', render);
+
+      // Suggestions dropdown
+      const sugg = el('#suggestions');
+      el('#search').addEventListener('input', ()=>{
+        const q = el('#search').value.trim().toLowerCase();
+        if (!q) { sugg.hidden = true; sugg.innerHTML=''; render(); return; }
+        const names = state.stations
+          .map(s => s.name)
+          .filter((v,i,arr)=> arr.indexOf(v)===i) // unique
+          .filter(n => n.toLowerCase().includes(q))
+          .slice(0, 8);
+        sugg.innerHTML = names.map(n => `<li role="option">${n.replace(/</g,'&lt;')}</li>`).join('');
+        sugg.hidden = names.length === 0;
+      });
+      el('#suggestions').addEventListener('mousedown', (e)=>{
+        const li = e.target.closest('li');
+        if (!li) return;
+        el('#search').value = li.textContent;
+        el('#suggestions').hidden = true;
+        render();
+      });
+      el('#search').addEventListener('blur', ()=> setTimeout(()=> el('#suggestions').hidden = true, 150));
+      el('#search').addEventListener('focus', ()=>{
+        const q = el('#search').value.trim();
+        if (q) el('#search').dispatchEvent(new Event('input'));
+      });
+
+      // Pull-to-refresh (mobile)
+      window.addEventListener('touchstart', (e)=>{
+        if (window.scrollY === 0) { ptrStartY = e.touches[0].clientY; ptrActive = true; ptrTriggered = false; showPTR('↻ Glisse vers le bas pour actualiser'); }
+      }, { passive: true });
+      window.addEventListener('touchmove', (e)=>{
+        if (!ptrActive) return;
+        const dy = e.touches[0].clientY - ptrStartY;
+        if (dy > PTR_THRESHOLD) { showPTR('Relâcher pour actualiser'); ptrTriggered = true; }
+      }, { passive: true });
+      window.addEventListener('touchend', ()=>{
+        if (!ptrActive) return; ptrActive = false;
+        if (ptrTriggered) { showPTR('Actualisation…'); fetchStations().finally(()=> hidePTR()); }
+        else { hidePTR(); }
+      });
+
+      // Premier rendu + données
+      render();
+      fetchStations();
+      startAutoRefresh();
+    })();
+  </script>
+
+</body>
+</html>
