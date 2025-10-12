@@ -29,7 +29,7 @@
     }
 
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji", "Segoe UI Emoji"; background: var(--bg); color: var(--fg); }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji", "Segoe UI Emoji"; background: var(--bg); color: var(--fg); overflow-x: hidden; }
 
     header {
       position: sticky; top: 0; z-index: 10;
@@ -37,7 +37,7 @@
       background: color-mix(in oklab, var(--bg) 85%, transparent);
       border-bottom: 1px solid var(--border);
     }
-    .bar { max-width: 900px; margin: 0 auto; padding: .8rem 1rem; display: flex; align-items: center; gap: .75rem; }
+    .bar { max-width: 900px; margin: 0 auto; padding: .8rem 1rem; display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
     .logoBike { 
       width: 24px; 
       height: 24px; 
@@ -50,14 +50,15 @@
       stroke-linejoin: round;
     }
 
-    .title { font-weight: 800; letter-spacing: .2px; }
+    .title { font-weight: 800; letter-spacing: .2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 46vw; }
     .spacer { flex: 1; }
+    .bar > * { max-width: 100%; }
     .pill { display: inline-flex; align-items: center; gap: .4rem; font-size: .9rem; padding: .35rem .6rem; border: 1px solid var(--border); border-radius: 999px; background: var(--card); }
     .btn { appearance: none; border: 1px solid var(--border); padding: .55rem .8rem; background: var(--card); color: var(--fg); border-radius: .7rem; box-shadow: var(--shadow); cursor: pointer; }
     .btn[aria-current="page"]{ outline: 2px solid var(--accent); }
     .settings { position: relative; }
     .gear { font-size: 1rem; }
-    .panel { position: absolute; right: 0; top: calc(100% + .4rem); min-width: 220px; background: var(--card); border: 1px solid var(--border); border-radius: .7rem; box-shadow: var(--shadow); padding: .5rem; display: none; z-index: 15; }
+    .panel { position: absolute; right: .5rem; top: calc(100% + .4rem); min-width: 220px; max-width: min(320px, 95vw); background: var(--card); border: 1px solid var(--border); border-radius: .7rem; box-shadow: var(--shadow); padding: .5rem; display: none; z-index: 15; }
     .panel.open { display: block; }
     .panel h3 { margin: .2rem .4rem .4rem; font-size: .9rem; font-weight: 700; }
     .panel .row { display: flex; align-items: center; gap: .5rem; padding: .35rem .5rem; border-radius: .5rem; }
@@ -73,7 +74,7 @@
     main { max-width: 900px; margin: 0 auto; padding: 1rem; }
 
     /* Search */
-    .search { position: sticky; top: 3.25rem; z-index: 5; background: var(--bg); padding: .6rem 0 .8rem; }
+    .search { position: sticky; top: var(--header-h, 56px); z-index: 5; background: var(--bg); padding: .6rem 0 .8rem; }
     .search .wrap { position: relative; }
     .suggestions { position: absolute; left: 0; right: 0; top: 100%; margin-top: .25rem; background: var(--card); border: 1px solid var(--border); border-radius: .7rem; box-shadow: var(--shadow); list-style: none; padding: .25rem 0; max-height: 280px; overflow: auto; }
     .suggestions[hidden] { display: none; }
@@ -121,6 +122,13 @@
     .switch input::after{ content:""; position:absolute; top:1px; left:1px; width:20px; height:20px; border-radius: 50%; background: #fff; transition: transform .2s ease; box-shadow: var(--shadow); }
     .switch input:checked{ background: color-mix(in oklab, var(--accent) 60%, #bdbdbd); }
     .switch input:checked::after{ transform: translateX(16px); }
+    @media (max-width: 480px){
+      .bar { padding: .6rem .6rem; }
+      .title { max-width: 56vw; font-size: .95rem; }
+      .btn { padding: .45rem .6rem; font-size: .9rem; }
+      .pill { display: none; }
+      .logoBike { width: 20px; height: 20px; }
+    }
   </style>
 </head>
 <body>
@@ -285,6 +293,10 @@
       saveHistory(snap);
     }
 
+    function updateHeaderHeight(){
+      const h = document.querySelector('header');
+      if (h) document.documentElement.style.setProperty('--header-h', h.offsetHeight + 'px');
+    }
     // ====== Rendu ======
     function render(){
       // Thème
@@ -329,6 +341,7 @@
       const filtered = q ? state.stations.filter(s => s.name.toLowerCase().includes(q)) : state.stations;
       allContainer.innerHTML = '';
       sortStations(filtered).forEach(s => allContainer.appendChild(stationCard(s)));
+      updateHeaderHeight();
     }
 
     function stationCard(s){
@@ -526,6 +539,8 @@
       // Nav
       el('#btnHome').addEventListener('click', ()=> setView('fav'));
       el('#btnBrowse').addEventListener('click', ()=> setView('browse'));
+      updateHeaderHeight();
+      window.addEventListener('resize', updateHeaderHeight);
 
       // Settings (tri & seuils)
       const panel = el('#settingsPanel');
@@ -544,6 +559,7 @@
         panel.classList.toggle('open', open);
         btnSettings.setAttribute('aria-expanded', String(open));
         if (open) applySortUI();
+        requestAnimationFrame(updateHeaderHeight);
       });
       document.addEventListener('click', (e)=>{
         if (!panel.contains(e.target) && e.target !== btnSettings) {
