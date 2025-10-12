@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Météo & Air — Lille (pluie dans l’heure + qualité de l’air)</title>
+  <meta name="description" content="Mini webapp locale : pluie dans l’heure (nowcast) + qualité de l’air près de moi pour la MEL / Lille. Open data : Open‑Meteo, OpenAQ, RainViewer." />
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <style>
+    :root{
+      --bg:#ffffff; --fg:#111; --muted:#6b7280; --card:#f7f7f9; --border:#e5e7eb; --accent:#0d6efd;
+      --ok:#16a34a; --warn:#f59e0b; --bad:#ef4444; --shadow:0 1px 2px rgba(0,0,0,.06),0 6px 20px rgba(0,0,0,.06);
+    }
+    html[data-theme="dark"]{ --bg:#0b0b0c; --fg:#e7e7e7; --muted:#a3a3a3; --card:#141419; --border:#22242a; --accent:#7aa2ff; --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 24px rgba(0,0,0,.3); }
+    body{ background:var(--bg); color:var(--fg); }
+    .navbar{ backdrop-filter: blur(6px); background: color-mix(in oklab, var(--bg) 85%, transparent); border-bottom:1px solid var(--border); }
+    .card{ background:var(--card); border:1px solid var(--border); box-shadow:var(--shadow); }
+    .chip{ display:inline-flex; align-items:center; gap:.4rem; padding:.3rem .55rem; border-radius:.6rem; border:1px solid var(--border); background:color-mix(in oklab, var(--card) 92%, transparent); font-variant-numeric: tabular-nums; }
+    .chip.ok{ border-color: color-mix(in oklab, var(--ok) 55%, var(--border)); }
+    .chip.warn{ border-color: color-mix(in oklab, var(--warn) 55%, var(--border)); }
+    .chip.bad{ border-color: color-mix(in oklab, var(--bad) 55%, var(--border)); }
+    #map{ height: 380px; border-radius: .75rem; border:1px solid var(--border); }
+    .switch input{ appearance:none; width:42px; height:24px; border-radius:999px; background:#bdbdbd; border:1px solid var(--border); position:relative; }
+    .switch input::after{ content:""; position:absolute; top:1px; left:1px; width:20px; height:20px; border-radius:999px; background:#fff; transition:transform .2s ease; box-shadow:var(--shadow); }
+    .switch input:checked{ background: color-mix(in oklab, var(--accent) 60%, #bdbdbd); }
+    .switch input:checked::after{ transform: translateX(18px); }
+    .small{ color:var(--muted); }
+    .mono{ font-variant-numeric: tabular-nums; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+    /* Mobile tweaks */
+    @media (max-width: 576px){
+      html, body { overflow-x: hidden; }
+      #map{ height: 300px; }
+      .navbar .container-fluid{ row-gap: .5rem; }
+      .navbar .container-fluid > .d-flex{ flex-wrap: wrap; }
+      .chip{ font-size: .9rem; }
+      .btn.btn-sm{ white-space: nowrap; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar sticky-top">
+    <div class="container-fluid py-2">
+      <div class="d-flex align-items-center gap-2">
+        <a href="index.html" class="btn btn-sm btn-outline-secondary">← Accueil</a>
+        <span class="fs-5 fw-bold">Météo & Air — Lille</span>
+        <span id="stamp" class="chip">⏱︎ Maj — …</span>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <button id="btnLocate" class="btn btn-sm btn-outline-primary">📍 Autour de moi</button>
+        <label class="switch d-inline-flex align-items-center gap-2 ms-2">
+          <span>🌙</span>
+          <input id="themeToggle" type="checkbox"/>
+        </label>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container my-3">
+    <div class="row g-3">
+      <div class="col-12 col-lg-6">
+        <div class="card p-3 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h2 class="h5 m-0">🌧️ Pluie dans l’heure</h2>
+            <div class="small">Source : Open‑Meteo (ICON 15‑min) · RainViewer radar</div>
+          </div>
+          <div id="rainSummary" class="mb-2">—</div>
+          <div id="map"></div>
+          <div class="d-flex align-items-center justify-content-between mt-2">
+            <div class="small">Radar 2h passées + 30’ à venir</div>
+            <div class="d-flex gap-2">
+              <button id="animBack" class="btn btn-sm btn-outline-secondary">⏪</button>
+              <button id="animPlay" class="btn btn-sm btn-primary">▶️</button>
+              <button id="animFwd" class="btn btn-sm btn-outline-secondary">⏩</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <div class="card p-3 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h2 class="h5 m-0">🫧 Qualité de l’air — près de moi</h2>
+            <div class="small">Source : OpenAQ (mesures locales)</div>
+          </div>
+          <div id="airSummary" class="mb-2">—</div>
+          <div id="airList" class="row g-2"></div>
+          <div class="small mt-2">⚠️ Lecture simplifiée : couleurs ≈ seuils OMS (PM2.5 / PM10) et repères NO₂ / O₃. Valeurs officielles Atmo Hauts‑de‑France disponibles sur leur site.</div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="small text-center mt-4 mb-5">
+      <div>Cartes © OpenStreetMap · Radar © RainViewer · Prévisions © Open‑Meteo · Qualité de l’air © OpenAQ</div>
+      <div><a href="index.html">← Retour portail</a></div>
+    </footer>
+  </main>
+
+  <script>
+    const state = {
+      loc: { lat: 50.62925, lon: 3.05726 }, // Lille par défaut
+      map: null,
+      radar: { frames: [], index: 0, layers: [] },
+      timer: null,
+    };
+
+    const el = (s, r=document)=>r.querySelector(s);
+    const fmtTime = (d) => new Intl.DateTimeFormat('fr-FR', { hour:'2-digit', minute:'2-digit' }).format(d);
+    const setStamp = ()=> el('#stamp').textContent = `⏱︎ Maj — ${fmtTime(new Date())}`;
+
+    // THEME
+    const themeToggle = el('#themeToggle');
+    const savedTheme = localStorage.getItem('metair_theme')||'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    themeToggle.checked = savedTheme==='dark';
+    themeToggle.addEventListener('change', ()=>{
+      const t = themeToggle.checked ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', t);
+      localStorage.setItem('metair_theme', t);
+    });
+
+    // MAP + RADAR (RainViewer)
+    function initMap(){
+      state.map = L.map('map', { zoomControl: false }).setView([state.loc.lat, state.loc.lon], 11);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap', maxZoom: 18
+      }).addTo(state.map);
+      L.control.zoom({ position: 'bottomright' }).addTo(state.map);
+      L.marker([state.loc.lat, state.loc.lon]).addTo(state.map).bindPopup('Position estimée');
+      loadRadar();
+    }
+
+    async function loadRadar(){
+      try{
+        const res = await fetch('https://api.rainviewer.com/public/weather-maps.json', { cache:'no-store' });
+        const json = await res.json();
+        const past = json.radar && json.radar.past ? json.radar.past : [];
+        const nowcast = json.radar && json.radar.nowcast ? json.radar.nowcast : [];
+        state.radar.frames = [...past, ...nowcast];
+        state.radar.index = state.radar.frames.length - 1; // start at latest
+        renderRadar();
+      }catch(e){ console.warn('Radar load error', e); }
+    }
+
+    function renderRadar(){
+      // remove old layers
+      state.radar.layers.forEach(l=> state.map.removeLayer(l));
+      state.radar.layers = [];
+      // show up to 6 last frames for smoother animation
+      const start = Math.max(0, state.radar.index - 5);
+      for (let i = start; i <= state.radar.index; i++){
+        const f = state.radar.frames[i]; if (!f) continue;
+        const url = `https://tilecache.rainviewer.com/v2/radar/${f.path}/256/{z}/{x}/{y}/2/1_1.png`;
+        const layer = L.tileLayer(url, { opacity: (i===state.radar.index)?0.8:0.15, zIndex: 200 + i });
+        state.radar.layers.push(layer);
+        layer.addTo(state.map);
+      }
+    }
+
+    function stepRadar(dir){
+      if (!state.radar.frames.length) return;
+      state.radar.index = (state.radar.index + dir + state.radar.frames.length) % state.radar.frames.length;
+      renderRadar();
+    }
+
+    function playRadar(){
+      if (state.timer) { clearInterval(state.timer); state.timer=null; el('#animPlay').textContent='▶️'; return; }
+      el('#animPlay').textContent='⏸️';
+      state.timer = setInterval(()=> stepRadar(1), 500);
+    }
+
+    // RAIN NOWCAST (Open‑Meteo: 15‑min)
+    async function loadRain(){
+      try{
+        // 15‑min nowcast via ICON where available
+        const url = new URL('https://api.open-meteo.com/v1/forecast');
+        url.searchParams.set('latitude', state.loc.lat);
+        url.searchParams.set('longitude', state.loc.lon);
+        url.searchParams.set('minutely_15', 'precipitation,precipitation_probability');
+        url.searchParams.set('timezone', 'Europe/Paris');
+        const res = await fetch(url, { cache:'no-store' });
+        const data = await res.json();
+        const times = data.minutely_15?.time || [];
+        const prec = data.minutely_15?.precipitation || [];
+        const prob = data.minutely_15?.precipitation_probability || [];
+        const nextHour = [];
+        const now = Date.now();
+        for (let i=0;i<times.length;i++){
+          const t = new Date(times[i]).getTime();
+          if (t - now >= 0 && t - now <= 60*60*1000){
+            nextHour.push({ t: times[i], p: prec[i] ?? 0, pr: prob[i] ?? null });
+          }
+        }
+        let text = 'Aucune donnée minute trouvée.';
+        if (nextHour.length){
+          const maxP = Math.max(...nextHour.map(x=> x.p||0));
+          const maxPr = Math.max(...nextHour.map(x=> x.pr ?? 0));
+          const firstWet = nextHour.findIndex(x=> (x.p||0) > 0.05 || (x.pr??0) >= 40);
+          if (firstWet >= 0){
+            const eta = new Date(nextHour[firstWet].t);
+            text = `☔ Probable averse vers ${fmtTime(eta)} · intensité max ${maxP.toFixed(1)} mm/h · prob. jusqu’à ${maxPr}%`;
+          }else{
+            text = `✅ Pas de pluie significative prévue dans l’heure (max ${maxP.toFixed(1)} mm/h · prob. ${maxPr}%).`;
+          }
+        }
+        el('#rainSummary').textContent = text;
+      }catch(e){
+        console.warn('Rain nowcast error', e);
+        el('#rainSummary').textContent = 'Indispo pour le moment.';
+      }
+    }
+
+    // AIR QUALITY (OpenAQ v3: latest around me)
+    async function loadAir(){
+      try{
+        const lat = state.loc.lat, lon = state.loc.lon;
+        const url = new URL('https://api.openaq.org/v3/measurements');
+        url.searchParams.set('coordinates', `${lat},${lon}`);
+        url.searchParams.set('radius', '15000'); // 15 km autour
+        url.searchParams.set('parameters', 'pm25,pm10,no2,o3');
+        url.searchParams.set('limit', '200');
+        url.searchParams.set('order_by', 'datetime');
+        url.searchParams.set('sort', 'desc');
+        const res = await fetch(url, { cache:'no-store' });
+        const json = await res.json();
+        const latest = {};
+        for (const m of (json?.results||[])){
+          const key = m.parameter;
+          if (!latest[key]) latest[key] = m; // first is most recent thanks to sort=desc
+        }
+        const list = el('#airList'); list.innerHTML = '';
+        const tiles = [
+          ['PM2.5','pm25', 5, 15, 25],
+          ['PM10','pm10', 10, 30, 50],
+          ['NO₂','no2', 40, 100, 200],
+          ['O₃','o3', 60, 120, 180],
+        ];
+        function clazz(v, a,b,c){ if (v==null) return ''; if (v<=a) return 'ok'; if (v<=b) return 'warn'; return 'bad'; }
+        let summary = [];
+        tiles.forEach(([label, key, a,b,c])=>{
+          const v = latest[key]?.value ?? null; const unit = latest[key]?.unit || 'µg/m³';
+          const when = latest[key]?.datetime ? new Date(latest[key].datetime) : null;
+          const col = clazz(v, a,b,c);
+          const div = document.createElement('div');
+          div.className = 'col-6 col-md-3';
+          div.innerHTML = `
+            <div class="p-2 rounded chip ${col}">
+              <div>
+                <div class="fw-semibold">${label}</div>
+                <div class="mono fs-6">${v!=null? v.toFixed(1): '—'} <span class="small">${unit}</span></div>
+                <div class="small">${when? fmtTime(when): ''}</div>
+              </div>
+            </div>`;
+          list.appendChild(div);
+          if (v!=null) summary.push(`${label} ${v.toFixed(0)}${unit}`);
+        });
+        el('#airSummary').textContent = summary.length ? `Dernières mesures · ${summary.join(' · ')}` : 'Aucune mesure récente trouvée à proximité.';
+      }catch(e){ console.warn('OpenAQ error', e); el('#airSummary').textContent='Indispo pour le moment.'; }
+    }
+
+    // Geoloc
+    async function locate(){
+      return new Promise((resolve)=>{
+        if (!('geolocation' in navigator)) return resolve(false);
+        navigator.geolocation.getCurrentPosition((pos)=>{
+          state.loc = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+          resolve(true);
+        }, ()=> resolve(false), { enableHighAccuracy:true, timeout: 8000, maximumAge: 30_000 });
+      });
+    }
+
+    // Init
+    (async function(){
+      setStamp();
+      initMap();
+      await loadRain();
+      await loadAir();
+      el('#btnLocate').addEventListener('click', async ()=>{
+        const ok = await locate();
+        if (ok){
+          state.map.setView([state.loc.lat, state.loc.lon], 12);
+          L.marker([state.loc.lat, state.loc.lon]).addTo(state.map).bindPopup('Ma position').openPopup();
+          await loadRain(); await loadAir(); setStamp();
+        } else alert('Impossible de récupérer la position.');
+      });
+      el('#animBack').addEventListener('click', ()=> stepRadar(-1));
+      el('#animFwd').addEventListener('click', ()=> stepRadar(1));
+      el('#animPlay').addEventListener('click', playRadar);
+    })();
+  </script>
+</body>
+</html>
