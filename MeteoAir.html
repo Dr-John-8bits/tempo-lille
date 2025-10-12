@@ -265,11 +265,15 @@
         const lat = state.loc.lat, lon = state.loc.lon;
         const url = new URL('https://api.openaq.org/v3/latest');
         url.searchParams.set('coordinates', `${lat},${lon}`);
-        url.searchParams.set('radius', '15000'); // 15 km
+        url.searchParams.set('radius', '30000'); // 30 km élargi
         url.searchParams.set('parameters', 'pm25,pm10,no2,o3');
         url.searchParams.set('limit', '100');
         const res = await fetch(url, { cache:'no-store' });
-        if (!res.ok) throw new Error('OpenAQ HTTP '+res.status);
+        if (!res.ok){
+          if (res.status === 429) throw new Error('OpenAQ limite de requêtes atteinte (429). Réessaie dans 1–2 min.');
+          if (res.status >= 500) throw new Error('OpenAQ indisponible (5xx).');
+          throw new Error('OpenAQ HTTP '+res.status);
+        }
         const json = await res.json();
 
         // Flatten latest per parameter (most recent value)
@@ -320,7 +324,8 @@
         document.getElementById('airSummary').textContent = sum.length ? `Dernières mesures · ${sum.join(' · ')}` : 'Aucune mesure récente trouvée à proximité.';
       }catch(e){
         console.warn('OpenAQ latest error', e);
-        document.getElementById('airSummary').textContent = 'Indispo pour le moment.';
+        const msg = (e && e.message) ? e.message : 'Indispo pour le moment.';
+        document.getElementById('airSummary').textContent = msg;
         document.getElementById('airList').innerHTML = '';
       }
     }
