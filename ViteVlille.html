@@ -400,7 +400,17 @@
         el('#favEmpty').hidden = false;
       } else {
         el('#favEmpty').hidden = true;
-        sortStations(applyFilter(favs)).forEach(s => favContainer.appendChild(stationCard(s)));
+        // Favoris : n'applique pas le filtre pour éviter l'effet "disparu" après ajout
+        sortStations(favs).forEach(s => favContainer.appendChild(stationCard(s)));
+        if (state.filter !== 'all') {
+          const hiddenCount = applyFilter(favs).length - favs.length; // negative value
+          if (hiddenCount !== 0) {
+            const note = document.createElement('div');
+            note.className = 'updated';
+            note.textContent = 'Astuce : le filtre n\'est pas appliqué aux favoris pour éviter de masquer vos stations.';
+            favContainer.parentElement.insertBefore(note, favContainer.nextSibling);
+          }
+        }
       }
 
       // Vue Parcourir (filtrée)
