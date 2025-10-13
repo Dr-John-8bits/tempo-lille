@@ -77,6 +77,14 @@ Voir [CONTRIBUTING.md](CONTRIBUTING.md).
 Style de commit : **Conventional Commits** (`feat: …`, `fix: …`, `chore: …`).
 
 ## Licence
+
 [MIT](LICENSE) — voir le fichier de licence.
+
+
+## Crédits / Transparence
+
+- **Conception / design :** Dr. John  
+- **Développement :** réalisé avec l’aide de ChatGPT (OpenAI), puis ajusté manuellement dans le code.  
+- **Hébergement :** GitHub Pages
 
 [![Licence: CC BY-SA 4.0](https://img.shields.io/badge/Licence-CC%20BY--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-sa/4.0/)
