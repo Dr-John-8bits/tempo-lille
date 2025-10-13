@@ -211,6 +211,8 @@
     const APP_VERSION = '2025.10.13.1';
     const GBFS_INDEX = 'https://backend.citiz.fr/public/provider/16/gbfs/v3.0/gbfs.json'; // HDF Citiz
     const GBFS_LANG = 'fr';
+    // Fallback proxy (for local dev if CORS blocks fetch). NOT for production.
+    const CORS_PROXY = 'https://cors.isomorphic-git.org/';
 
     const LS_KEYS = { fav: 'citiz_favorites', filter: 'citiz_filter' };
     const state = {
@@ -229,6 +231,25 @@
     const els = (sel, root=document) => Array.from(root.querySelectorAll(sel));
     const fmtTime = (iso) => { try { const d=new Date(iso); return new Intl.DateTimeFormat('fr-FR',{hour:'2-digit',minute:'2-digit'}).format(d);} catch{ return '—'; } };
     const unit = (n,sing,plur)=> (n===0||n===1? sing: plur);
+
+    // Robust JSON fetch helper with CORS proxy fallback
+    async function fetchJSON(url){
+      try {
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status} on ${url}`);
+        return await res.json();
+      } catch (err) {
+        console.warn('[citiz] direct fetch failed, trying proxy:', url, err);
+        try {
+          const res2 = await fetch(CORS_PROXY + url, { cache: 'no-store' });
+          if (!res2.ok) throw new Error(`HTTP ${res2.status} on proxy for ${url}`);
+          return await res2.json();
+        } catch (err2) {
+          console.error('[citiz] proxy fetch failed:', url, err2);
+          throw err2;
+        }
+      }
+    }
 
     function saveFavorites(){ localStorage.setItem(LS_KEYS.fav, JSON.stringify([...state.favorites])); }
 
@@ -312,8 +333,7 @@
 
     async function fetchStations(){
       try{
-        const idxRes = await fetch(GBFS_INDEX, { cache:'no-store' });
-        const idx = await idxRes.json();
+        const idx = await fetchJSON(GBFS_INDEX);
         let feeds = [];
         if (Array.isArray(idx.data?.feeds)) {
           feeds = idx.data.feeds;
@@ -323,26 +343,21 @@
           const first = Object.values(idx.data || {})[0];
           feeds = first?.feeds || [];
         }
+        if (!feeds || feeds.length === 0) throw new Error('Aucun feed GBFS détecté');
         const infoUrl   = feeds.find(f=> f.name==='station_information')?.url;
         const statusUrl = feeds.find(f=> f.name==='station_status')?.url;
         // vehicle_status is optional; we stick to station_* like V'Lille for consistency
         if(!infoUrl || !statusUrl) throw new Error('Flux GBFS Citiz manquants');
 
-        const [infoRes, statusRes] = await Promise.all([
-          fetch(infoUrl, { cache:'no-store' }),
-          fetch(statusUrl, { cache:'no-store' })
+        const [info, status] = await Promise.all([
+          fetchJSON(infoUrl),
+          fetchJSON(statusUrl)
         ]);
-        const [info, status] = await Promise.all([infoRes.json(), statusRes.json()]);
 
         const infoById = new Map();
         for(const s of (info.data?.stations || [])) infoById.set(String(s.station_id), s);
 
         const out=[];
-        let updatedIso;
-        const lu = status?.last_updated;
-        if (typeof lu === 'number') updatedIso = new Date(lu * 1000).toISOString();
-        else if (typeof lu === 'string') updatedIso = new Date(lu).toISOString();
-        else updatedIso = new Date().toISOString();
         for(const st of (status.data?.stations || [])){
           const id = String(st.station_id);
           const i = infoById.get(id) || {};
@@ -353,7 +368,7 @@
             name: i.name || `Station ${id}`,
             cars,
             spots,
-            updatedAt: updatedIso,
+            updatedAt: (status?.last_updated ? new Date(status.last_updated*1000).toISOString() : new Date().toISOString()),
             lat: Number(i.lat),
             lon: Number(i.lon),
             is_installed: Number(st.is_installed ?? 1),
@@ -366,7 +381,11 @@
         state.stations = out; state.lastFetch = new Date().toISOString();
         el('#errorBanner').style.display='none';
         render();
-      } catch(err){ console.error('Erreur GBFS Citiz', err); el('#errorBanner').style.display='block'; }
+      } catch(err){
+        console.error('Erreur GBFS Citiz:', err);
+        const b = el('#errorBanner');
+        if (b) b.style.display='block';
+      }
     }
 
     function startAutoRefresh(){ if(state.timer) clearInterval(state.timer); state.timer = setInterval(fetchStations, 300_000); } // 5 min
