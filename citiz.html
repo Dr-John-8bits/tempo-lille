@@ -133,7 +133,7 @@
   </div>
 
   <div id="ptr" class="ptr" role="status" aria-live="polite"><div class="wrap">↻ Glisse vers le bas pour actualiser</div></div>
-  <div id="errorBanner" class="banner" role="status" aria-live="polite"><div class="wrap">⚠️ Impossible d’actualiser les données pour le moment. Dernières infos affichées.</div></div>
+  <div id="errorBanner" class="banner" role="status" aria-live="polite"><div class="wrap">⚠️ Impossible d’actualiser les données pour le moment. <span id="errCause">(détails en console)</span></div></div>
 
   <main>
     <section id="view-fav" data-view class="active" aria-labelledby="btnHome">
@@ -211,6 +211,7 @@
     const APP_VERSION = '2025.10.13.1';
     const GBFS_INDEX = 'https://backend.citiz.fr/public/provider/16/gbfs/v3.0/gbfs.json'; // HDF Citiz
     const GBFS_LANG = 'fr';
+    const GBFS_BASE  = 'https://backend.citiz.fr/public/provider/16/gbfs/v3.0/';
     // Fallback proxy (for local dev if CORS blocks fetch). NOT for production.
     const CORS_PROXY = 'https://cors.isomorphic-git.org/';
 
@@ -333,22 +334,25 @@
 
     async function fetchStations(){
       try{
-        const idx = await fetchJSON(GBFS_INDEX);
-        let feeds = [];
-        if (Array.isArray(idx.data?.feeds)) {
-          feeds = idx.data.feeds;
-        } else if (idx.data?.[GBFS_LANG]?.feeds) {
-          feeds = idx.data[GBFS_LANG].feeds;
-        } else {
-          const first = Object.values(idx.data || {})[0];
-          feeds = first?.feeds || [];
+        // 1) Try to read gbfs index and extract feeds
+        let infoUrl, statusUrl, idx;
+        try {
+          idx = await fetchJSON(GBFS_INDEX);
+          let feeds = [];
+          if (Array.isArray(idx.data?.feeds)) feeds = idx.data.feeds;
+          else if (idx.data?.[GBFS_LANG]?.feeds) feeds = idx.data[GBFS_LANG].feeds;
+          else feeds = (Object.values(idx.data||{})[0]?.feeds) || [];
+          infoUrl   = feeds.find(f=> f.name==='station_information')?.url;
+          statusUrl = feeds.find(f=> f.name==='station_status')?.url;
+        } catch(e){
+          console.warn('[citiz] index fetch failed, will fallback to base URLs', e);
         }
-        if (!feeds || feeds.length === 0) throw new Error('Aucun feed GBFS détecté');
-        const infoUrl   = feeds.find(f=> f.name==='station_information')?.url;
-        const statusUrl = feeds.find(f=> f.name==='station_status')?.url;
-        // vehicle_status is optional; we stick to station_* like V'Lille for consistency
-        if(!infoUrl || !statusUrl) throw new Error('Flux GBFS Citiz manquants');
 
+        // 2) Fallback to known paths if needed
+        if (!infoUrl)   infoUrl   = GBFS_BASE + 'station_information.json';
+        if (!statusUrl) statusUrl = GBFS_BASE + 'station_status.json';
+
+        // 3) Fetch feeds (with proxy fallback inside fetchJSON)
         const [info, status] = await Promise.all([
           fetchJSON(infoUrl),
           fetchJSON(statusUrl)
@@ -358,17 +362,22 @@
         for(const s of (info.data?.stations || [])) infoById.set(String(s.station_id), s);
 
         const out=[];
-        for(const st of (status.data?.stations || [])){
+        let updatedIso; const lu = status?.last_updated;
+        if (typeof lu === 'number') updatedIso = new Date(lu * 1000).toISOString();
+        else if (typeof lu === 'string') updatedIso = new Date(lu).toISOString();
+        else updatedIso = new Date().toISOString();
+
+        for (const st of (status.data?.stations || [])){
           const id = String(st.station_id);
           const i = infoById.get(id) || {};
           const cars  = Number(st.num_vehicles_available ?? st.num_bikes_available ?? 0);
           const spots = Number(st.num_parking_spots_available ?? st.num_docks_available ?? 0);
           out.push({
             id,
-            name: i.name || `Station ${id}`,
+            name: String(i.name ?? `Station ${id}`),
             cars,
             spots,
-            updatedAt: (status?.last_updated ? new Date(status.last_updated*1000).toISOString() : new Date().toISOString()),
+            updatedAt: updatedIso,
             lat: Number(i.lat),
             lon: Number(i.lon),
             is_installed: Number(st.is_installed ?? 1),
@@ -377,14 +386,18 @@
             address: String(i.address || i.adresse || i.street_address || i.rue || '')
           });
         }
-        out.sort((a,b)=> a.name.localeCompare(b.name,'fr'));
+        out.sort((a,b)=> String(a?.name ?? '').localeCompare(String(b?.name ?? ''), 'fr', { sensitivity: 'base' }));
         state.stations = out; state.lastFetch = new Date().toISOString();
         el('#errorBanner').style.display='none';
         render();
       } catch(err){
         console.error('Erreur GBFS Citiz:', err);
         const b = el('#errorBanner');
-        if (b) b.style.display='block';
+        if (b) {
+          b.style.display='block';
+          const cause = (err && (err.message || err.toString())).slice(0,140);
+          const span = el('#errCause'); if (span) span.textContent = cause ? `(${cause})` : '(voir console)';
+        }
       }
     }
 
