@@ -38,16 +38,9 @@
       border-bottom: 1px solid var(--border);
     }
     .bar { max-width: 900px; margin: 0 auto; padding: .8rem 1rem; display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
-    .logoBike { 
-      width: 24px; 
-      height: 24px; 
-      margin-right: .4rem; 
-      display: inline-block; 
-      stroke: var(--fg); 
-      fill: none; 
-      stroke-width: 1.8; 
-      stroke-linecap: round; 
-      stroke-linejoin: round;
+    .logoBike {
+      width: 24px; height: 24px; margin-right: .4rem; display: inline-block;
+      stroke: var(--fg); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
     }
 
     .title { font-weight: 800; letter-spacing: .2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 46vw; }
@@ -56,24 +49,13 @@
     .pill { display: inline-flex; align-items: center; gap: .4rem; font-size: .9rem; padding: .35rem .6rem; border: 1px solid var(--border); border-radius: 999px; background: var(--card); }
     .btn { appearance: none; border: 1px solid var(--border); padding: .55rem .8rem; background: var(--card); color: var(--fg); border-radius: .7rem; box-shadow: var(--shadow); cursor: pointer; }
     .btn[aria-current="page"]{ outline: 2px solid var(--accent); }
-    .settings { position: relative; }
-    .gear { font-size: 1rem; }
-    .panel { position: absolute; right: .5rem; top: calc(100% + .4rem); min-width: 220px; max-width: min(320px, 95vw); background: var(--card); border: 1px solid var(--border); border-radius: .7rem; box-shadow: var(--shadow); padding: .5rem; display: none; z-index: 15; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
-    .panel.open { display: block; }
-    .panel h3 { margin: .2rem .4rem .4rem; font-size: .9rem; font-weight: 700; }
-    .panel .row { display: flex; align-items: center; gap: .5rem; padding: .35rem .5rem; border-radius: .5rem; }
-    .panel .row:hover { background: color-mix(in oklab, var(--card) 85%, var(--accent) 15%); }
-    .panel label { flex: 1; cursor: pointer; }
-    .backdrop { display: none; position: fixed; inset: 0; background: color-mix(in oklab, var(--fg) 20%, transparent); z-index: 14; }
-    .backdrop.open { display: block; }
 
     .banner { display: none; background: color-mix(in oklab, var(--bad) 18%, var(--bg)); color: var(--fg); border-bottom: 1px solid var(--border); }
     .banner .wrap { max-width: 900px; margin: 0 auto; padding: .5rem 1rem; display: flex; align-items: center; gap: .6rem; }
+
     .ptr { display:none; background: color-mix(in oklab, var(--accent) 12%, var(--bg)); border-bottom: 1px solid var(--border); }
     .ptr .wrap { max-width: 900px; margin: 0 auto; padding: .4rem 1rem; font-size: .9rem; }
     .ptr.show { display:block; }
-    .legend { display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; color: var(--muted); font-size: .9rem; margin: .25rem 0 .75rem; }
-    .legend span { display: inline-flex; align-items: center; gap: .35rem; padding: .25rem .5rem; border-radius: .5rem; background: color-mix(in oklab, var(--card) 92%, transparent); border: 1px solid var(--border); }
 
     main { max-width: 900px; margin: 0 auto; padding: 1rem; }
 
@@ -120,31 +102,21 @@
     footer { max-width: 900px; margin: 1rem auto 3rem; padding: 0 1rem; color: var(--muted); font-size: .85rem; }
     a { color: var(--accent); }
 
-    /* Switch */
-    .switch { display:inline-flex; align-items:center; gap:.5rem; cursor:pointer; user-select:none; }
-    .switch input { appearance: none; width: 40px; height: 24px; border-radius: 999px; background: #bdbdbd; position: relative; outline: none; border: 1px solid var(--border); }
-    .switch input::after{ content:""; position:absolute; top:1px; left:1px; width:20px; height:20px; border-radius: 50%; background: #fff; transition: transform .2s ease; box-shadow: var(--shadow); }
-    .switch input:checked{ background: color-mix(in oklab, var(--accent) 60%, #bdbdbd); }
-    .switch input:checked::after{ transform: translateX(16px); }
+    /* Bottom bar */
     .bottom-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 12; display: none; background: var(--card); border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom); }
     .bottom-bar .wrap { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr 1fr; }
     .bottom-bar a, .bottom-bar button { appearance: none; border: none; background: transparent; color: var(--fg); padding: .6rem 0; font: inherit; cursor: pointer; }
     .bottom-bar .item { display: flex; flex-direction: column; align-items: center; gap: .25rem; padding: .5rem 0; }
     .bottom-bar .icon { font-size: 1.1rem; line-height: 1; }
     .bottom-bar .label { font-size: .75rem; opacity: .8; }
+
     @media (max-width: 480px){
       .bar { padding: .6rem .6rem; }
       .title { max-width: 56vw; font-size: .95rem; }
       .btn { padding: .45rem .6rem; font-size: .9rem; }
-      .pill { display: none; }
+      .pill { display: none; } /* on peut laisser la pastille ailleurs si tu veux */
       .logoBike { width: 20px; height: 20px; }
-      .panel { position: fixed; left: 0; right: 0; bottom: 0; top: auto; margin: 0; border-radius: .8rem .8rem 0 0; max-width: 100vw; min-width: 0; max-height: 80vh; overflow: auto; padding: .75rem 1rem calc(env(safe-area-inset-bottom) + .75rem); }
-      .panel .row { min-height: 44px; }
-      .panel input, .panel label { font-size: 16px; }
-      .sheet-head { position: sticky; top: 0; background: var(--card); padding: .25rem 0 .6rem; margin: -.75rem -1rem .5rem; border-bottom: 1px solid var(--border); }
-      .handle { display: block; width: 36px; height: 4px; border-radius: 999px; background: #9aa0a6; margin: .35rem auto; opacity: .8; }
-      .sheet-title { text-align: center; font-weight: 700; }
-      body.no-scroll { overflow: hidden; }
+
       .bottom-bar { display: block; }
       main { padding-bottom: 72px; }
       footer { margin-bottom: calc(72px + env(safe-area-inset-bottom)); }
@@ -161,32 +133,15 @@
         <path d="M12 13 L14 17"></path>
       </svg>
       <div class="title">Vite un V'Lille&nbsp;!</div>
+
       <a href="index.html" class="btn" title="Retour au portail d’accueil">🏠 Accueil</a>
       <span id="lastUpdate" class="pill" aria-live="polite">⏱︎ Maj — …</span>
       <button id="btnLocate" class="btn" title="Stations proches">📍 Autour de moi</button>
+
       <div class="spacer"></div>
-      <div class="settings">
-        <button id="btnSettings" class="btn gear" aria-haspopup="true" aria-expanded="false" title="Menu">☰ Menu</button>
-        <div id="settingsPanel" class="panel" role="dialog" aria-label="Tri & filtres">
-          <div class="sheet-head" tabindex="-1"><span class="handle"></span><div class="sheet-title">Paramètres</div></div>
-          <h3>Actions</h3>
-          <div class="row"><button id="goFav" class="btn" style="width:100%;">⭐ Mes stations</button></div>
-          <div class="row"><button id="goBrowse" class="btn" style="width:100%;">➕ Gérer mes stations</button></div>
-          <h3>Tri des stations</h3>
-          <div class="row"><input type="radio" name="sort" id="sort-bikes" value="bikes"><label for="sort-bikes">Par vélos disponibles</label></div>
-          <div class="row"><input type="radio" name="sort" id="sort-docks" value="docks"><label for="sort-docks">Par places disponibles</label></div>
-          <div class="row"><input type="radio" name="sort" id="sort-distance" value="distance"><label for="sort-distance">Par distance</label></div>
-          <div class="row"><input type="checkbox" id="sort-auto"><label for="sort-auto">Tri auto par proximité (si géoloc)</label></div>
-          <h3>Badges d’état</h3>
-          <div class="row"><label for="thr-empty">Seuil “bientôt vide”</label><input type="number" id="thr-empty" min="0" max="10" style="width:64px;"></div>
-          <div class="row"><label for="thr-full">Seuil “bientôt plein”</label><input type="number" id="thr-full" min="0" max="10" style="width:64px;"></div>
-        </div>
-        <div id="settingsBackdrop" class="backdrop" aria-hidden="true"></div>
-      </div>
-      <label class="switch" title="Basculer le thème">
-        <span>🌙</span>
-        <input id="themeToggle" type="checkbox" aria-label="Activer le thème sombre" />
-      </label>
+
+      <!-- Favoris en accès direct -->
+      <button id="btnFav" class="btn" title="Afficher mes stations">⭐ Favoris</button>
     </div>
   </header>
 
@@ -197,12 +152,8 @@
   </div>
 
   <main>
-    <div class="legend" aria-label="Légende des icônes">
-      <span>🚲 Vélos disponibles</span>
-      <span>🅿️ Places vacantes</span>
-    </div>
     <!-- Vue 1 : Favoris -->
-    <section id="view-fav" data-view class="active" aria-labelledby="btnHome">
+    <section id="view-fav" data-view class="active" aria-labelledby="btnFav">
       <section id="nearby" class="nearby" hidden>
         <h2>À proximité</h2>
         <div id="nearList" class="list" role="list"></div>
@@ -239,9 +190,9 @@
         <span class="icon">📍</span>
         <span class="label">Autour</span>
       </button>
-      <button id="mbMenu" class="item" title="Menu">
-        <span class="icon">☰</span>
-        <span class="label">Menu</span>
+      <button id="mbFav" class="item" title="Mes stations">
+        <span class="icon">⭐</span>
+        <span class="label">Favoris</span>
       </button>
     </div>
   </nav>
@@ -251,12 +202,11 @@
     const GBFS_INDEX = 'https://media.ilevia.fr/opendata/gbfs.json';
     const GBFS_LANG = 'fr'; // fallback to first available if missing
 
-    const LS_KEYS = { fav: 'vlille_favorites', theme: 'vlille_theme' };
+    const LS_KEYS = { fav: 'vlille_favorites' };
 
     const state = {
       stations: /** @type {Array<Station>} */([]),
       favorites: new Set(JSON.parse(localStorage.getItem(LS_KEYS.fav) || '[]')),
-      theme: localStorage.getItem(LS_KEYS.theme) || 'light',
       timer: null,
       lastFetch: null,
       userLoc: null,
@@ -276,7 +226,6 @@
     };
 
     function saveFavorites(){ localStorage.setItem(LS_KEYS.fav, JSON.stringify([...state.favorites])); }
-    function saveTheme(){ localStorage.setItem(LS_KEYS.theme, state.theme); }
     function saveSort(){ localStorage.setItem('vlille_sort', state.sort); }
     function saveThr(){ localStorage.setItem('vlille_thr', JSON.stringify(state.thr)); }
     function saveSortAuto(){ localStorage.setItem('vlille_sort_auto', JSON.stringify(state.sortAuto)); }
@@ -290,11 +239,7 @@
       if (n >= 1) return 'warn';
       return 'bad';
     }
-
-    function unit(n, singular, plural){
-      // Spécifique demandé : 0 utilise le singulier
-      return (n === 0 || n === 1) ? singular : plural;
-    }
+    function unit(n, singular, plural){ return (n === 0 || n === 1) ? singular : plural; }
 
     function toRad(d){ return d * Math.PI / 180; }
     function haversine(a, b){
@@ -332,7 +277,6 @@
         }
       }
       state.trend = trend;
-      // Save current snapshot
       const snap = { ts: now, data: Object.fromEntries(newStations.map(s=> [s.id, { bikes: s.bikes, docks: s.docks }])) };
       saveHistory(snap);
     }
@@ -341,12 +285,12 @@
       const h = document.querySelector('header');
       if (h) document.documentElement.style.setProperty('--header-h', h.offsetHeight + 'px');
     }
+
+    // Haptique léger (mobile)
+    function haptic(ms = 10){ try { if (navigator.vibrate) navigator.vibrate(ms); } catch {} }
+
     // ====== Rendu ======
     function render(){
-      // Thème
-      document.documentElement.setAttribute('data-theme', state.theme);
-      el('#themeToggle').checked = state.theme === 'dark';
-
       // Dernière maj (header)
       el('#lastUpdate').textContent = `⏱︎ Maj — ${state.lastFetch ? fmtTime(state.lastFetch) : '—'}`;
 
@@ -355,7 +299,7 @@
       favContainer.innerHTML = '';
       const favs = state.stations.filter(s => state.favorites.has(s.id));
 
-      // Nearby section
+      // Nearby
       const nearWrap = el('#nearby');
       const nearList = el('#nearList');
       if (state.userLoc) {
@@ -431,23 +375,19 @@
 
       // Badges d’état
       const badges = [];
-      // Fermée / Hors service d’après GBFS
       if (s.is_installed === 0) badges.push(badge('Hors service'));
       else if (s.is_renting === 0 && s.is_returning === 0) badges.push(badge('Fermée'));
 
-      // Plein / Bientôt plein
       if (s.docks === 0) badges.push(badge('Plein'));
       else if (s.docks <= state.thr.full) badges.push(badge('Bientôt plein'));
 
-      // Vide / Bientôt vide
       if (s.bikes === 0) badges.push(badge('Vide'));
       else if (s.bikes <= state.thr.empty) badges.push(badge('Bientôt vide'));
 
       function badge(txt){ const b=document.createElement('span'); b.className='chip'; b.textContent=txt; return b; }
-
       if (badges.length){ const row=document.createElement('div'); row.className='stats'; badges.forEach(x=>row.appendChild(x)); card.appendChild(row); }
 
-      // Lien d'itinéraire uniquement (Google Maps)
+      // Itinéraire Google Maps
       if (Number.isFinite(s.lat) && Number.isFinite(s.lon)){
         const actions = document.createElement('div');
         actions.className = 'actions';
@@ -464,7 +404,7 @@
 
       const bikes = document.createElement('span');
       bikes.className = `chip ${qtyClass(s.bikes)}`;
-      bikes.innerHTML = `🚲 <strong>${s.bikes}</strong> ${unit(s.bikes,'vélo','vélos')}`;
+      bikes.innerHTML = `🚲 <strong>${s.bikes}</strong> ${unit(s.bikes,'vélo disponible','vélos disponibles')}`;
       const tb = state.trend[s.id]?.bikes || 0;
       if (tb !== 0){
         const arrow = document.createElement('span');
@@ -475,7 +415,7 @@
 
       const docks = document.createElement('span');
       docks.className = `chip ${qtyClass(s.docks)}`;
-      docks.innerHTML = `🅿️ <strong>${s.docks}</strong> ${unit(s.docks,'place','places')}`;
+      docks.innerHTML = `🅿️ <strong>${s.docks}</strong> ${unit(s.docks,'place vacante','places vacantes')}`;
       const td = state.trend[s.id]?.docks || 0;
       if (td !== 0){
         const arrow = document.createElement('span');
@@ -503,7 +443,6 @@
     // ====== GBFS: récupération fusionnée ======
     async function fetchStations(){
       try {
-        // 1) Resolve localized GBFS feeds from index
         const idxRes = await fetch(GBFS_INDEX, { cache: 'no-store' });
         const idx = await idxRes.json();
         const feeds = (idx.data?.[GBFS_LANG]?.feeds)
@@ -513,14 +452,12 @@
         const statusUrl = feeds.find(f => f.name === 'station_status')?.url;
         if (!infoUrl || !statusUrl) throw new Error('Flux GBFS manquants');
 
-        // 2) Fetch station_information & station_status in parallel
         const [infoRes, statusRes] = await Promise.all([
           fetch(infoUrl, { cache: 'no-store' }),
           fetch(statusUrl, { cache: 'no-store' })
         ]);
         const [info, status] = await Promise.all([infoRes.json(), statusRes.json()]);
 
-        // 3) Merge by station_id
         const infoById = new Map();
         for (const s of (info.data?.stations || [])) infoById.set(String(s.station_id), s);
 
@@ -561,85 +498,25 @@
       state.timer = setInterval(fetchStations, 60_000); // 60s
     }
 
-    // ====== Init ======
+    // ====== Pull-to-refresh (mobile) ======
     let ptrStartY = 0, ptrActive = false, ptrTriggered = false;
     const PTR_THRESHOLD = 70;
     function showPTR(msg){ const b=el('#ptr'); if(!b) return; b.querySelector('.wrap').textContent = msg; b.classList.add('show'); }
     function hidePTR(){ const b=el('#ptr'); if(!b) return; b.classList.remove('show'); }
 
     (function init(){
-      // Thème
-      state.theme = (state.theme === 'dark') ? 'dark' : 'light';
-      document.documentElement.setAttribute('data-theme', state.theme);
-      el('#themeToggle').checked = state.theme === 'dark';
-      el('#themeToggle').addEventListener('change', (e)=>{
-        state.theme = e.target.checked ? 'dark' : 'light';
-        saveTheme();
-        render();
-      });
+      // Thème auto (suit l’appareil)
+      const mediaTheme = window.matchMedia('(prefers-color-scheme: dark)');
+      const applyTheme = ()=> document.documentElement.setAttribute('data-theme', mediaTheme.matches ? 'dark' : 'light');
+      applyTheme();
+      mediaTheme.addEventListener('change', applyTheme);
 
-      // Nav via Menu actions (inside the panel)
-      const goFav = () => { setView('fav'); closePanel(); };
-      const goBrowse = () => { setView('browse'); closePanel(); };
+      // Header layout helpers
       updateHeaderHeight();
       window.addEventListener('resize', updateHeaderHeight);
 
-      // Settings (tri & seuils)
-      const panel = el('#settingsPanel');
-      const btnSettings = el('#btnSettings');
-      const backdrop = el('#settingsBackdrop');
-      function closePanel(){
-        panel.classList.remove('open');
-        if (backdrop) backdrop.classList.remove('open');
-        btnSettings.setAttribute('aria-expanded','false');
-        document.body.classList.remove('no-scroll');
-        requestAnimationFrame(updateHeaderHeight);
-      }
-      const radios = ['bikes','docks','distance'];
-      const applySortUI = ()=>{
-        const id = 'sort-' + (radios.includes(state.sort)? state.sort : 'bikes');
-        const r = el('#'+id);
-        if (r) r.checked = true;
-        el('#thr-empty').value = state.thr.empty;
-        el('#thr-full').value  = state.thr.full;
-        el('#sort-auto').checked = !!state.sortAuto;
-      };
-      btnSettings.addEventListener('click', ()=>{
-        const open = !panel.classList.contains('open');
-        panel.classList.toggle('open', open);
-        btnSettings.setAttribute('aria-expanded', String(open));
-        if (backdrop) backdrop.classList.toggle('open', open);
-        const isSmall = window.matchMedia('(max-width: 480px)').matches;
-        document.body.classList.toggle('no-scroll', open && isSmall);
-        if (open) applySortUI();
-        if (open) { panel.scrollTop = 0; }
-        if (open) { const head = panel.querySelector('.sheet-head'); if (head) head.focus({ preventScroll: false }); }
-        requestAnimationFrame(updateHeaderHeight);
-      });
-      document.addEventListener('click', (e)=>{
-        if (panel.classList.contains('open') && !panel.contains(e.target) && e.target !== btnSettings) {
-          closePanel();
-        }
-      });
-      document.addEventListener('keydown', (e)=>{
-        if (e.key === 'Escape' && panel.classList.contains('open')){
-          closePanel();
-        }
-      });
-      ['sort-bikes','sort-docks','sort-distance'].forEach(id => {
-        el('#'+id).addEventListener('change', (e)=>{
-          state.sort = e.target.value;
-          saveSort();
-          render();
-        });
-      });
-      el('#thr-empty').addEventListener('change', (e)=>{ state.thr.empty = Math.max(0, Number(e.target.value||0)); saveThr(); render(); });
-      el('#thr-full').addEventListener('change', (e)=>{ state.thr.full  = Math.max(0, Number(e.target.value||0)); saveThr(); render(); });
-      el('#sort-auto').addEventListener('change', (e)=>{ state.sortAuto = !!e.target.checked; saveSortAuto(); render(); });
-
-      // Hook menu action buttons
-      el('#goFav').addEventListener('click', goFav);
-      el('#goBrowse').addEventListener('click', goBrowse);
+      // Navigation directe
+      el('#btnFav').addEventListener('click', ()=> { setView('fav'); });
 
       // Géolocalisation
       el('#btnLocate').addEventListener('click', ()=>{
@@ -654,17 +531,15 @@
         }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 30_000 });
       });
 
-      // Recherche
+      // Recherche + suggestions
       el('#search').addEventListener('input', render);
-
-      // Suggestions dropdown
       const sugg = el('#suggestions');
       el('#search').addEventListener('input', ()=>{
         const q = el('#search').value.trim().toLowerCase();
         if (!q) { sugg.hidden = true; sugg.innerHTML=''; render(); return; }
         const names = state.stations
           .map(s => s.name)
-          .filter((v,i,arr)=> arr.indexOf(v)===i) // unique
+          .filter((v,i,arr)=> arr.indexOf(v)===i)
           .filter(n => n.toLowerCase().includes(q))
           .slice(0, 8);
         sugg.innerHTML = names.map(n => `<li role="option">${n.replace(/</g,'&lt;')}</li>`).join('');
@@ -683,7 +558,7 @@
         if (q) el('#search').dispatchEvent(new Event('input'));
       });
 
-      // Pull-to-refresh (mobile)
+      // Pull-to-refresh
       window.addEventListener('touchstart', (e)=>{
         if (window.scrollY === 0) { ptrStartY = e.touches[0].clientY; ptrActive = true; ptrTriggered = false; showPTR('↻ Glisse vers le bas pour actualiser'); }
       }, { passive: true });
@@ -697,6 +572,15 @@
         if (ptrTriggered) { showPTR('Actualisation…'); fetchStations().finally(()=> hidePTR()); }
         else { hidePTR(); }
       });
+
+      // Bottom bar (mobile)
+      const mbLocate = el('#mbLocate');
+      const mbFav    = el('#mbFav');
+      const mbHome   = el('#mbHome');
+
+      if (mbHome)   mbHome.addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); });
+      if (mbLocate) mbLocate.addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); el('#btnLocate')?.click(); });
+      if (mbFav)    mbFav.addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); setView('fav'); });
 
       // Premier rendu + données
       render();
