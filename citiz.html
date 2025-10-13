@@ -314,7 +314,15 @@
       try{
         const idxRes = await fetch(GBFS_INDEX, { cache:'no-store' });
         const idx = await idxRes.json();
-        const feeds = (idx.data?.[GBFS_LANG]?.feeds) || idx.data?.[Object.keys(idx.data||{})[0]]?.feeds || [];
+        let feeds = [];
+        if (Array.isArray(idx.data?.feeds)) {
+          feeds = idx.data.feeds;
+        } else if (idx.data?.[GBFS_LANG]?.feeds) {
+          feeds = idx.data[GBFS_LANG].feeds;
+        } else {
+          const first = Object.values(idx.data || {})[0];
+          feeds = first?.feeds || [];
+        }
         const infoUrl   = feeds.find(f=> f.name==='station_information')?.url;
         const statusUrl = feeds.find(f=> f.name==='station_status')?.url;
         // vehicle_status is optional; we stick to station_* like V'Lille for consistency
@@ -330,6 +338,11 @@
         for(const s of (info.data?.stations || [])) infoById.set(String(s.station_id), s);
 
         const out=[];
+        let updatedIso;
+        const lu = status?.last_updated;
+        if (typeof lu === 'number') updatedIso = new Date(lu * 1000).toISOString();
+        else if (typeof lu === 'string') updatedIso = new Date(lu).toISOString();
+        else updatedIso = new Date().toISOString();
         for(const st of (status.data?.stations || [])){
           const id = String(st.station_id);
           const i = infoById.get(id) || {};
@@ -340,7 +353,7 @@
             name: i.name || `Station ${id}`,
             cars,
             spots,
-            updatedAt: (status?.last_updated ? new Date(status.last_updated*1000).toISOString() : new Date().toISOString()),
+            updatedAt: updatedIso,
             lat: Number(i.lat),
             lon: Number(i.lon),
             is_installed: Number(st.is_installed ?? 1),
