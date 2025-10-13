@@ -63,6 +63,25 @@
     .ptr .wrap { max-width: 900px; margin: 0 auto; padding: .4rem 1rem; font-size: .9rem; }
     .ptr.show { display:block; }
 
+    /* Filters segment */
+    .filters { position: sticky; top: calc(var(--header-h, 56px)); z-index: 6; background: var(--bg); border-bottom: 1px solid var(--border); padding: .5rem 1rem; display: flex; gap: .4rem; justify-content: center; }
+    .seg { appearance: none; border: 1px solid var(--border); background: var(--card); color: var(--fg); padding: .45rem .8rem; border-radius: 999px; cursor: pointer; font: inherit; }
+    .seg[aria-selected="true"] { outline: 2px solid var(--accent); }
+
+    /* About modal */
+    .about-backdrop { position: fixed; inset: 0; background: color-mix(in oklab, var(--fg) 25%, transparent); backdrop-filter: blur(3px); z-index: 999; }
+    .about-panel { position: fixed; left: 0; right: 0; bottom: 0; margin: 0; background: var(--card); border-top: 1px solid var(--border); border-radius: .9rem .9rem 0 0; box-shadow: var(--shadow); z-index: 1000; max-height: 85svh; transform: translateY(100%); opacity: 0; transition: transform 220ms ease, opacity 220ms ease; display: flex; flex-direction: column; }
+    .about-panel.open { transform: translateY(0); opacity: 1; }
+    .about-head { position: sticky; top: 0; background: var(--card); padding: .6rem 1rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: .6rem; }
+    .about-handle { width: 36px; height: 4px; background: #9aa0a6; opacity: .8; border-radius: 999px; margin-right: .4rem; }
+    .about-body { padding: .8rem 1rem calc(env(safe-area-inset-bottom) + 1rem); overflow: auto; }
+    .about-close { margin-left: auto; }
+
+    @media (min-width: 640px){
+      .about-panel { left: 50%; right: auto; width: 520px; bottom: auto; top: 12vh; border-radius: .9rem; transform: translate(-50%, 10px); }
+      .about-panel.open { transform: translate(-50%, 0); }
+    }
+
     main { max-width: 900px; margin: 0 auto; padding: 1rem; }
 
     /* Search */
@@ -149,8 +168,16 @@
       <div class="spacer"></div>
 
       <button id="btnSearch" class="btn mobile-hide" title="Rechercher des stations">🔍 Recherche</button>
+      <button id="btnAbout" class="btn" title="À propos">ℹ️ À propos</button>
     </div>
   </header>
+
+  <!-- Filtres sous le header -->
+  <div id="filters" class="filters" role="tablist" aria-label="Filtrer les stations">
+    <button id="fltAll"   class="seg" role="tab" aria-selected="true"  data-mode="all">Tous</button>
+    <button id="fltBikes" class="seg" role="tab" aria-selected="false" data-mode="bikes">Vélos</button>
+    <button id="fltDocks" class="seg" role="tab" aria-selected="false" data-mode="docks">Places</button>
+  </div>
 
   <div id="ptr" class="ptr" role="status" aria-live="polite"><div class="wrap">↻ Glisse vers le bas pour actualiser</div></div>
 
@@ -204,12 +231,40 @@
     </div>
   </nav>
 
+  <!-- À propos: panel + backdrop -->
+  <div id="aboutBackdrop" class="about-backdrop" hidden></div>
+  <div id="aboutPanel" class="about-panel" role="dialog" aria-modal="true" aria-labelledby="aboutTitle" hidden>
+    <div class="about-head">
+      <div class="about-handle"></div>
+      <h2 id="aboutTitle">À propos</h2>
+      <button id="aboutClose" class="btn about-close" aria-label="Fermer">✕</button>
+    </div>
+    <div class="about-body">
+      <p><strong>Vite un V'Lille !</strong> affiche rapidement les disponibilités des stations V'Lille (vélos & places) et vos favoris. Données en temps quasi réel (GBFS Ilévia).
+      </p>
+      <h3>Légendes & indications</h3>
+      <ul>
+        <li>🚲 Vélos disponibles — nombre de vélos prêts à partir.</li>
+        <li>🅿️ Places vacantes — nombre d’emplacements libres pour retourner un vélo.</li>
+        <li>Badges : <em>Vide / Bientôt vide / Bientôt plein / Plein</em> selon les seuils internes.</li>
+      </ul>
+      <h3>Liens</h3>
+      <p><a href="index.html">Retour au portail</a> · <a href="https://transport.data.gouv.fr/datasets/vlille-disponibilite-en-temps-reel-3" target="_blank" rel="noopener">Source GBFS</a></p>
+      <h3>Version</h3>
+      <p id="aboutVersion">—</p>
+      <p style="color:var(--muted)">Aucune donnée personnelle n’est collectée. Vos préférences (favoris) restent dans votre navigateur (<code>localStorage</code>).
+      </p>
+    </div>
+  </div>
+
   <script>
     // ====== Constantes & état ======
     const GBFS_INDEX = 'https://media.ilevia.fr/opendata/gbfs.json';
     const GBFS_LANG = 'fr'; // fallback to first available if missing
 
-    const LS_KEYS = { fav: 'vlille_favorites' };
+    const APP_VERSION = '2025.10.13.1';
+
+    const LS_KEYS = { fav: 'vlille_favorites', filter: 'vlille_filter' };
 
     const state = {
       stations: /** @type {Array<Station>} */([]),
@@ -221,6 +276,7 @@
       thr: JSON.parse(localStorage.getItem('vlille_thr') || '{"empty":2,"full":2}'),
       sortAuto: JSON.parse(localStorage.getItem('vlille_sort_auto') || 'true'),
       trend: {},
+      filter: localStorage.getItem(LS_KEYS.filter) || 'all',
     };
 
     /** @typedef {{ id:string, name:string, bikes:number, docks:number, updatedAt:string, lat?:number, lon?:number, address?:string }} Station */
@@ -247,6 +303,22 @@
       return 'bad';
     }
     function unit(n, singular, plural){ return (n === 0 || n === 1) ? singular : plural; }
+
+    function applyFilter(arr){
+      if (state.filter === 'bikes') return arr.filter(s => (s.bikes||0) > 0);
+      if (state.filter === 'docks') return arr.filter(s => (s.docks||0) > 0);
+      return arr;
+    }
+    function setFilter(mode){
+      state.filter = mode; localStorage.setItem(LS_KEYS.filter, mode);
+      // Update segment aria-selected
+      const map = { all: '#fltAll', bikes: '#fltBikes', docks: '#fltDocks' };
+      for (const k of Object.keys(map)){
+        const btn = el(map[k]); if (!btn) continue;
+        btn.setAttribute('aria-selected', String(k === mode));
+      }
+      render();
+    }
 
     function toRad(d){ return d * Math.PI / 180; }
     function haversine(a, b){
@@ -317,8 +389,8 @@
           .slice(0, 6)
           .map(x => x.s);
         nearList.innerHTML = '';
-        nearby.forEach(s => nearList.appendChild(stationCard(s)));
-        nearWrap.hidden = nearby.length === 0;
+        applyFilter(nearby).forEach(s => nearList.appendChild(stationCard(s)));
+        nearWrap.hidden = applyFilter(nearby).length === 0;
       } else {
         nearWrap.hidden = true;
       }
@@ -327,7 +399,7 @@
         el('#favEmpty').hidden = false;
       } else {
         el('#favEmpty').hidden = true;
-        sortStations(favs).forEach(s => favContainer.appendChild(stationCard(s)));
+        sortStations(applyFilter(favs)).forEach(s => favContainer.appendChild(stationCard(s)));
       }
 
       // Vue Parcourir (filtrée)
@@ -335,8 +407,9 @@
       const q = el('#search').value.trim().toLowerCase();
       const filtered = q ? state.stations.filter(s => s.name.toLowerCase().includes(q)) : state.stations;
       allContainer.innerHTML = '';
-      sortStations(filtered).forEach(s => allContainer.appendChild(stationCard(s)));
+      sortStations(applyFilter(filtered)).forEach(s => allContainer.appendChild(stationCard(s)));
       updateHeaderHeight();
+      // No-op placeholder: sticky search already uses --header-h; filters are stacked visually.
     }
 
     function stationCard(s){
@@ -523,6 +596,12 @@
       updateHeaderHeight();
       window.addEventListener('resize', updateHeaderHeight);
 
+      // Init filters segment
+      setFilter(state.filter);
+      el('#fltAll').addEventListener('click',   ()=> { if (typeof haptic==='function') haptic(); setFilter('all'); });
+      el('#fltBikes').addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); setFilter('bikes'); });
+      el('#fltDocks').addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); setFilter('docks'); });
+
       // Navigation directe (header)
       el('#btnHome').addEventListener('click',   ()=> { setView('fav'); });
       el('#btnSearch').addEventListener('click', ()=> { setView('browse'); });
@@ -566,6 +645,28 @@
         const q = el('#search').value.trim();
         if (q) el('#search').dispatchEvent(new Event('input'));
       });
+
+      // À propos (sheet) — robust lazy binding
+      const aboutBtn = el('#btnAbout');
+      const openAbout = ()=>{
+        const aboutPanel = el('#aboutPanel');
+        const aboutBackdrop = el('#aboutBackdrop');
+        const aboutClose = el('#aboutClose');
+        const ver = el('#aboutVersion');
+        if (ver) ver.textContent = `Version : ${APP_VERSION}`;
+        if (!aboutPanel || !aboutBackdrop) return;
+        aboutPanel.hidden = false; aboutBackdrop.hidden = false;
+        requestAnimationFrame(()=> aboutPanel.classList.add('open'));
+        const onEsc = (e)=>{ if (e.key === 'Escape') close(); };
+        function close(){
+          aboutPanel.classList.remove('open');
+          setTimeout(()=> { aboutPanel.hidden = true; aboutBackdrop.hidden = true; document.removeEventListener('keydown', onEsc); }, 220);
+        }
+        aboutBackdrop.addEventListener('click', close, { once: true });
+        if (aboutClose) aboutClose.addEventListener('click', close, { once: true });
+        document.addEventListener('keydown', onEsc);
+      };
+      if (aboutBtn) aboutBtn.addEventListener('click', openAbout);
 
       // Pull-to-refresh
       window.addEventListener('touchstart', (e)=>{
