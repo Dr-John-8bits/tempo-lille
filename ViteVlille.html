@@ -117,6 +117,7 @@
       .pill { display: none; } /* on peut laisser la pastille ailleurs si tu veux */
       .logoBike { width: 20px; height: 20px; }
 
+      .mobile-hide { display: none !important; }
       .bottom-bar { display: block; }
       main { padding-bottom: 72px; }
       footer { margin-bottom: calc(72px + env(safe-area-inset-bottom)); }
@@ -134,14 +135,14 @@
       </svg>
       <div class="title">Vite un V'Lille&nbsp;!</div>
 
-      <a href="index.html" class="btn" title="Retour au portail d’accueil">🏠 Accueil</a>
+      <a href="index.html" class="btn mobile-hide" title="Retour au portail d’accueil">🏠 Accueil</a>
       <span id="lastUpdate" class="pill" aria-live="polite">⏱︎ Maj — …</span>
-      <button id="btnLocate" class="btn" title="Stations proches">📍 Autour de moi</button>
+      <button id="btnLocate" class="btn mobile-hide" title="Stations proches">📍 Autour de moi</button>
 
       <div class="spacer"></div>
 
       <!-- Favoris en accès direct -->
-      <button id="btnFav" class="btn" title="Afficher mes stations">⭐ Favoris</button>
+      <button id="btnFav" class="btn mobile-hide" title="Afficher mes stations">⭐ Favoris</button>
     </div>
   </header>
 
