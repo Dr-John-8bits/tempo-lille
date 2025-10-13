@@ -138,8 +138,9 @@
       .btn { padding: .45rem .6rem; font-size: .9rem; }
       .pill { display: none; }
       .logoBike { width: 20px; height: 20px; }
-      .panel { position: fixed; left: 0; right: 0; bottom: 0; top: auto; margin: 0; border-radius: .8rem .8rem 0 0; max-width: 100vw; min-width: 0; max-height: 70vh; overflow: auto; padding: .75rem 1rem calc(env(safe-area-inset-bottom) + .75rem); }
+      .panel { position: fixed; left: 0; right: 0; bottom: 0; top: auto; margin: 0; border-radius: .8rem .8rem 0 0; max-width: 100vw; min-width: 0; max-height: 80vh; overflow: auto; padding: .75rem 1rem calc(env(safe-area-inset-bottom) + .75rem); }
       .panel .row { min-height: 44px; }
+      .panel input, .panel label { font-size: 16px; }
       .sheet-head { position: sticky; top: 0; background: var(--card); padding: .25rem 0 .6rem; margin: -.75rem -1rem .5rem; border-bottom: 1px solid var(--border); }
       .handle { display: block; width: 36px; height: 4px; border-radius: 999px; background: #9aa0a6; margin: .35rem auto; opacity: .8; }
       .sheet-title { text-align: center; font-weight: 700; }
@@ -167,7 +168,7 @@
       <div class="settings">
         <button id="btnSettings" class="btn gear" aria-haspopup="true" aria-expanded="false" title="Menu">☰ Menu</button>
         <div id="settingsPanel" class="panel" role="dialog" aria-label="Tri & filtres">
-          <div class="sheet-head"><span class="handle"></span><div class="sheet-title">Paramètres</div></div>
+          <div class="sheet-head" tabindex="-1"><span class="handle"></span><div class="sheet-title">Paramètres</div></div>
           <h3>Actions</h3>
           <div class="row"><button id="goFav" class="btn" style="width:100%;">⭐ Mes stations</button></div>
           <div class="row"><button id="goBrowse" class="btn" style="width:100%;">➕ Gérer mes stations</button></div>
@@ -612,6 +613,7 @@
         document.body.classList.toggle('no-scroll', open && isSmall);
         if (open) applySortUI();
         if (open) { panel.scrollTop = 0; }
+        if (open) { const head = panel.querySelector('.sheet-head'); if (head) head.focus({ preventScroll: false }); }
         requestAnimationFrame(updateHeaderHeight);
       });
       document.addEventListener('click', (e)=>{
