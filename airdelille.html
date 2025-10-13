@@ -356,6 +356,8 @@
         [data-bs-theme="dark"] .pull-indicator {
             background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0));
         }
+        .text-white-75 { color: rgba(255,255,255,.85); }
+        [data-bs-theme="dark"] #adviceText { color: rgba(255,255,255,.9); }
     </style>
 </head>
 <body>
@@ -388,6 +390,10 @@
                             <i class="fas fa-location-crosshairs"></i>
                             Me localiser
                         </button>
+                    </div>
+                    <div id="adviceBox" class="mt-3 small fw-medium d-flex flex-column align-items-center">
+                        <div id="adviceEmoji" style="font-size:1.4rem" aria-hidden="true">🙂</div>
+                        <div id="adviceText" class="mt-1 text-white-75"></div>
                     </div>
                 </div>
                 <div class="card-body">
@@ -619,6 +625,7 @@
                 generateForecast(forecast);
                 generateRainForecast(forecast);
                 generateAirQuality(air);
+                generateAdvice(forecast, air);
             } catch (err) {
                 showError('Impossible de récupérer les données météo/air. Veuillez réessayer.');
                 console.error(err);
@@ -791,6 +798,100 @@
             document.getElementById('pm10').textContent = v(h.pm10);
             document.getElementById('no2').textContent  = v(h.nitrogen_dioxide);
             document.getElementById('o3').textContent   = v(h.ozone);
+        }
+
+        function nextHourRainRisk(forecast){
+            // Returns { pct:number, label:string } using minutely_15 if available, else hourly probability
+            const m = forecast.minutely_15 || {};
+            const times = m.time || [];
+            const precs = m.precipitation || [];
+            if (times.length && precs.length){
+                const idx = nearestIndex(times);
+                const slice = precs.slice(idx, idx + 4);
+                const mmMax = slice.reduce((mx,v)=> Math.max(mx, Number(v||0)), 0);
+                const pct = Math.max(0, Math.min(100, Math.round((mmMax / 2) * 100)));
+                let label = 'Risque de pluie faible';
+                if (pct > 60) label = 'Forte probabilité de pluie';
+                else if (pct >= 20) label = 'Risque de pluie';
+                return { pct, label };
+            } else {
+                const h = forecast.hourly || {};
+                const idxH = nearestIndex(h.time || []);
+                const step1 = Number(h.precipitation_probability?.[idxH] ?? 0);
+                const step2 = Number(h.precipitation_probability?.[idxH+1] ?? step1);
+                const pct = Math.max(step1, step2);
+                let label = 'Risque de pluie faible';
+                if (pct > 60) label = 'Forte probabilité de pluie';
+                else if (pct >= 20) label = 'Risque de pluie';
+                return { pct, label };
+            }
+        }
+
+        function generateAdvice(forecast, air){
+            const c = forecast.current || {};
+            const temp = Number(c.temperature_2m);
+            const wind = Number(c.wind_speed_10m);
+            const code = Number(c.weather_code);
+            const rain = nextHourRainRisk(forecast);
+            const h = air.hourly || {};
+            const idx = nearestIndex(h.time || []);
+            const aqi = Number(h.european_aqi?.[idx]);
+
+            // AQI band (0–20 TB, 20–40 B, 40–60 M, 60–80 Médiocre, 80–100 Mauvais, >100 Très mauvais)
+            let aqiBand = 'bon';
+            if (Number.isFinite(aqi)){
+                if (aqi <= 20) aqiBand = 'très bon';
+                else if (aqi <= 40) aqiBand = 'bon';
+                else if (aqi <= 60) aqiBand = 'moyen';
+                else if (aqi <= 80) aqiBand = 'médiocre';
+                else if (aqi <= 100) aqiBand = 'mauvais';
+                else aqiBand = 'très mauvais';
+            }
+
+            // Build advice with priorities:
+            // 1) Polluted air warnings
+            // 2) Strong rain incoming
+            // 3) Heat or sun
+            // 4) Cold
+            // 5) Windy
+            // 6) Nice air encouragement
+            let emoji = '🙂';
+            let text = 'Bonne journée !';
+
+            if (Number.isFinite(aqi) && aqi > 80){
+                emoji = '😷';
+                text = (aqi > 100)
+                  ? "Air très mauvais : limite l'activité dehors, aère aux heures les moins chargées."
+                  : "Air mauvais : évite l’effort dehors, privilégie les trajets courts.";
+            } else if (rain.pct > 60){
+                emoji = '☔';
+                text = "Pluie probable dans l’heure : prends un parapluie ou une capuche.";
+            } else if (Number.isFinite(temp) && temp >= 28){
+                emoji = '🥵';
+                text = "Chaud aujourd’hui : hydrate‑toi et reste à l’ombre si possible.";
+            } else if ([0,1,2].includes(code)){
+                emoji = '🕶️';
+                text = "Grand ciel clair : lunettes de soleil conseillées.";
+            } else if (Number.isFinite(temp) && temp <= 6){
+                emoji = '🧥';
+                text = "Frais à froid : couvre‑toi bien.";
+            } else if (Number.isFinite(wind) && wind >= 45){
+                emoji = '💨';
+                text = "Coup de vent : attention aux rafales, maintiens ton parapluie si besoin.";
+            } else if (Number.isFinite(aqi) && aqi <= 40){
+                emoji = '🌿';
+                text = (aqi <= 20)
+                  ? "Air très bon : bon bol d’air, profite pour sortir."
+                  : "Air bon : conditions agréables pour une balade.";
+            } else if (rain.pct >= 20){
+                emoji = '🌦️';
+                text = "Petit risque d’averse : une veste imperméable peut aider.";
+            }
+
+            const advEmoji = document.getElementById('adviceEmoji');
+            const advText = document.getElementById('adviceText');
+            if (advEmoji) advEmoji.textContent = emoji;
+            if (advText) advText.textContent = text;
         }
 
         function showError(message) {
