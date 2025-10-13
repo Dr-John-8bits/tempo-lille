@@ -120,7 +120,7 @@
       .bar { padding: .6rem .6rem; }
       .title { max-width: 56vw; font-size: .95rem; }
       .btn { padding: .45rem .6rem; font-size: .9rem; }
-      .pill { display: none; } /* on peut laisser la pastille ailleurs si tu veux */
+      .pill { display: none; }
       .logoBike { width: 20px; height: 20px; }
 
       .mobile-hide { display: none !important; }
@@ -141,14 +141,14 @@
       </svg>
       <div class="title">Vite un V'Lille&nbsp;!</div>
 
-      <a href="index.html" class="btn mobile-hide" title="Retour au portail d’accueil">🏠 Accueil</a>
+      <!-- Header actions (cachées sur mobile) -->
+      <button id="btnHome"   class="btn mobile-hide" title="Accueil (favoris)">🏠 Accueil</button>
       <span id="lastUpdate" class="pill" aria-live="polite">⏱︎ Maj — …</span>
       <button id="btnLocate" class="btn mobile-hide" title="Stations proches">📍 Autour de moi</button>
 
       <div class="spacer"></div>
 
-      <!-- Favoris en accès direct -->
-      <button id="btnFav" class="btn mobile-hide" title="Afficher mes stations">⭐ Favoris</button>
+      <button id="btnSearch" class="btn mobile-hide" title="Rechercher des stations">🔍 Recherche</button>
     </div>
   </header>
 
@@ -160,19 +160,19 @@
 
   <main>
     <!-- Vue 1 : Favoris -->
-    <section id="view-fav" data-view class="active" aria-labelledby="btnFav">
+    <section id="view-fav" data-view class="active" aria-labelledby="btnHome">
       <section id="nearby" class="nearby" hidden>
         <h2>À proximité</h2>
         <div id="nearList" class="list" role="list"></div>
       </section>
       <div id="favList" class="list" role="list"></div>
       <div id="favEmpty" class="empty" hidden>
-        Aucune station en favori pour l'instant. Ouvre « Gérer mes stations » pour en ajouter ⭐.
+        Aucune station en favori pour l'instant. Ouvre la recherche (🔍) pour en ajouter ⭐.
       </div>
     </section>
 
     <!-- Vue 2 : Recherche / Ajout -->
-    <section id="view-browse" data-view aria-labelledby="btnBrowse">
+    <section id="view-browse" data-view aria-labelledby="btnSearch">
       <div class="search">
         <div class="wrap">
           <input id="search" type="search" placeholder="Rechercher une station… (filtre en direct)" aria-label="Rechercher une station" autocomplete="off" />
@@ -189,17 +189,17 @@
 
   <nav class="bottom-bar" aria-label="Actions rapides">
     <div class="wrap">
-      <a id="mbHome" class="item" href="index.html" title="Accueil du portail">
+      <button id="mbHome" class="item" title="Accueil (favoris)">
         <span class="icon">🏠</span>
         <span class="label">Accueil</span>
-      </a>
+      </button>
       <button id="mbLocate" class="item" title="Autour de moi">
         <span class="icon">📍</span>
         <span class="label">Autour</span>
       </button>
-      <button id="mbFav" class="item" title="Mes stations">
-        <span class="icon">⭐</span>
-        <span class="label">Favoris</span>
+      <button id="mbSearch" class="item" title="Rechercher">
+        <span class="icon">🔍</span>
+        <span class="label">Recherche</span>
       </button>
     </div>
   </nav>
@@ -445,6 +445,7 @@
       el('#view-fav').classList.toggle('active', isFavView);
       el('#view-browse').classList.toggle('active', !isFavView);
       if (!isFavView) el('#search').focus({ preventScroll: true });
+      if (!isFavView) el('#search').select();
     }
 
     // ====== GBFS: récupération fusionnée ======
@@ -522,8 +523,9 @@
       updateHeaderHeight();
       window.addEventListener('resize', updateHeaderHeight);
 
-      // Navigation directe
-      el('#btnFav').addEventListener('click', ()=> { setView('fav'); });
+      // Navigation directe (header)
+      el('#btnHome').addEventListener('click',   ()=> { setView('fav'); });
+      el('#btnSearch').addEventListener('click', ()=> { setView('browse'); });
 
       // Géolocalisation
       el('#btnLocate').addEventListener('click', ()=>{
@@ -582,12 +584,12 @@
 
       // Bottom bar (mobile)
       const mbLocate = el('#mbLocate');
-      const mbFav    = el('#mbFav');
+      const mbSearch = el('#mbSearch');
       const mbHome   = el('#mbHome');
 
-      if (mbHome)   mbHome.addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); });
+      if (mbHome)   mbHome.addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); setView('fav'); });
       if (mbLocate) mbLocate.addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); el('#btnLocate')?.click(); });
-      if (mbFav)    mbFav.addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); setView('fav'); });
+      if (mbSearch) mbSearch.addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); setView('browse'); });
 
       // Premier rendu + données
       render();
