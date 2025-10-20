@@ -47,6 +47,31 @@
     html[data-theme="dark"] .badge.text-bg-light{background:#2a2d33!important;color:#e2e8f0!important;}
     html[data-theme="dark"] .text-secondary{color:#b3b3b3!important;}
     html[data-theme="dark"] .toast.text-bg-danger{background:#7f1d1d!important;}
+
+    /* ===== Tempo Lille navbar (commun) ===== */
+    .tl-navbar {
+      background: rgba(248, 250, 252, .94);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 2px 14px rgba(0,0,0,.06);
+      border: 1px solid rgba(13,110,253,.15);
+      --bs-navbar-toggler-icon-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(13,110,253,.9)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+      --bs-navbar-color: #0d6efd;
+      --bs-navbar-hover-color: #0a58ca;
+    }
+    html[data-theme="dark"] .tl-navbar {
+      background: rgba(28,32,38,.92);
+      box-shadow: 0 6px 22px rgba(0,0,0,.35);
+      --bs-navbar-toggler-icon-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255,255,255,.9)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+      --bs-navbar-color: #e9eef8;
+      --bs-navbar-hover-color: #fff;
+    }
+    .tl-navbar .navbar-brand,
+    .tl-navbar .nav-link { color: #0d6efd !important; opacity:.95; transition: transform .12s ease, opacity .12s ease; }
+    .tl-navbar .nav-link:hover,
+    .tl-navbar .nav-link:focus { opacity:1; transform: translateY(-1px); background: rgba(13,110,253,.07); border-radius: .4rem; box-shadow: 0 1px 6px rgba(13,110,253,.1); }
+    .tl-navbar .nav-link.active { font-weight:700; text-decoration: underline 2px; text-underline-offset:4px; }
+    .navbar-toggler { border: 1px solid rgba(13,110,253,.35); border-radius:.6rem; padding:.35rem .6rem; }
+    html[data-theme="dark"] .navbar-toggler { border-color: rgba(255,255,255,.5); }
   </style>
 </head>
 <body>
@@ -58,21 +83,18 @@
       mq.addEventListener('change', apply);
     })();
   </script>
-  <!-- Header -->
-  <nav class="navbar sticky-top sticky-top-blur bg-white/75 shadow-sm">
-    <div class="container-fluid px-3 d-flex align-items-center justify-content-between">
-      <div class="d-flex align-items-center gap-2">
-        <a href="index.html" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1">
-          <i class="bi bi-arrow-left"></i> Accueil
-        </a>
-        <span class="navbar-brand fw-bold d-flex align-items-center gap-2 mb-0">
-          <i class="bi bi-subway"></i> Métro Ilévia <span aria-hidden="true">🚇</span>
-        </span>
-      </div>
-      <div class="d-flex align-items-center gap-2">
-        <button id="btnRefresh" class="btn btn-outline-primary btn-sm">
-          <i class="bi bi-arrow-clockwise"></i> Actualiser
-        </button>
+  <nav class="navbar navbar-expand-lg tl-navbar navbar-light sticky-top" aria-label="Menu principal">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="index.html"><i class="bi bi-buildings me-2"></i>Tempo Lille</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#tlNav" aria-controls="tlNav" aria-expanded="false" aria-label="Basculer la navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="tlNav">
+        <ul class="navbar-nav ms-auto align-items-lg-center">
+          <li class="nav-item"><a class="nav-link" href="ViteVlille.html"><i class="bi bi-bicycle me-1"></i>V’Lille</a></li>
+          <li class="nav-item"><a class="nav-link active" href="metroilevia.html"><i class="bi bi-train-front me-1"></i>Métro Ilévia</a></li>
+          <li class="nav-item"><a class="nav-link" href="airdelille.html"><i class="bi bi-cloud-sun me-1"></i>Air de Lille</a></li>
+        </ul>
       </div>
     </div>
   </nav>
@@ -88,7 +110,12 @@
         <span class="line-chip chip-m2"><i class="bi bi-circle-fill" style="font-size:.65rem"></i> Ligne 2</span>
         <span id="pillM2" class="status-pill status-ok">Chargement…</span>
       </div>
-      <div class="mt-2 small text-secondary" id="lastUpdate">—</div>
+      <div class="mt-2 small text-secondary d-flex align-items-center gap-2">
+        <span id="lastUpdate">—</span>
+        <button id="btnRefresh" class="btn btn-outline-primary btn-sm">
+          <i class="bi bi-arrow-clockwise"></i> Actualiser
+        </button>
+      </div>
     </section>
 
     <!-- Cards lines -->

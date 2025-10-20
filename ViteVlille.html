@@ -11,6 +11,8 @@
   <meta name="theme-color" content="#0d6efd" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Vite un V'Lille !" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <style>
     :root {
       --bg: #ffffff;
@@ -147,31 +149,70 @@
       main { padding-bottom: 72px; }
       footer { margin-bottom: calc(72px + env(safe-area-inset-bottom)); }
     }
+    /* ===== Tempo Lille navbar (light like page background) ===== */
+    .tl-navbar {
+      background: rgba(248, 250, 252, .94);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 2px 14px rgba(0,0,0,.06);
+      border: 1px solid rgba(13,110,253,.15);
+      --bs-navbar-toggler-icon-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(13,110,253,.9)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+      --bs-navbar-color: #0d6efd;
+      --bs-navbar-hover-color: #0a58ca;
+    }
+    html[data-theme="dark"] .tl-navbar {
+      background: rgba(28,32,38,.92);
+      box-shadow: 0 6px 22px rgba(0,0,0,.35);
+      --bs-navbar-toggler-icon-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255,255,255,.9)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+      --bs-navbar-color: #e9eef8;
+      --bs-navbar-hover-color: #fff;
+    }
+    .tl-navbar .navbar-brand,
+    .tl-navbar .nav-link { color: #0d6efd !important; opacity:.95; transition: transform .12s ease, opacity .12s ease; }
+    .tl-navbar .nav-link:hover,
+    .tl-navbar .nav-link:focus { opacity:1; transform: translateY(-1px); background: rgba(13,110,253,.07); border-radius: .4rem; box-shadow: 0 1px 6px rgba(13,110,253,.1); }
+    .tl-navbar .nav-link.active { font-weight:700; text-decoration: underline 2px; text-underline-offset:4px; }
+    .navbar-toggler { border: 1px solid rgba(13,110,253,.35); border-radius:.6rem; padding:.35rem .6rem; }
+    html[data-theme="dark"] .navbar-toggler { border-color: rgba(255,255,255,.5); }
+
+    /* Subnav (local to V'Lille) */
+    .tl-subnav { background: color-mix(in oklab, var(--bg) 96%, transparent); border-bottom: 1px solid var(--border); }
+    .tl-subnav .form-control { max-width: 280px; }
+    /* Subnav inline title */
+    .tl-subnav .brand-inline { font-weight: 800; color: var(--muted); display: flex; align-items: center; gap: .5rem; }
+    .tl-subnav .brand-inline .bi { font-size: 1rem; }
   </style>
 </head>
 <body>
-  <header>
-    <div class="bar">
-      <a href="index.html" id="btnPortal" class="btn" title="Retour au portail">⟵ Accueil</a>
-      <svg class="logoBike" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <circle cx="6" cy="17" r="4"></circle>
-        <circle cx="18" cy="17" r="4"></circle>
-        <path d="M6 17 L10 9 L12 13 L18 13"></path>
-        <path d="M12 13 L14 17"></path>
-      </svg>
-      <div class="title">Vite un V'Lille&nbsp;!</div>
-
-      <!-- Header actions (cachées sur mobile) -->
-      <button id="btnHome"   class="btn mobile-hide" title="Accueil (favoris)">🏠 Accueil</button>
-      <span id="lastUpdate" class="pill" aria-live="polite">⏱︎ Maj — …</span>
-      <button id="btnLocate" class="btn mobile-hide" title="Stations proches">📍 Autour de moi</button>
-
-      <div class="spacer"></div>
-
-      <button id="btnSearch" class="btn mobile-hide" title="Rechercher des stations">🔍 Recherche</button>
-      <button id="btnAbout" class="btn" title="À propos">ℹ️ À propos</button>
+  <nav class="navbar navbar-expand-lg tl-navbar navbar-light sticky-top" aria-label="Menu principal">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="index.html"><i class="bi bi-buildings me-2"></i>Tempo Lille</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#tlNav" aria-controls="tlNav" aria-expanded="false" aria-label="Basculer la navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="tlNav">
+        <ul class="navbar-nav ms-auto align-items-lg-center">
+          <li class="nav-item"><a class="nav-link active" href="ViteVlille.html"><i class="bi bi-bicycle me-1"></i>V’Lille</a></li>
+          <li class="nav-item"><a class="nav-link" href="metroilevia.html"><i class="bi bi-train-front me-1"></i>Métro Ilévia</a></li>
+          <li class="nav-item"><a class="nav-link" href="airdelille.html"><i class="bi bi-cloud-sun me-1"></i>Air de Lille</a></li>
+        </ul>
+      </div>
     </div>
-  </header>
+  </nav>
+  <nav class="tl-subnav" aria-label="Sous-menu V'Lille">
+    <div class="container" style="max-width:900px;">
+      <ul class="nav align-items-center gap-2 py-2 flex-wrap">
+        <li class="nav-item"><span class="brand-inline"><i class="bi bi-bicycle"></i> Vite un V'Lille&nbsp;!</span></li>
+        <li class="nav-item"><button id="subFav" type="button" class="btn btn-sm btn-outline-primary">⭐ Favoris</button></li>
+        <li class="nav-item"><button id="subNear" type="button" class="btn btn-sm btn-outline-primary">📍 Autour de moi</button></li>
+        <li class="nav-item d-flex align-items-center gap-2">
+          <i class="bi bi-search"></i>
+          <input id="subSearch" type="search" class="form-control form-control-sm" placeholder="Rechercher une station…">
+        </li>
+        <li class="nav-item ms-auto"><span id="lastUpdate" class="pill">⏱︎ Maj — …</span></li>
+      </ul>
+    </div>
+  </nav>
+
 
   <!-- Filtres sous le header -->
   <div id="filters" class="filters" role="tablist" aria-label="Filtrer les stations">
@@ -217,9 +258,9 @@
 
   <nav class="bottom-bar" aria-label="Actions rapides">
     <div class="wrap">
-      <button id="mbHome" class="item" title="Accueil (favoris)">
-        <span class="icon">🏠</span>
-        <span class="label">Accueil</span>
+      <button id="mbHome" class="item" title="Favoris">
+        <span class="icon">⭐</span>
+        <span class="label">Favoris</span>
       </button>
       <button id="mbLocate" class="item" title="Autour de moi">
         <span class="icon">📍</span>
@@ -368,6 +409,19 @@
 
     // Haptique léger (mobile)
     function haptic(ms = 10){ try { if (navigator.vibrate) navigator.vibrate(ms); } catch {} }
+
+    // Géolocalisation partagée (subnav + mobile bar)
+    window.requestVLilleLocation = function(){
+      if (!('geolocation' in navigator)) { alert("Géolocalisation non disponible sur cet appareil."); return; }
+      navigator.geolocation.getCurrentPosition((pos)=>{
+        state.userLoc = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+        setView('fav');
+        render();
+      }, (err)=>{
+        console.warn('Geoloc error', err);
+        alert("Impossible de récupérer la position.");
+      }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 30_000 });
+    }
 
     // ====== Rendu ======
     function render(){
@@ -614,21 +668,11 @@
       el('#fltDocks').addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); setFilter('docks'); });
 
       // Navigation directe (header)
-      el('#btnHome').addEventListener('click',   ()=> { setView('fav'); });
-      el('#btnSearch').addEventListener('click', ()=> { setView('browse'); });
+      el('#btnHome')?.addEventListener('click',   ()=> { setView('fav'); });
+      el('#btnSearch')?.addEventListener('click', ()=> { setView('browse'); });
 
       // Géolocalisation
-      el('#btnLocate').addEventListener('click', ()=>{
-        if (!('geolocation' in navigator)) return alert("Géolocalisation non disponible sur cet appareil.");
-        navigator.geolocation.getCurrentPosition((pos)=>{
-          state.userLoc = { lat: pos.coords.latitude, lon: pos.coords.longitude };
-          setView('fav');
-          render();
-        }, (err)=>{
-          console.warn('Geoloc error', err);
-          alert("Impossible de récupérer la position.");
-        }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 30_000 });
-      });
+      el('#btnLocate')?.addEventListener('click', ()=>{ window.requestVLilleLocation(); });
 
       // Recherche + suggestions
       el('#search').addEventListener('input', render);
@@ -700,7 +744,7 @@
       const mbHome   = el('#mbHome');
 
       if (mbHome)   mbHome.addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); setView('fav'); });
-      if (mbLocate) mbLocate.addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); el('#btnLocate')?.click(); });
+      if (mbLocate) mbLocate.addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); window.requestVLilleLocation?.(); });
       if (mbSearch) mbSearch.addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); setView('browse'); });
 
       // Premier rendu + données
@@ -711,4 +755,33 @@
   </script>
 
 </body>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Refermer le menu mobile au clic (si jamais ouvert)
+    document.addEventListener('click', (e) => {
+      const link = e.target.closest('.navbar .nav-link');
+      const nav = document.getElementById('tlNav');
+      if (!link || !nav || !nav.classList.contains('show')) return;
+      const bsCollapse = bootstrap.Collapse.getOrCreateInstance(nav);
+      bsCollapse.hide();
+    });
+
+    // Sous-menu V'Lille : actions
+    (function(){
+      const btnFav = document.getElementById('subFav');
+      const btnNear = document.getElementById('subNear');
+      const subSearch = document.getElementById('subSearch');
+      if (btnFav) btnFav.addEventListener('click', ()=> { if (typeof setView==='function') setView('fav'); });
+      if (btnNear) btnNear.addEventListener('click', ()=> { window.requestVLilleLocation?.(); });
+      if (subSearch) {
+        const mainSearch = document.getElementById('search');
+        subSearch.addEventListener('input', ()=> {
+          if (!mainSearch) return;
+          mainSearch.value = subSearch.value;
+          if (typeof setView==='function') setView('browse');
+          mainSearch.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+      }
+    })();
+  </script>
 </html>
