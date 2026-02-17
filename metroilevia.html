@@ -273,6 +273,8 @@
 
       if(/\bM[ -]?1\b/i.test(raw) || /\bM[ÉE]TRO[ -]?1\b/i.test(raw) || /\bMETRO[ -]?1\b/i.test(raw)) lines.add('M1');
       if(/\bM[ -]?2\b/i.test(raw) || /\bM[ÉE]TRO[ -]?2\b/i.test(raw) || /\bMETRO[ -]?2\b/i.test(raw)) lines.add('M2');
+      if(/LINEREF::ME1:/i.test(raw)) lines.add('M1');
+      if(/LINEREF::ME2:/i.test(raw)) lines.add('M2');
       if(metroMention && /\bLIGNE[ -]?1\b/i.test(raw)) lines.add('M1');
       if(metroMention && /\bLIGNE[ -]?2\b/i.test(raw)) lines.add('M2');
 
@@ -281,7 +283,7 @@
 
     function classifySeverity(text){
       const s = textOf(text).toLowerCase();
-      if(/interruption|panne|bloqu|suspend|arr[êe]t|no[_ ]service|service suspendu|service interrompu/i.test(s)) return 'err';
+      if(/interruption|interromp|panne|bloqu|suspend|arr[êe]t|no[_ ]service|service suspendu|service interrompu/i.test(s)) return 'err';
       if(/retard|ralent|travaux|incident|perturb|d[ée]viation|deviation|significant[_ ]delays/i.test(s)) return 'warn';
       return 'info';
     }
@@ -327,7 +329,9 @@
     function inferLineMeta(parts){
       const joined = parts.map((value) => sanitizeText(value)).filter(Boolean).join(' ');
       const lines = extractLinesFromText(joined);
-      const metroRelated = lines.size > 0 || isMetroText(joined);
+      const metroGlobalPattern =
+        /LINEREF::ME[12]:|(?:ligne|lignes)\s*(?:1|2)\s*du\s*m[ée]tro|m[ée]tro\s*(?:ligne\s*)?(?:1|2)|\bm[ée]tro\b.*(?:interromp|suspend|panne|incident)/i;
+      const metroRelated = lines.size > 0 || metroGlobalPattern.test(joined);
       return { lines, metroRelated };
     }
 
@@ -336,8 +340,12 @@
       const typeRaw = firstFilled(props, ['type_perturbation','statut','nature','categorie']) || 'Information';
       const statusRaw = firstFilled(props, ['statut', 'etat', 'status']) || '';
 
-      const startMs = toDateMs(firstFilled(props, ['date_debut','date_debut_perturbation','debut','start_date','date']));
-      const endMs = toDateMs(firstFilled(props, ['date_fin','date_fin_perturbation','fin','end_date']));
+      const startMs = toDateMs(firstFilled(props, [
+        'date_debut','date_debut_perturbation','heure_debut_prevue','debut','start_date','date'
+      ]));
+      const endMs = toDateMs(firstFilled(props, [
+        'date_fin','date_fin_perturbation','heure_fin_prevue','fin','end_date'
+      ]));
       const updatedMs = toDateMs(firstFilled(props, ['date_modification','date_maj','updated_at','date'])) || nowMs();
 
       const { lines, metroRelated } = inferLineMeta([
@@ -473,9 +481,14 @@
 
     async function fetchOgcEvents(){
       const { json } = await fetchFirstJSON(OGC_URLS);
-      const features = Array.isArray(json?.features) ? json.features : [];
-      return features
-        .map((feature, index) => normalizeOgcEvent(feature?.properties || {}, index))
+      let rows = [];
+      if(Array.isArray(json?.records)) rows = json.records;
+      else if(Array.isArray(json?.features)) rows = json.features.map((feature) => feature?.properties || {});
+      else if(Array.isArray(json?.items)) rows = json.items;
+      else if(Array.isArray(json)) rows = json;
+
+      return rows
+        .map((row, index) => normalizeOgcEvent(row?.properties || row || {}, index))
         .filter((event) => event.metroRelated && event.active);
     }
 
