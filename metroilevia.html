@@ -170,6 +170,7 @@
 
     <section class="text-center mt-4">
       <p id="dataSourceLabel" class="text-secondary small mb-1">Sources : Open Data MEL <code>ilevia:perturbations</code> + proxy transport.data.gouv.fr (GTFS-RT alerts)</p>
+      <p id="diagLine" class="text-secondary small mb-1"></p>
       <p class="text-secondary small">Cette page est non-officielle. Les données peuvent évoluer.</p>
     </section>
   </main>
@@ -189,7 +190,7 @@
 
   <script>
     const OGC_URLS = [
-      'https://data.lillemetropole.fr/data/ogcapi/collections/ilevia:perturbations/items?f=json&limit=1000'
+      'https://data.lillemetropole.fr/data/ogcapi/collections/ilevia:perturbations/items?f=json&limit=-1'
     ];
     const GTFS_ALERT_URLS = [
       'https://proxy.transport.data.gouv.fr/resource/ilevia-gtfs-rt-service-alerts?format=json',
@@ -200,6 +201,7 @@
     const FETCH_TIMEOUT_MS = 10000;
     const STALE_HOURS = 72;
     const END_GRACE_MS = 15 * 60 * 1000;
+    const BUILD_ID = '2026-02-17-1708';
 
     const pillM1 = document.getElementById('pillM1');
     const pillM2 = document.getElementById('pillM2');
@@ -209,6 +211,7 @@
     const badgeCountM2 = document.getElementById('badgeCountM2');
     const lastUpdate = document.getElementById('lastUpdate');
     const dataSourceLabel = document.getElementById('dataSourceLabel');
+    const diagLine = document.getElementById('diagLine');
 
     document.getElementById('btnRefresh').addEventListener('click', load);
 
@@ -324,6 +327,12 @@
       const label = status.level === 'err' ? 'alerte' : 'perturbation';
       el.classList.add(status.level === 'err' ? 'status-err' : 'status-warn');
       el.innerHTML = `<i class="bi ${icon}"></i> ${status.count} ${label}${status.count > 1 ? 's' : ''}`;
+    }
+
+    function setPillUnknown(el){
+      el.classList.remove('status-ok','status-warn','status-err');
+      el.classList.add('status-warn');
+      el.innerHTML = '<i class="bi bi-exclamation-diamond"></i> Données incomplètes';
     }
 
     function inferLineMeta(parts){
@@ -545,12 +554,14 @@
 
         const events = [];
         const sourceFlags = [];
+        const sourceErrors = [];
 
         if(ogcResult.status === 'fulfilled'){
           events.push(...ogcResult.value);
           sourceFlags.push('MEL');
         }else{
           console.warn('Source MEL indisponible', ogcResult.reason);
+          sourceErrors.push('MEL');
         }
 
         if(gtfsResult.status === 'fulfilled'){
@@ -558,10 +569,31 @@
           sourceFlags.push('GTFS-RT');
         }else{
           console.warn('Source GTFS-RT indisponible', gtfsResult.reason);
+          sourceErrors.push('GTFS-RT');
         }
 
         if(ogcResult.status === 'rejected' && gtfsResult.status === 'rejected'){
           throw ogcResult.reason || gtfsResult.reason || new Error('Aucune source de données disponible');
+        }
+
+        const ogcUnavailable = ogcResult.status === 'rejected';
+        const ogcActiveCount = ogcResult.status === 'fulfilled' ? ogcResult.value.length : 0;
+        const gtfsActiveCount = gtfsResult.status === 'fulfilled' ? gtfsResult.value.length : 0;
+        if(ogcUnavailable && events.length === 0){
+          setPillUnknown(pillM1);
+          setPillUnknown(pillM2);
+          badgeCountM1.textContent = 'Statut partiel';
+          badgeCountM2.textContent = 'Statut partiel';
+          listM1.innerHTML = '<li class="list-group-item text-warning"><i class="bi bi-exclamation-diamond me-2"></i>Source MEL indisponible, statut M1 non fiable</li>';
+          listM2.innerHTML = '<li class="list-group-item text-warning"><i class="bi bi-exclamation-diamond me-2"></i>Source MEL indisponible, statut M2 non fiable</li>';
+          lastUpdate.textContent = `Dernière mise à jour : ${new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})} (MEL indisponible)`;
+          if(dataSourceLabel){
+            dataSourceLabel.innerHTML = 'Sources : Open Data MEL <code>ilevia:perturbations</code> + proxy transport.data.gouv.fr (GTFS-RT alerts). <strong>Attention :</strong> source MEL indisponible pour cette requête.';
+          }
+          if(diagLine){
+            diagLine.textContent = `Diagnostic ${BUILD_ID}: MEL KO, GTFS-RT ${gtfsActiveCount} événement(s) métro actif(s).`;
+          }
+          return;
         }
 
         const deduped = dedupeEvents(events);
@@ -582,9 +614,14 @@
         listM2.innerHTML = m2.length ? m2.map(itemHTML).join('') : '<li class="list-group-item text-success"><i class="bi bi-check2-circle me-2"></i>Trafic normal sur M2</li>';
 
         const sourceLabel = sourceFlags.length ? sourceFlags.join(' + ') : 'source indisponible';
-        lastUpdate.textContent = `Dernière mise à jour : ${new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})} (${sourceLabel})`;
+        const degradedNote = sourceErrors.length ? `, partiel: ${sourceErrors.join(' + ')}` : '';
+        lastUpdate.textContent = `Dernière mise à jour : ${new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})} (${sourceLabel}${degradedNote})`;
         if(dataSourceLabel){
           dataSourceLabel.innerHTML = 'Sources : Open Data MEL <code>ilevia:perturbations</code> + proxy transport.data.gouv.fr (GTFS-RT alerts).';
+        }
+        if(diagLine){
+          const melState = ogcUnavailable ? 'KO' : 'OK';
+          diagLine.textContent = `Diagnostic ${BUILD_ID}: MEL ${melState} (${ogcActiveCount}), GTFS-RT (${gtfsActiveCount}), M1=${m1.length}, M2=${m2.length}.`;
         }
       }catch(err){
         console.error(err);
@@ -599,6 +636,9 @@
         pillM2.classList.remove('status-ok','status-warn','status-err');
         pillM1.textContent = 'Indisponible';
         pillM2.textContent = 'Indisponible';
+        if(diagLine){
+          diagLine.textContent = `Diagnostic ${BUILD_ID}: échec global des sources.`;
+        }
       }
     }
 
