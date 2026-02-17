@@ -1,0 +1,554 @@
+:root {
+  --tempo-font-heading: "Sora", "Jost", "Avenir Next", "Segoe UI", sans-serif;
+  --tempo-font-body: "Nunito Sans", "Avenir Next", "Segoe UI", sans-serif;
+  --tempo-bg: #eaf2fb;
+  --tempo-bg-gradient:
+    radial-gradient(1100px 620px at 8% -22%, rgba(52, 135, 255, 0.24), transparent 60%),
+    radial-gradient(950px 610px at 110% -14%, rgba(26, 195, 233, 0.18), transparent 62%),
+    linear-gradient(180deg, #f8fbff 0%, #ecf4ff 100%);
+  --tempo-surface: rgba(255, 255, 255, 0.82);
+  --tempo-surface-strong: #ffffff;
+  --tempo-text: #102034;
+  --tempo-text-muted: #4c6685;
+  --tempo-border: rgba(16, 56, 108, 0.18);
+  --tempo-border-soft: rgba(16, 56, 108, 0.1);
+  --tempo-accent: #0d6efd;
+  --tempo-accent-2: #00a4e4;
+  --tempo-focus: #2b8cff;
+  --tempo-shadow-xs: 0 3px 10px rgba(15, 36, 66, 0.08);
+  --tempo-shadow-sm: 0 8px 22px rgba(15, 36, 66, 0.1);
+  --tempo-shadow-md: 0 14px 36px rgba(15, 36, 66, 0.14);
+  --tempo-radius-lg: 22px;
+  --tempo-radius-md: 14px;
+  --tempo-radius-sm: 10px;
+  --tempo-content-max: 1140px;
+}
+
+html[data-theme="dark"],
+html[data-bs-theme="dark"] {
+  --tempo-bg: #0b111a;
+  --tempo-bg-gradient:
+    radial-gradient(1000px 560px at 4% -18%, rgba(53, 126, 225, 0.24), transparent 58%),
+    radial-gradient(900px 560px at 106% -16%, rgba(0, 143, 180, 0.2), transparent 62%),
+    linear-gradient(180deg, #0b111a 0%, #111a27 100%);
+  --tempo-surface: rgba(20, 30, 44, 0.84);
+  --tempo-surface-strong: #182336;
+  --tempo-text: #e8f1ff;
+  --tempo-text-muted: #b0c2df;
+  --tempo-border: rgba(149, 181, 227, 0.24);
+  --tempo-border-soft: rgba(149, 181, 227, 0.14);
+  --tempo-focus: #7cb4ff;
+  --tempo-shadow-xs: 0 3px 10px rgba(0, 0, 0, 0.26);
+  --tempo-shadow-sm: 0 10px 26px rgba(0, 0, 0, 0.32);
+  --tempo-shadow-md: 0 16px 38px rgba(0, 0, 0, 0.4);
+}
+
+.tempo-app {
+  min-height: 100vh;
+  font-family: var(--tempo-font-body);
+  color: var(--tempo-text);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+.tempo-app:not(.tempo-air) {
+  background: var(--tempo-bg-gradient);
+}
+
+.tempo-app > main,
+.tempo-app > .container,
+.tempo-app main.container,
+.tempo-app .tl-navbar > .container,
+.tempo-app .tl-subnav > .container {
+  width: min(var(--tempo-content-max), calc(100% - clamp(1rem, 4vw, 3.2rem)));
+  max-width: none;
+  margin-inline: auto;
+}
+
+.tempo-app h1,
+.tempo-app h2,
+.tempo-app h3,
+.tempo-app .navbar-brand,
+.tempo-app .title,
+.tempo-app .card-title {
+  margin-top: 0;
+  color: var(--tempo-text);
+  font-family: var(--tempo-font-heading);
+  letter-spacing: -0.02em;
+}
+
+.tempo-app p {
+  color: var(--tempo-text-muted);
+}
+
+.tempo-app .card-text,
+.tempo-app .updated,
+.tempo-app .addr,
+.tempo-app .text-secondary,
+.tempo-app .text-muted,
+.tempo-app .tempo-muted {
+  color: var(--tempo-text-muted) !important;
+}
+
+.tempo-app a {
+  text-underline-offset: 3px;
+}
+
+.tempo-app :focus-visible {
+  outline: 3px solid var(--tempo-focus);
+  outline-offset: 2px;
+}
+
+.tempo-skip-link {
+  position: fixed;
+  top: -120px;
+  left: 1rem;
+  z-index: 3200;
+  padding: 0.65rem 0.95rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--tempo-border);
+  background: var(--tempo-surface-strong);
+  color: var(--tempo-text);
+  box-shadow: var(--tempo-shadow-sm);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.tempo-skip-link:focus-visible {
+  top: 1rem;
+}
+
+.tempo-app .tl-navbar {
+  border: 1px solid var(--tempo-border);
+  border-radius: 0 0 var(--tempo-radius-sm) var(--tempo-radius-sm);
+  box-shadow: var(--tempo-shadow-sm);
+  background: color-mix(in oklab, var(--tempo-surface) 90%, transparent);
+  backdrop-filter: blur(14px) saturate(145%);
+}
+
+.tempo-app .tl-navbar .navbar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: clamp(1rem, 1.1vw + 0.74rem, 1.24rem);
+  font-weight: 800;
+  color: var(--tempo-accent) !important;
+}
+
+.tempo-app .tl-navbar .nav-link {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 0.78rem;
+  padding: 0.5rem 0.82rem !important;
+  font-weight: 700;
+  color: var(--tempo-accent) !important;
+  text-decoration: none;
+}
+
+.tempo-app .tl-navbar .nav-link:hover,
+.tempo-app .tl-navbar .nav-link:focus-visible {
+  background: color-mix(in oklab, var(--tempo-accent) 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--tempo-accent) 24%, transparent);
+}
+
+.tempo-app .tl-navbar .nav-link.active {
+  background: linear-gradient(
+    120deg,
+    color-mix(in oklab, var(--tempo-accent) 18%, transparent),
+    color-mix(in oklab, var(--tempo-accent-2) 18%, transparent)
+  );
+  text-decoration: none;
+}
+
+.tempo-app .navbar-toggler {
+  min-height: 44px;
+  min-width: 44px;
+  border-radius: 0.75rem;
+}
+
+@media (max-width: 991.98px) {
+  .tempo-app .tl-navbar .navbar-collapse {
+    margin-top: 0.7rem;
+    padding: 0.55rem;
+    border: 1px solid var(--tempo-border);
+    border-radius: 0.95rem;
+    background: color-mix(in oklab, var(--tempo-surface-strong) 92%, transparent);
+    box-shadow: var(--tempo-shadow-sm);
+  }
+
+  .tempo-app .tl-navbar .navbar-nav {
+    gap: 0.25rem;
+  }
+}
+
+.tempo-app .btn,
+.tempo-app .btn-link,
+.tempo-app .seg,
+.tempo-app .btn-comp,
+.tempo-app .navbar-toggler {
+  min-height: 44px;
+  font-weight: 700;
+}
+
+.tempo-app .btn,
+.tempo-app .btn-link,
+.tempo-app .seg {
+  border-radius: 0.82rem;
+}
+
+.tempo-app .card,
+.tempo-app .card-line,
+.tempo-app .weather-card,
+.tempo-app .about-panel {
+  border: 1px solid var(--tempo-border-soft);
+  box-shadow: var(--tempo-shadow-md);
+}
+
+.tempo-app .list {
+  gap: clamp(0.68rem, 1vw, 1rem);
+}
+
+.tempo-app .filters {
+  background: color-mix(in oklab, var(--tempo-bg) 84%, transparent);
+  border-bottom: 1px solid var(--tempo-border-soft);
+  backdrop-filter: blur(11px) saturate(135%);
+  justify-content: flex-start;
+  overflow-x: auto;
+  gap: 0.55rem;
+  padding-inline: clamp(0.65rem, 2vw, 1.2rem);
+}
+
+.tempo-app .filters::-webkit-scrollbar {
+  display: none;
+}
+
+.tempo-app .seg {
+  white-space: nowrap;
+  border: 1px solid var(--tempo-border);
+  box-shadow: var(--tempo-shadow-xs);
+}
+
+.tempo-app .seg[aria-selected="true"] {
+  background: color-mix(in oklab, var(--tempo-accent) 14%, var(--tempo-surface-strong));
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--tempo-accent) 38%, transparent);
+}
+
+.tempo-app .bottom-bar {
+  border-top: 1px solid var(--tempo-border);
+  background: color-mix(in oklab, var(--tempo-surface-strong) 90%, transparent);
+  backdrop-filter: blur(15px) saturate(145%);
+}
+
+.tempo-app .bottom-bar .item {
+  min-height: 58px;
+}
+
+.tempo-app .bottom-bar .label {
+  font-weight: 700;
+}
+
+.tempo-app footer {
+  color: var(--tempo-text-muted);
+  font-size: 0.9rem;
+}
+
+.tempo-home header {
+  width: min(var(--tempo-content-max), calc(100% - clamp(1rem, 4vw, 3.2rem)));
+  margin-top: clamp(0.68rem, 2vw, 1.2rem);
+  margin-inline: auto;
+  border-radius: var(--tempo-radius-lg);
+  border: 1px solid color-mix(in oklab, var(--tempo-accent) 28%, transparent);
+  background:
+    linear-gradient(145deg, color-mix(in oklab, var(--tempo-accent) 68%, #5db8ff), color-mix(in oklab, var(--tempo-accent-2) 46%, #91dfff));
+  box-shadow: var(--tempo-shadow-md);
+}
+
+.tempo-home header h1,
+.tempo-home header p {
+  color: #f7fbff !important;
+}
+
+.tempo-home .card {
+  border-radius: var(--tempo-radius-lg);
+  overflow: hidden;
+  background: color-mix(in oklab, var(--tempo-surface-strong) 92%, transparent);
+  transform-origin: 50% 85%;
+}
+
+.tempo-home .card:hover,
+.tempo-home .card:focus-within {
+  transform: translateY(-5px);
+}
+
+.tempo-home .card-title {
+  font-size: clamp(1.05rem, 0.75vw + 0.88rem, 1.28rem);
+  color: var(--tempo-accent) !important;
+}
+
+.tempo-home .card-text {
+  font-size: clamp(0.96rem, 0.38vw + 0.86rem, 1.03rem);
+}
+
+.tempo-home .feature-icon {
+  border: 1px solid color-mix(in oklab, #ffffff 75%, transparent);
+  box-shadow: 0 8px 16px rgba(13, 110, 253, 0.22);
+}
+
+.tempo-home .btn-comp {
+  border-radius: 999px !important;
+  background: linear-gradient(115deg, var(--tempo-accent), var(--tempo-accent-2)) !important;
+  box-shadow: var(--tempo-shadow-sm);
+}
+
+.tempo-home .btn-comp:hover,
+.tempo-home .btn-comp:focus-visible {
+  filter: brightness(1.04);
+}
+
+.tempo-vlille {
+  --bg: #f3f7fc;
+  --fg: var(--tempo-text);
+  --muted: var(--tempo-text-muted);
+  --card: color-mix(in oklab, var(--tempo-surface-strong) 92%, transparent);
+  --accent: var(--tempo-accent);
+  --border: var(--tempo-border);
+  --shadow: var(--tempo-shadow-xs);
+}
+
+html[data-theme="dark"] .tempo-vlille {
+  --bg: #0f1621;
+  --fg: var(--tempo-text);
+  --muted: var(--tempo-text-muted);
+  --card: color-mix(in oklab, var(--tempo-surface-strong) 95%, transparent);
+  --border: var(--tempo-border);
+  --shadow: var(--tempo-shadow-xs);
+}
+
+.tempo-vlille .tl-subnav {
+  position: sticky;
+  top: var(--nav-main-h, 56px);
+  z-index: 9;
+  border-bottom: 1px solid var(--tempo-border-soft);
+  background: color-mix(in oklab, var(--tempo-bg) 88%, transparent);
+  backdrop-filter: blur(11px) saturate(130%);
+}
+
+.tempo-vlille .tl-subnav .nav {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tempo-vlille .tl-subnav .nav::-webkit-scrollbar {
+  display: none;
+}
+
+.tempo-vlille .tl-subnav .btn {
+  border-radius: 999px;
+}
+
+.tempo-vlille .filters {
+  z-index: 8;
+}
+
+.tempo-vlille .pill {
+  border: 1px solid var(--tempo-border);
+  background: color-mix(in oklab, var(--tempo-surface-strong) 88%, transparent);
+}
+
+.tempo-vlille .search {
+  top: calc(var(--header-h, 56px) + var(--filters-h, 52px));
+}
+
+.tempo-vlille .search input {
+  border-radius: 0.88rem;
+  border: 1px solid var(--tempo-border);
+  box-shadow: var(--tempo-shadow-xs);
+}
+
+.tempo-vlille .suggestions {
+  border: 1px solid var(--tempo-border);
+  box-shadow: var(--tempo-shadow-sm);
+}
+
+.tempo-vlille .card {
+  position: relative;
+  border-radius: 1rem;
+}
+
+.tempo-vlille .card::before {
+  content: "";
+  position: absolute;
+  left: 0.7rem;
+  right: 0.7rem;
+  top: 0;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--tempo-accent), var(--tempo-accent-2));
+  opacity: 0.78;
+}
+
+.tempo-vlille .chip {
+  border: 1px solid var(--tempo-border);
+}
+
+.tempo-vlille .btn-link {
+  border-radius: 999px;
+}
+
+.tempo-vlille .about-panel {
+  border-radius: 1rem 1rem 0 0;
+}
+
+.tempo-metro {
+  background: var(--tempo-bg-gradient);
+}
+
+.tempo-metro .line-chip {
+  border: 1px solid color-mix(in oklab, var(--tempo-text) 14%, transparent);
+}
+
+.tempo-metro .status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  border: 1px solid var(--tempo-border-soft);
+  box-shadow: var(--tempo-shadow-xs);
+}
+
+.tempo-metro .card-line {
+  border-radius: 1.05rem;
+  border: 1px solid var(--tempo-border-soft);
+  background: color-mix(in oklab, var(--tempo-surface-strong) 92%, transparent);
+}
+
+.tempo-metro .card-line .card-header {
+  background: color-mix(in oklab, var(--tempo-surface-strong) 95%, transparent);
+}
+
+.tempo-metro .list-group-item {
+  background: transparent;
+}
+
+.tempo-metro .badge {
+  border-radius: 999px;
+}
+
+.tempo-metro #btnRefresh {
+  border-radius: 999px;
+}
+
+.tempo-page-head {
+  border: 1px solid var(--tempo-border-soft);
+  border-radius: var(--tempo-radius-lg);
+  background: color-mix(in oklab, var(--tempo-surface-strong) 90%, transparent);
+  box-shadow: var(--tempo-shadow-sm);
+  padding: clamp(0.9rem, 2vw, 1.25rem);
+}
+
+.tempo-page-head .eyebrow {
+  margin-bottom: 0.24rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--tempo-text-muted);
+}
+
+.tempo-air {
+  font-family: var(--tempo-font-body);
+}
+
+.tempo-air .weather-card {
+  border-radius: clamp(14px, 2.2vw, 24px);
+  overflow: clip;
+}
+
+.tempo-air .loading p {
+  color: #eef5ff;
+}
+
+.tempo-air #weatherContent {
+  padding-bottom: calc(4.6rem + env(safe-area-inset-bottom));
+}
+
+.tempo-air .weather-detail,
+.tempo-air .air-quality,
+.tempo-air #forecast,
+.tempo-air .alert {
+  border: 1px solid var(--tempo-border-soft);
+  border-radius: 0.9rem;
+  background: color-mix(in oklab, var(--tempo-surface-strong) 90%, transparent);
+  box-shadow: var(--tempo-shadow-xs);
+}
+
+.tempo-air .aqi-main {
+  border-radius: 0.9rem;
+}
+
+.tempo-air .refresh-btn {
+  right: clamp(0.85rem, 2.5vw, 1.4rem);
+  bottom: calc(0.9rem + env(safe-area-inset-bottom));
+  z-index: 1060;
+  box-shadow: var(--tempo-shadow-md);
+}
+
+.tempo-air .detail-value {
+  color: color-mix(in oklab, var(--tempo-accent) 75%, #3f8cff);
+  font-size: clamp(1.2rem, 2.8vw, 1.62rem);
+}
+
+.tempo-air .rain-bar {
+  min-height: 62px;
+}
+
+.tempo-air .pollutants .pollutant-item {
+  border: 1px solid var(--tempo-border-soft);
+  border-radius: 0.75rem;
+  padding: 0.5rem 0.45rem;
+}
+
+@media (max-width: 860px) {
+  .tempo-vlille .bottom-bar {
+    display: block !important;
+  }
+
+  .tempo-vlille main {
+    padding-bottom: 84px;
+  }
+
+  .tempo-vlille footer {
+    margin-bottom: calc(82px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 640px) {
+  .tempo-app > main,
+  .tempo-app > .container,
+  .tempo-app main.container,
+  .tempo-app .tl-navbar > .container,
+  .tempo-app .tl-subnav > .container {
+    width: calc(100% - 1rem);
+  }
+
+  .tempo-app .tl-navbar .navbar-brand {
+    font-size: 1rem;
+  }
+
+  .tempo-home header h1 {
+    font-size: clamp(1.6rem, 5.3vw, 2rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tempo-app *,
+  .tempo-app *::before,
+  .tempo-app *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
