@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="fr" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Air de Lille – Météo et qualité de l’air</title>
+    <meta name="description" content="Météo et qualité de l’air à Lille en temps réel: température, pluie dans l’heure, vent et indices EAQI.">
+    <link rel="canonical" href="https://dr-john-8bits.github.io/tempo-lille/airdelille.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="fr_FR">
+    <meta property="og:site_name" content="Tempo Lille">
+    <meta property="og:title" content="Air de Lille – Météo et qualité de l’air">
+    <meta property="og:description" content="Météo et qualité de l’air à Lille en temps réel: température, pluie dans l’heure, vent et indices EAQI.">
+    <meta property="og:url" content="https://dr-john-8bits.github.io/tempo-lille/airdelille.html">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Air de Lille – Météo et qualité de l’air">
+    <meta name="twitter:description" content="Météo et qualité de l’air à Lille en temps réel: température, pluie dans l’heure, vent et indices EAQI.">
+    <meta name="theme-color" content="#0d6efd">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            /* Dynamic background driven by CSS vars and mood classes */
+            background: var(--app-bg, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        
+        .weather-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            margin: 20px auto;
+            max-width: clamp(320px, 92vw, 900px);
+            overflow: hidden;
+        }
+        
+        .weather-header {
+            background: var(--hdr-bg, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        /* ========== Mood maps (EAQI & SKY) ========== */
+        /* We combine two influences:
+           - AQI band sets the base hues (greens -> purple)
+           - SKY overlays nuance (clear/cold/fog/rain/storm/snow/cloud) via subtle tints
+        */
+
+        /* Default */
+        :root{
+            --app-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --hdr-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        /* AQI-driven palettes */
+        body.mood-aqi-good{
+            --app-bg: radial-gradient(1200px 700px at 20% -20%, rgba(255,255,255,.12), transparent 60%), linear-gradient(135deg, #3bb273 0%, #91e697 100%);
+            --hdr-bg: linear-gradient(135deg, #2bb673 0%, #64d88e 100%);
+        }
+        body.mood-aqi-moderate{
+            --app-bg: radial-gradient(1200px 700px at 20% -20%, rgba(255,255,255,.12), transparent 60%), linear-gradient(135deg, #f7b733 0%, #ffd56b 100%);
+            --hdr-bg: linear-gradient(135deg, #f59e0b 0%, #ffcc66 100%);
+        }
+        body.mood-aqi-medium{
+            --app-bg: radial-gradient(1200px 700px at 20% -20%, rgba(255,255,255,.12), transparent 60%), linear-gradient(135deg, #f1c40f 0%, #ffde6b 100%);
+            --hdr-bg: linear-gradient(135deg, #f2c037 0%, #ffd76b 100%);
+        }
+        body.mood-aqi-poor{
+            --app-bg: radial-gradient(1200px 700px at 20% -20%, rgba(255,255,255,.08), transparent 60%), linear-gradient(135deg, #ff9800 0%, #ffb86b 100%);
+            --hdr-bg: linear-gradient(135deg, #ff8c00 0%, #ffad5c 100%);
+        }
+        body.mood-aqi-bad{
+            --app-bg: radial-gradient(1200px 700px at 20% -20%, rgba(255,255,255,.06), transparent 60%), linear-gradient(135deg, #e74c3c 0%, #f78c6b 100%);
+            --hdr-bg: linear-gradient(135deg, #e74c3c 0%, #f07c5c 100%);
+        }
+        body.mood-aqi-verybad{
+            --app-bg: radial-gradient(1200px 700px at 20% -20%, rgba(255,255,255,.06), transparent 60%), linear-gradient(135deg, #8e44ad 0%, #c084fc 100%);
+            --hdr-bg: linear-gradient(135deg, #7e3ab5 0%, #b277f5 100%);
+        }
+
+        /* SKY nuance (overlay via mix-blend-like illusion using semi-transparent gradient) */
+        body.mood-sky-clear{ --app-bg: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.0)), var(--app-bg); }
+        body.mood-sky-cloud{ --app-bg: linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.05)), var(--app-bg); }
+        body.mood-sky-fog  { --app-bg: linear-gradient(135deg, rgba(240,240,240,0.35), rgba(220,220,220,0.2)), var(--app-bg); }
+        body.mood-sky-rain { --app-bg: linear-gradient(135deg, rgba(120,170,255,0.25), rgba(20,60,160,0.25)), var(--app-bg); }
+        body.mood-sky-storm{ --app-bg: linear-gradient(135deg, rgba(140,80,255,0.30), rgba(60,10,90,0.30)), var(--app-bg); }
+        body.mood-sky-snow { --app-bg: linear-gradient(135deg, rgba(255,255,255,0.45), rgba(220,240,255,0.35)), var(--app-bg); }
+        
+        .current-temp {
+            font-size: clamp(2.5rem, 7vw, 4.5rem);
+            font-weight: 300;
+            margin: 20px 0;
+        }
+        
+        .weather-icon {
+            font-size: clamp(3rem, 10vw, 6rem);
+            margin: 20px 0;
+        }
+        
+        .forecast-item {
+            border-bottom: 1px solid #eee;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .forecast-item:last-child {
+            border-bottom: none;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: white;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            margin: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .weather-detail {
+            padding: 0;
+        }
+        
+        .detail-item {
+            text-align: center;
+        }
+        
+        .detail-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .detail-label {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .refresh-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: clamp(52px, 8vw, 68px);
+            height: clamp(52px, 8vw, 68px);
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+        }
+        
+        
+        .rain-alert-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .rain-alert-content i {
+            font-size: 2.5rem;
+        }
+        
+        .rain-percentage {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        
+        .rain-timeline {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+            padding-bottom: 25px;
+        }
+        
+        .rain-bar {
+            flex: 1;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            position: relative;
+            overflow: visible;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+        
+        .rain-bar-fill {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 5px;
+            transition: height 0.3s ease;
+            width: 100%;
+            position: relative;
+        }
+        
+        .rain-bar-percentage {
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.65rem;
+            font-weight: bold;
+            white-space: nowrap;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        .rain-bar-label {
+            position: absolute;
+            bottom: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.65rem;
+            white-space: nowrap;
+            color: white;
+            font-weight: 500;
+        }
+        
+        
+        .air-quality {
+            margin: 15px;
+        }
+        
+        .air-quality-content {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .aqi-main {
+            text-align: center;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .aqi-value {
+            font-size: clamp(2rem, 6vw, 3.25rem);
+            font-weight: bold;
+            color: white;
+        }
+        
+        .aqi-label {
+            font-size: 1.1rem;
+            color: white;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+        
+        .aqi-good { background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%); }
+        .aqi-moderate { background: linear-gradient(135deg, #f7b733 0%, #ffd89b 100%); }
+        .aqi-unhealthy-sensitive { background: linear-gradient(135deg, #f79d00 0%, #ffc371 100%); }
+        .aqi-unhealthy { background: linear-gradient(135deg, #f2709c 0%, #ff9472 100%); }
+        .aqi-very-unhealthy { background: linear-gradient(135deg, #c94b4b 0%, #e97451 100%); }
+        .aqi-hazardous { background: linear-gradient(135deg, #8e0e00 0%, #c94b4b 100%); }
+        
+        .pollutants {
+            /* Bootstrap grid will manage layout with row/col classes */
+            margin-top: 10px;
+        }
+        
+        .pollutant-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .pollutant-name {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 0.9rem;
+        }
+        
+        .pollutant-value {
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+        /* Pull-to-refresh indicator */
+        .pull-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.25), rgba(255,255,255,0));
+            color: white;
+            z-index: 1050;
+            transition: height 0.2s ease;
+            backdrop-filter: blur(4px);
+        }
+        .pull-indicator .pi-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0.9;
+        }
+        .pull-indicator .pi-text {
+            font-weight: 600;
+            letter-spacing: .3px;
+        }
+        .geo-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+        }
+        /* Color scheme hint */
+        :root { color-scheme: light dark; }
+        /* Auto dark styles when data-bs-theme="dark" is set on <html> */
+        [data-bs-theme="dark"] body {
+            background: linear-gradient(135deg, #1e1f29 0%, #0b0d12 100%);
+        }
+        [data-bs-theme="dark"] .weather-card {
+            background: rgba(22, 23, 28, 0.92);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+        [data-bs-theme="dark"] .weather-header {
+            background: linear-gradient(135deg, #2a2f7f 0%, #4a2c65 100%);
+        }
+        /* Subtle rain streaks when mood-sky-rain is active */
+        @keyframes rainFall {
+            0% { background-position: 0 -40px; opacity: .25; }
+            100% { background-position: 0 40px; opacity: .25; }
+        }
+        body.mood-sky-rain::before{
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image: repeating-linear-gradient( to bottom, rgba(255,255,255,0.08) 0 2px, rgba(255,255,255,0.0) 2px 7px );
+            animation: rainFall 0.9s linear infinite;
+            z-index: 1;
+        }
+        .weather-card, .pull-indicator { position: relative; z-index: 2; }
+        [data-bs-theme="dark"] .air-quality-content,
+        [data-bs-theme="dark"] .pollutant-item {
+            background: #1f2127;
+            color: var(--bs-body-color);
+        }
+        [data-bs-theme="dark"] .detail-label {
+            color: #a6adbb;
+        }
+        [data-bs-theme="dark"] .rain-alert {
+            color: #f8f9fa;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        }
+        [data-bs-theme="dark"] .pull-indicator {
+            background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0));
+        }
+        .text-white-75 { color: rgba(255,255,255,.85); }
+        [data-bs-theme="dark"] #adviceText { color: rgba(255,255,255,.9); }
+        /* ===== Tempo Lille navbar (commun) ===== */
+        .tl-navbar {
+            background: rgba(248, 250, 252, .94);
+            backdrop-filter: blur(6px);
+            box-shadow: 0 2px 14px rgba(0,0,0,.06);
+            border: 1px solid rgba(13,110,253,.15);
+            --bs-navbar-toggler-icon-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(13,110,253,.9)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+            --bs-navbar-color: #0d6efd;
+            --bs-navbar-hover-color: #0a58ca;
+        }
+        [data-bs-theme="dark"] .tl-navbar {
+            background: rgba(28,32,38,.92);
+            box-shadow: 0 6px 22px rgba(0,0,0,.35);
+            --bs-navbar-toggler-icon-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255,255,255,.9)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+            --bs-navbar-color: #e9eef8;
+            --bs-navbar-hover-color: #fff;
+        }
+        .tl-navbar .navbar-brand,
+        .tl-navbar .nav-link { color: #0d6efd !important; opacity:.95; transition: transform .12s ease, opacity .12s ease; }
+        .tl-navbar .nav-link:hover,
+        .tl-navbar .nav-link:focus { opacity:1; transform: translateY(-1px); background: rgba(13,110,253,.07); border-radius: .4rem; box-shadow: 0 1px 6px rgba(13,110,253,.1); }
+        .tl-navbar .nav-link.active { font-weight:700; text-decoration: underline 2px; text-underline-offset:4px; }
+        .navbar-toggler { border: 1px solid rgba(13,110,253,.35); border-radius:.6rem; padding:.35rem .6rem; }
+        [data-bs-theme="dark"] .navbar-toggler { border-color: rgba(255,255,255,.5); }
+    </style>
+    <link href="assets/tempo-ux.css" rel="stylesheet">
+</head>
+<body class="tempo-app tempo-air">
+    <a class="tempo-skip-link" href="#main-content">Aller au contenu</a>
+    <script src="assets/tempo-common.js"></script>
+    <script>
+        if (window.TempoCommon) window.TempoCommon.bindSystemTheme('data-bs-theme');
+    </script>
+    <nav class="navbar navbar-expand-lg tl-navbar navbar-light sticky-top" aria-label="Menu principal">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="index.html"><i class="bi bi-buildings me-2"></i>Tempo Lille</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#tlNav" aria-controls="tlNav" aria-expanded="false" aria-label="Basculer la navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="tlNav">
+                <ul class="navbar-nav ms-auto align-items-lg-center">
+                    <li class="nav-item"><a class="nav-link" href="ViteVlille.html"><i class="bi bi-bicycle me-1"></i>V’Lille</a></li>
+                    <li class="nav-item"><a class="nav-link" href="metroilevia.html"><i class="bi bi-train-front me-1"></i>Métro Ilévia</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="airdelille.html"><i class="bi bi-cloud-sun me-1"></i>Air de Lille</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div id="pullIndicator" class="pull-indicator">
+        <div class="pi-content py-2">
+            <div class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></div>
+            <span class="pi-text">Relâchez pour actualiser</span>
+        </div>
+    </div>
+    <main id="main-content" class="container">
+        <div id="loading" class="loading">
+            <div class="spinner-border text-light" role="status">
+                <span class="visually-hidden">Chargement...</span>
+            </div>
+            <p class="mt-3">Récupération des données météo...</p>
+        </div>
+        
+        <div id="error" class="error d-none"></div>
+        
+        <div id="weatherContent" class="d-none" aria-live="polite">
+            <div class="weather-card">
+                <div class="card-header weather-header text-center position-relative">
+                    <h1 class="h3 mb-0"><i class="fas fa-map-marker-alt"></i> <span id="cityName">Lille</span></h1>
+                    <small id="updateTime"></small>
+                    <div class="mt-2">
+                        <button class="btn btn-sm btn-light geo-btn" onclick="geolocateNow()" title="Me géolocaliser">
+                            <i class="fas fa-location-crosshairs"></i>
+                            Me localiser
+                        </button>
+                    </div>
+                    <div id="adviceBox" class="mt-3 small fw-medium d-flex flex-column align-items-center">
+                        <div id="adviceEmoji" style="font-size:1.4rem" aria-hidden="true">🙂</div>
+                        <div id="adviceText" class="mt-1 text-white-75"></div>
+                    </div>
+                </div>
+                <div class="card-body">
+                <div class="text-center p-4">
+                    <div class="weather-icon" id="weatherIcon">
+                        <i class="fas fa-cloud-sun"></i>
+                    </div>
+                    <div class="current-temp" id="currentTemp">--°C</div>
+                    <p class="h5 text-muted" id="weatherDesc">--</p>
+                </div>
+                
+                <div class="weather-detail bg-body-secondary">
+                    <div class="container px-3 py-3">
+                        <div class="row text-center gy-3">
+                            <div class="detail-item col-4">
+                                <div class="detail-value" id="humidity">--%</div>
+                                <div class="detail-label"><i class="fas fa-tint"></i> Humidité</div>
+                            </div>
+                            <div class="detail-item col-4">
+                                <div class="detail-value" id="wind">-- km/h</div>
+                                <div class="detail-label"><i class="fas fa-wind"></i> Vent</div>
+                            </div>
+                            <div class="detail-item col-4">
+                                <div class="detail-value" id="pressure">-- hPa</div>
+                                <div class="detail-label"><i class="fas fa-compress-arrows-alt"></i> Pression</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info shadow-sm mx-3 my-3" id="rainAlert" role="alert">
+                    <div class="rain-alert-content">
+                        <i class="fas fa-umbrella"></i>
+                        <div>
+                            <strong>Risque de pluie dans l'heure</strong>
+                            <div class="rain-percentage" id="rainRisk">--%</div>
+                        </div>
+                    </div>
+                    <div class="rain-timeline d-flex gap-2" id="rainTimeline"></div>
+                </div>
+                
+                <div class="air-quality" id="airQuality">
+                    <h5 class="px-3 pt-3 text-muted mb-3">Qualité de l'air</h5>
+                    <div class="air-quality-content">
+                        <div class="aqi-main">
+                            <div class="aqi-value" id="aqiValue">--</div>
+                            <div class="aqi-label" id="aqiLabel">Chargement...</div>
+                        </div>
+                        <div class="pollutants row row-cols-2 row-cols-md-4 g-3">
+                            <div class="pollutant-item col">
+                                <span class="pollutant-name">PM2.5</span>
+                                <span class="pollutant-value" id="pm25">-- µg/m³</span>
+                            </div>
+                            <div class="pollutant-item col">
+                                <span class="pollutant-name">PM10</span>
+                                <span class="pollutant-value" id="pm10">-- µg/m³</span>
+                            </div>
+                            <div class="pollutant-item col">
+                                <span class="pollutant-name">NO₂</span>
+                                <span class="pollutant-value" id="no2">-- µg/m³</span>
+                            </div>
+                            <div class="pollutant-item col">
+                                <span class="pollutant-name">O₃</span>
+                                <span class="pollutant-value" id="o3">-- µg/m³</span>
+                            </div>
+                        </div>
+                        <div class="mt-3 small">
+                            <div class="d-flex flex-wrap gap-2 justify-content-center">
+                                <span class="badge rounded-pill text-bg-success">Très bon 0–20</span>
+                                <span class="badge rounded-pill bg-warning-subtle text-dark border">Bon 20–40</span>
+                                <span class="badge rounded-pill bg-warning text-dark">Moyen 40–60</span>
+                                <span class="badge rounded-pill bg-orange border text-dark" style="--bs-bg-opacity:.2;background-color:#fd7e14 !important;">Médiocre 60–80</span>
+                                <span class="badge rounded-pill text-bg-danger">Mauvais 80–100</span>
+                                <span class="badge rounded-pill bg-purple text-white" style="background-color:#6f42c1 !important;">Très mauvais &gt;100</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="forecast" class="mt-3">
+                    <h5 class="px-3 pt-3 text-muted">Prévisions</h5>
+                </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <button class="refresh-btn" onclick="loadWeather()" title="Actualiser" aria-label="Actualiser les données météo">
+        <i class="fas fa-sync-alt"></i>
+    </button>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+        if (window.TempoCommon) window.TempoCommon.bindMobileNavCollapse();
+        const LILLE_COORDS = { lat: 50.6292, lon: 3.0573 };
+        let userCoords = null;
+
+        function nearestIndex(timesISO){
+            if (!Array.isArray(timesISO) || timesISO.length === 0) return 0;
+            const now = Date.now();
+            let best = 0, bestDiff = Infinity;
+            timesISO.forEach((t,i)=>{ const d = Math.abs(new Date(t).getTime() - now); if (d < bestDiff){ best=i; bestDiff=d; } });
+            return best;
+        }
+
+        function weatherFromCode(code){
+            const c = Number(code);
+            if (c === 0) return { icon: 'fa-sun', label: 'Ciel dégagé' };
+            if ([1,2].includes(c)) return { icon: 'fa-cloud-sun', label: 'Peu nuageux' };
+            if ([3].includes(c)) return { icon: 'fa-cloud', label: 'Nuageux' };
+            if ([45,48].includes(c)) return { icon: 'fa-smog', label: 'Brouillard' };
+            if ([51,53,55].includes(c)) return { icon: 'fa-cloud-rain', label: 'Bruine' };
+            if ([61,63,65].includes(c)) return { icon: 'fa-cloud-showers-heavy', label: 'Pluie' };
+            if ([66,67].includes(c)) return { icon: 'fa-icicles', label: 'Pluie verglaçante' };
+            if ([71,73,75,77].includes(c)) return { icon: 'fa-snowflake', label: 'Neige' };
+            if ([80,81,82].includes(c)) return { icon: 'fa-cloud-showers-heavy', label: 'Averses' };
+            if ([85,86].includes(c)) return { icon: 'fa-snowflake', label: 'Averses de neige' };
+            if (c === 95) return { icon: 'fa-bolt', label: 'Orages' };
+            if ([96,99].includes(c)) return { icon: 'fa-bolt', label: 'Orages violents' };
+            return { icon: 'fa-cloud-sun', label: 'Variable' };
+        }
+
+        function skyMoodFromCode(code){
+            const c = Number(code);
+            if (c === 0) return 'clear';
+            if ([1,2,3].includes(c)) return 'cloud';
+            if ([45,48].includes(c)) return 'fog';
+            if ([51,53,55,61,63,65,80,81,82].includes(c)) return 'rain';
+            if ([66,67].includes(c)) return 'rain'; // freezing rain -> keep as rain nuance
+            if ([71,73,75,77,85,86].includes(c)) return 'snow';
+            if ([95,96,99].includes(c)) return 'storm';
+            return 'cloud';
+        }
+
+        function setBodyMood({ aqi, sky }){
+            const b = document.body;
+            // Clean previous mood classes
+            b.classList.remove('mood-aqi-good','mood-aqi-moderate','mood-aqi-medium','mood-aqi-poor','mood-aqi-bad','mood-aqi-verybad',
+                               'mood-sky-clear','mood-sky-cloud','mood-sky-fog','mood-sky-rain','mood-sky-storm','mood-sky-snow');
+            if (aqi) b.classList.add(aqi);
+            if (sky) b.classList.add(sky);
+        }
+
+        function getWeatherIcon(description) {
+            const desc = description.toLowerCase();
+            if (desc.includes('soleil') || desc.includes('clair') || desc.includes('dégagé')) return 'fa-sun';
+            if (desc.includes('nuage') || desc.includes('couvert')) return 'fa-cloud';
+            if (desc.includes('pluie')) return 'fa-cloud-rain';
+            if (desc.includes('orage')) return 'fa-bolt';
+            if (desc.includes('neige')) return 'fa-snowflake';
+            if (desc.includes('brouillard') || desc.includes('brume')) return 'fa-smog';
+            return 'fa-cloud-sun';
+        }
+
+        async function loadWeather() {
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const content = document.getElementById('weatherContent');
+            
+            loading.classList.remove('d-none');
+            error.classList.add('d-none');
+            content.classList.add('d-none');
+
+            try {
+                // Tentative de géolocalisation
+                if (navigator.geolocation && !userCoords) {
+                    navigator.geolocation.getCurrentPosition(
+                        position => {
+                            userCoords = {
+                                lat: position.coords.latitude,
+                                lon: position.coords.longitude
+                            };
+                            fetchWeatherData(userCoords);
+                        },
+                        () => {
+                            // Si refusé, utiliser Lille par défaut
+                            fetchWeatherData(LILLE_COORDS);
+                        }
+                    );
+                } else {
+                    fetchWeatherData(userCoords || LILLE_COORDS);
+                }
+            } catch (err) {
+                showError('Erreur lors du chargement des données météo.');
+            }
+        }
+
+        async function fetchWeatherData(coords) {
+            try {
+                const { lat, lon } = coords;
+                // Forecast + current + hourly + daily + minutely_15 (Open‑Meteo)
+                const fUrl = new URL('https://api.open-meteo.com/v1/forecast');
+                fUrl.searchParams.set('latitude', lat);
+                fUrl.searchParams.set('longitude', lon);
+                fUrl.searchParams.set('timezone', 'Europe/Paris');
+                fUrl.searchParams.set('current', 'temperature_2m,precipitation,wind_speed_10m,weather_code,relative_humidity_2m,surface_pressure');
+                fUrl.searchParams.set('hourly', 'temperature_2m,precipitation_probability,precipitation,wind_speed_10m');
+                fUrl.searchParams.set('daily', 'temperature_2m_max,temperature_2m_min,precipitation_sum');
+                fUrl.searchParams.set('minutely_15', 'precipitation');
+                fUrl.searchParams.set('wind_speed_unit','kmh');
+                fUrl.searchParams.set('precipitation_unit','mm');
+
+                // Air quality (CAMS via Open‑Meteo)
+                const aUrl = new URL('https://air-quality-api.open-meteo.com/v1/air-quality');
+                aUrl.searchParams.set('latitude', lat);
+                aUrl.searchParams.set('longitude', lon);
+                aUrl.searchParams.set('timezone', 'Europe/Paris');
+                aUrl.searchParams.set('hourly','european_aqi,pm2_5,pm10,ozone,nitrogen_dioxide');
+
+                const [fRes, aRes] = await Promise.all([
+                    fetch(fUrl, { cache: 'no-store' }),
+                    fetch(aUrl, { cache: 'no-store' })
+                ]);
+                if (!fRes.ok) throw new Error('forecast');
+                if (!aRes.ok) throw new Error('air');
+
+                const [forecast, air] = await Promise.all([fRes.json(), aRes.json()]);
+
+                displayWeather(forecast, coords);
+                generateForecast(forecast);
+                generateRainForecast(forecast);
+                generateAirQuality(air);
+                generateAdvice(forecast, air);
+            } catch (err) {
+                showError('Impossible de récupérer les données météo/air. Veuillez réessayer.');
+                console.error(err);
+            }
+        }
+
+        function displayWeather(forecast, coords) {
+            const city = (coords === LILLE_COORDS) ? 'Lille' : 'Ma position';
+            const c = forecast.current || {};
+            const w = weatherFromCode(c.weather_code);
+            const skyMood = skyMoodFromCode(c.weather_code);
+            setBodyMood({ sky: 'mood-sky-' + skyMood });
+
+            document.getElementById('cityName').textContent = city;
+            document.getElementById('currentTemp').textContent = (Number.isFinite(c.temperature_2m) ? Math.round(c.temperature_2m) : '--') + '°C';
+            document.getElementById('weatherDesc').textContent = w.label;
+            document.getElementById('humidity').textContent = (Number.isFinite(c.relative_humidity_2m) ? Math.round(c.relative_humidity_2m) : '--') + '%';
+            document.getElementById('wind').textContent = (Number.isFinite(c.wind_speed_10m) ? Math.round(c.wind_speed_10m) : '--') + ' km/h';
+            document.getElementById('pressure').textContent = (Number.isFinite(c.surface_pressure) ? Math.round(c.surface_pressure) : '--') + ' hPa';
+
+            document.getElementById('weatherIcon').innerHTML = `<i class="fas ${w.icon}"></i>`;
+
+            const now = new Date();
+            document.getElementById('updateTime').textContent = `Mis à jour à ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+            document.getElementById('loading').classList.add('d-none');
+            document.getElementById('weatherContent').classList.remove('d-none');
+        }
+
+        function generateForecast(forecast) {
+            const d = forecast.daily || {};
+            const days = d.time || [];
+            const tMax = d.temperature_2m_max || [];
+            const tMin = d.temperature_2m_min || [];
+
+            let forecastHTML = '<h5 class="px-3 pt-3 text-muted">Prévisions</h5>';
+            forecastHTML += '<div class="list-group list-group-flush">';
+
+            const fmtDay = (iso, idx) => {
+                const dt = new Date(iso);
+                const opts = { weekday: 'long' };
+                return idx === 0 ? "Aujourd'hui" : dt.toLocaleDateString('fr-FR', opts).replace(/^\w/, c => c.toUpperCase());
+            };
+
+            for (let i = 0; i < Math.min(5, days.length); i++) {
+                const name = fmtDay(days[i], i);
+                const tmax = Number.isFinite(tMax[i]) ? Math.round(tMax[i]) : '--';
+                const tmin = Number.isFinite(tMin[i]) ? Math.round(tMin[i]) : '--';
+                forecastHTML += `
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div class="fw-semibold">${name}</div>
+                        <div class="text-muted"><i class="fas fa-cloud me-2"></i>${tmax}° / ${tmin}°</div>
+                    </div>
+                `;
+            }
+            forecastHTML += '</div>';
+            document.getElementById('forecast').innerHTML = forecastHTML;
+        }
+        
+        function generateRainForecast(forecast) {
+            const rainAlert = document.getElementById('rainAlert');
+            const rainRisk = document.getElementById('rainRisk');
+            const rainTimeline = document.getElementById('rainTimeline');
+
+            const m = forecast.minutely_15 || {};
+            const times = m.time || [];
+            const precs = m.precipitation || [];
+
+            let items = [];
+
+            if (times.length && precs.length) {
+                // Use next 60 minutes (4 slots of 15 min)
+                const idx = nearestIndex(times);
+                const sliceT = times.slice(idx, idx + 4);
+                const sliceP = precs.slice(idx, idx + 4);
+
+                // Convert mm/15min to a pseudo "risk %" for visual purpose (cap at 2 mm = 100%)
+                items = sliceT.map((t, i) => {
+                    const mm = Number(sliceP[i] ?? 0);
+                    const pct = Math.max(0, Math.min(100, Math.round((mm / 2) * 100)));
+                    return { time: new Date(t), pct, mm };
+                });
+            } else {
+                // Fallback: build two steps from hourly precipitation probability
+                const h = forecast.hourly || {};
+                const idxH = nearestIndex(h.time || []);
+                const step1 = Number(h.precipitation_probability?.[idxH] ?? 0);
+                const step2 = Number(h.precipitation_probability?.[idxH+1] ?? step1);
+                const now = new Date();
+
+                items = [
+                    { time: now, pct: step1, mm: Number(h.precipitation?.[idxH] ?? 0) },
+                    { time: new Date(now.getTime() + 60*60000), pct: step2, mm: Number(h.precipitation?.[idxH+1] ?? 0) }
+                ];
+            }
+
+            const maxPct = items.reduce((m,x)=> Math.max(m, x.pct), 0);
+            rainRisk.textContent = `${maxPct}%`;
+
+            rainAlert.classList.remove('alert-success','alert-info','alert-warning');
+            if (maxPct < 20) {
+                rainAlert.classList.add('alert-success');
+                rainAlert.querySelector('strong').textContent = 'Pas de pluie prévue dans l\'heure';
+            } else if (maxPct > 60) {
+                rainAlert.classList.add('alert-warning');
+                rainAlert.querySelector('strong').textContent = 'Forte probabilité de pluie';
+            } else {
+                rainAlert.classList.add('alert-info');
+                rainAlert.querySelector('strong').textContent = 'Risque de pluie dans l\'heure';
+            }
+
+            // Timeline
+            let timelineHTML = '';
+            items.forEach((it, i) => {
+                const timeStr = `${String(it.time.getHours()).padStart(2,'0')}:${String(it.time.getMinutes()).padStart(2,'0')}`;
+                const showLabel = (i === 0 || i === items.length - 1);
+                const labelText = i === 0 ? 'Maintenant' : timeStr;
+                timelineHTML += `
+                    <div class="rain-bar" title="${timeStr} – ${it.pct}% (≈ ${it.mm} mm)">
+                        <div class="rain-bar-fill" style="height: ${it.pct}%">
+                            ${it.pct > 10 ? `<div class="rain-bar-percentage">${it.pct}%</div>` : ''}
+                        </div>
+                        ${showLabel ? `<div class="rain-bar-label">${labelText}</div>` : ''}
+                    </div>
+                `;
+            });
+            rainTimeline.innerHTML = timelineHTML;
+        }
+        
+        function generateAirQuality(air) {
+            const h = air.hourly || {};
+            const idx = nearestIndex(h.time || []);
+            const aqi = Number(h.european_aqi?.[idx]);
+            // Open‑Meteo (CAMS) European AQI ranges:
+            // 0–20 (Très bon), 20–40 (Bon), 40–60 (Moyen), 60–80 (Médiocre), 80–100 (Mauvais), >100 (Très mauvais)
+            let band = { label: '—', cls: 'aqi-moderate' };
+            if (Number.isFinite(aqi)) {
+                if (aqi <= 20) band = { label: 'Très bon', cls: 'aqi-good' };
+                else if (aqi <= 40) band = { label: 'Bon', cls: 'aqi-moderate' };
+                else if (aqi <= 60) band = { label: 'Moyen', cls: 'aqi-unhealthy-sensitive' };
+                else if (aqi <= 80) band = { label: 'Médiocre', cls: 'aqi-unhealthy' };
+                else if (aqi <= 100) band = { label: 'Mauvais', cls: 'aqi-very-unhealthy' };
+                else band = { label: 'Très mauvais', cls: 'aqi-hazardous' };
+            }
+
+            // Map label to mood class
+            const aqiClassMap = {
+                'Très bon': 'mood-aqi-good',
+                'Bon': 'mood-aqi-moderate',
+                'Moyen': 'mood-aqi-medium',
+                'Médiocre': 'mood-aqi-poor',
+                'Mauvais': 'mood-aqi-bad',
+                'Très mauvais': 'mood-aqi-verybad'
+            };
+            const aqiMood = aqiClassMap[band.label] || null;
+            if (aqiMood) setBodyMood({ aqi: aqiMood });
+
+            document.getElementById('aqiValue').textContent = Number.isFinite(aqi) ? String(Math.round(aqi)) : '—';
+            document.getElementById('aqiLabel').textContent = band.label;
+
+            const aqiMain = document.querySelector('.aqi-main');
+            aqiMain.classList.remove('aqi-good','aqi-moderate','aqi-unhealthy-sensitive','aqi-unhealthy','aqi-very-unhealthy','aqi-hazardous');
+            aqiMain.classList.add(band.cls);
+
+            const v = (arr)=> {
+                const val = Number(arr?.[idx]);
+                return Number.isFinite(val) ? `${Math.round(val)} µg/m³` : '—';
+            };
+            document.getElementById('pm25').textContent = v(h.pm2_5);
+            document.getElementById('pm10').textContent = v(h.pm10);
+            document.getElementById('no2').textContent  = v(h.nitrogen_dioxide);
+            document.getElementById('o3').textContent   = v(h.ozone);
+        }
+
+        function nextHourRainRisk(forecast){
+            // Returns { pct:number, label:string } using minutely_15 if available, else hourly probability
+            const m = forecast.minutely_15 || {};
+            const times = m.time || [];
+            const precs = m.precipitation || [];
+            if (times.length && precs.length){
+                const idx = nearestIndex(times);
+                const slice = precs.slice(idx, idx + 4);
+                const mmMax = slice.reduce((mx,v)=> Math.max(mx, Number(v||0)), 0);
+                const pct = Math.max(0, Math.min(100, Math.round((mmMax / 2) * 100)));
+                let label = 'Risque de pluie faible';
+                if (pct > 60) label = 'Forte probabilité de pluie';
+                else if (pct >= 20) label = 'Risque de pluie';
+                return { pct, label };
+            } else {
+                const h = forecast.hourly || {};
+                const idxH = nearestIndex(h.time || []);
+                const step1 = Number(h.precipitation_probability?.[idxH] ?? 0);
+                const step2 = Number(h.precipitation_probability?.[idxH+1] ?? step1);
+                const pct = Math.max(step1, step2);
+                let label = 'Risque de pluie faible';
+                if (pct > 60) label = 'Forte probabilité de pluie';
+                else if (pct >= 20) label = 'Risque de pluie';
+                return { pct, label };
+            }
+        }
+
+        function generateAdvice(forecast, air){
+            const c = forecast.current || {};
+            const temp = Number(c.temperature_2m);
+            const wind = Number(c.wind_speed_10m);
+            const code = Number(c.weather_code);
+            const rain = nextHourRainRisk(forecast);
+            const h = air.hourly || {};
+            const idx = nearestIndex(h.time || []);
+            const aqi = Number(h.european_aqi?.[idx]);
+
+            // AQI band (0–20 TB, 20–40 B, 40–60 M, 60–80 Médiocre, 80–100 Mauvais, >100 Très mauvais)
+            let aqiBand = 'bon';
+            if (Number.isFinite(aqi)){
+                if (aqi <= 20) aqiBand = 'très bon';
+                else if (aqi <= 40) aqiBand = 'bon';
+                else if (aqi <= 60) aqiBand = 'moyen';
+                else if (aqi <= 80) aqiBand = 'médiocre';
+                else if (aqi <= 100) aqiBand = 'mauvais';
+                else aqiBand = 'très mauvais';
+            }
+
+            // Build advice with priorities:
+            // 1) Polluted air warnings
+            // 2) Strong rain incoming
+            // 3) Heat or sun
+            // 4) Cold
+            // 5) Windy
+            // 6) Nice air encouragement
+            let emoji = '🙂';
+            let text = 'Bonne journée !';
+
+            if (Number.isFinite(aqi) && aqi > 80){
+                emoji = '😷';
+                text = (aqi > 100)
+                  ? "Air très mauvais : limite l'activité dehors, aère aux heures les moins chargées."
+                  : "Air mauvais : évite l’effort dehors, privilégie les trajets courts.";
+            } else if (rain.pct > 60){
+                emoji = '☔';
+                text = "Pluie probable dans l’heure : prends un parapluie ou une capuche.";
+            } else if (Number.isFinite(temp) && temp >= 28){
+                emoji = '🥵';
+                text = "Chaud aujourd’hui : hydrate‑toi et reste à l’ombre si possible.";
+            } else if ([0,1,2].includes(code)){
+                emoji = '🕶️';
+                text = "Grand ciel clair : lunettes de soleil conseillées.";
+            } else if (Number.isFinite(temp) && temp <= 6){
+                emoji = '🧥';
+                text = "Frais à froid : couvre‑toi bien.";
+            } else if (Number.isFinite(wind) && wind >= 45){
+                emoji = '💨';
+                text = "Coup de vent : attention aux rafales, maintiens ton parapluie si besoin.";
+            } else if (Number.isFinite(aqi) && aqi <= 40){
+                emoji = '🌿';
+                text = (aqi <= 20)
+                  ? "Air très bon : bon bol d’air, profite pour sortir."
+                  : "Air bon : conditions agréables pour une balade.";
+            } else if (rain.pct >= 20){
+                emoji = '🌦️';
+                text = "Petit risque d’averse : une veste imperméable peut aider.";
+            }
+
+            const advEmoji = document.getElementById('adviceEmoji');
+            const advText = document.getElementById('adviceText');
+            if (advEmoji) advEmoji.textContent = emoji;
+            if (advText) advText.textContent = text;
+        }
+
+        function showError(message) {
+            document.getElementById('loading').classList.add('d-none');
+            document.getElementById('error').textContent = message;
+            document.getElementById('error').classList.remove('d-none');
+        }
+
+        function geolocateNow() {
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const content = document.getElementById('weatherContent');
+
+            loading.classList.remove('d-none');
+            error.classList.add('d-none');
+            content.classList.add('d-none');
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    pos => {
+                        userCoords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+                        fetchWeatherData(userCoords);
+                    },
+                    () => {
+                        // Refus ou échec : rester sur Lille
+                        userCoords = null;
+                        fetchWeatherData(LILLE_COORDS);
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            } else {
+                fetchWeatherData(userCoords || LILLE_COORDS);
+            }
+        }
+
+        // Pull-to-refresh (mobile-friendly)
+        (function setupPullToRefresh(){
+            const indicator = document.getElementById('pullIndicator');
+            let startY = 0;
+            let pulling = false;
+            let maxHeight = 80;
+
+            window.addEventListener('touchstart', (e) => {
+                if (window.scrollY === 0) {
+                    startY = e.touches[0].clientY;
+                    pulling = true;
+                } else {
+                    pulling = false;
+                }
+            }, { passive: true });
+
+            window.addEventListener('touchmove', (e) => {
+                if (!pulling) return;
+                const y = e.touches[0].clientY;
+                const delta = Math.max(0, y - startY);
+                const height = Math.min(maxHeight, delta * 0.6);
+                indicator.style.height = height + 'px';
+            }, { passive: true });
+
+            window.addEventListener('touchend', () => {
+                const currentH = parseFloat(indicator.style.height || '0');
+                if (currentH >= maxHeight * 0.7) {
+                    // Trigger refresh
+                    indicator.style.height = maxHeight + 'px';
+                    setTimeout(() => {
+                        loadWeather();
+                        indicator.style.height = '0px';
+                    }, 50);
+                } else {
+                    indicator.style.height = '0px';
+                }
+                pulling = false;
+            });
+        })();
+
+        // Charger la météo au démarrage
+        loadWeather();
+    </script>
+</body>
+</html>

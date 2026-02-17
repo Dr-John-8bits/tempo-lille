@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>État du Métro Ilévia – M1 & M2</title>
+  <meta name="description" content="Statut en temps réel des lignes de métro Ilévia (M1, M2) – open data MEL." />
+  <link rel="canonical" href="https://dr-john-8bits.github.io/tempo-lille/metroilevia.html">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:site_name" content="Tempo Lille">
+  <meta property="og:title" content="État du Métro Ilévia – M1 & M2">
+  <meta property="og:description" content="Statut en temps réel des lignes de métro Ilévia (M1, M2) – open data MEL.">
+  <meta property="og:url" content="https://dr-john-8bits.github.io/tempo-lille/metroilevia.html">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="État du Métro Ilévia – M1 & M2">
+  <meta name="twitter:description" content="Statut en temps réel des lignes de métro Ilévia (M1, M2) – open data MEL.">
+  <meta name="theme-color" content="#0d6efd">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    :root{
+      --m1:#f1c40f; /* jaune */
+      --m2:#e74c3c; /* rouge */
+      --ok:#10b981;
+      --warn:#f59e0b;
+      --err:#e11d48;
+    }
+    body{background:#f8f9fa;}
+    .sticky-top-blur{backdrop-filter: saturate(140%) blur(8px);}
+    .badge-dot{display:inline-flex;align-items:center;gap:.4rem}
+    .badge-dot::before{content:"";width:.55rem;height:.55rem;border-radius:50%;display:inline-block;background:currentColor}
+    .line-chip{font-weight:700;border-radius:999px;padding:.35rem .75rem;display:inline-flex;align-items:center;gap:.4rem;color:#111}
+    .chip-m1{background:linear-gradient(90deg,var(--m1),#ffd95a)}
+    .chip-m2{background:linear-gradient(90deg,var(--m2),#ff7f73);color:#fff}
+    .status-pill{border-radius:999px;padding:.35rem .75rem;font-weight:600}
+    .status-ok{background:#ecfdf5;color:var(--ok);}
+    .status-warn{background:#fff7ed;color:var(--warn);}
+    .status-err{background:#fef2f2;color:var(--err);}
+    .card-line{border:0;border-radius:1rem;box-shadow:0 8px 30px rgba(0,0,0,.06)}
+    .card-line .card-header{border:0;border-bottom:1px solid rgba(0,0,0,.06);background:#fff;border-top-left-radius:1rem;border-top-right-radius:1rem}
+    .list-group-item{border:0;border-bottom:1px dashed rgba(0,0,0,.08)}
+    .list-group-item:last-child{border-bottom:0}
+    .time{font-variant-numeric:tabular-nums;color:#6c757d}
+    .skeleton{background:linear-gradient(90deg,#eee,#f8f9fa,#eee);background-size:200% 100%;animation:sh 1.2s infinite}
+    @keyframes sh{to{background-position:-200% 0}}
+
+    /* Dark mode overrides */
+    html[data-theme="dark"] body{background:#0b0b0c;color:#ececec;}
+    html[data-theme="dark"] .navbar{background:rgba(21,21,24,.85)!important;}
+    html[data-theme="dark"] .card-line{background:#151518;color:#ececec;}
+    html[data-theme="dark"] .card-line .card-header{background:#151518;border-bottom-color:rgba(255,255,255,.08);}
+    html[data-theme="dark"] .list-group-item{background:#151518;border-bottom-color:rgba(255,255,255,.08);}
+    html[data-theme="dark"] .badge.text-bg-light{background:#2a2d33!important;color:#e2e8f0!important;}
+    html[data-theme="dark"] .text-secondary{color:#b3b3b3!important;}
+    html[data-theme="dark"] .toast.text-bg-danger{background:#7f1d1d!important;}
+
+    /* ===== Tempo Lille navbar (commun) ===== */
+    .tl-navbar {
+      background: rgba(248, 250, 252, .94);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 2px 14px rgba(0,0,0,.06);
+      border: 1px solid rgba(13,110,253,.15);
+      --bs-navbar-toggler-icon-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(13,110,253,.9)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+      --bs-navbar-color: #0d6efd;
+      --bs-navbar-hover-color: #0a58ca;
+    }
+    html[data-theme="dark"] .tl-navbar {
+      background: rgba(28,32,38,.92);
+      box-shadow: 0 6px 22px rgba(0,0,0,.35);
+      --bs-navbar-toggler-icon-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255,255,255,.9)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+      --bs-navbar-color: #e9eef8;
+      --bs-navbar-hover-color: #fff;
+    }
+    .tl-navbar .navbar-brand,
+    .tl-navbar .nav-link { color: #0d6efd !important; opacity:.95; transition: transform .12s ease, opacity .12s ease; }
+    .tl-navbar .nav-link:hover,
+    .tl-navbar .nav-link:focus { opacity:1; transform: translateY(-1px); background: rgba(13,110,253,.07); border-radius: .4rem; box-shadow: 0 1px 6px rgba(13,110,253,.1); }
+    .tl-navbar .nav-link.active { font-weight:700; text-decoration: underline 2px; text-underline-offset:4px; }
+    .navbar-toggler { border: 1px solid rgba(13,110,253,.35); border-radius:.6rem; padding:.35rem .6rem; }
+    html[data-theme="dark"] .navbar-toggler { border-color: rgba(255,255,255,.5); }
+  </style>
+  <link href="assets/tempo-ux.css" rel="stylesheet">
+</head>
+<body class="tempo-app tempo-metro">
+  <a class="tempo-skip-link" href="#main-content">Aller au contenu</a>
+  <script src="assets/tempo-common.js"></script>
+  <script>
+    if (window.TempoCommon) window.TempoCommon.bindSystemTheme('data-theme');
+  </script>
+  <nav class="navbar navbar-expand-lg tl-navbar navbar-light sticky-top" aria-label="Menu principal">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="index.html"><i class="bi bi-buildings me-2"></i>Tempo Lille</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#tlNav" aria-controls="tlNav" aria-expanded="false" aria-label="Basculer la navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="tlNav">
+        <ul class="navbar-nav ms-auto align-items-lg-center">
+          <li class="nav-item"><a class="nav-link" href="ViteVlille.html"><i class="bi bi-bicycle me-1"></i>V’Lille</a></li>
+          <li class="nav-item"><a class="nav-link active" href="metroilevia.html"><i class="bi bi-train-front me-1"></i>Métro Ilévia</a></li>
+          <li class="nav-item"><a class="nav-link" href="airdelille.html"><i class="bi bi-cloud-sun me-1"></i>Air de Lille</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main-content" class="container py-3 py-md-4">
+    <header class="tempo-page-head mb-3 mb-md-4" aria-label="Présentation de la page">
+      <p class="eyebrow">Ilévia Temps Réel</p>
+      <h1 class="h4 mb-1">État du métro M1 et M2</h1>
+      <p class="mb-0">Vue claire des perturbations en cours, mise à jour automatiquement toutes les 60 secondes.</p>
+    </header>
+    <!-- Top status -->
+    <section class="mb-3">
+      <div class="d-flex flex-wrap gap-2">
+        <span class="line-chip chip-m1"><i class="bi bi-circle-fill" style="font-size:.65rem"></i> Ligne 1</span>
+        <span id="pillM1" class="status-pill status-ok">Chargement…</span>
+      </div>
+      <div class="d-flex flex-wrap gap-2 mt-2">
+        <span class="line-chip chip-m2"><i class="bi bi-circle-fill" style="font-size:.65rem"></i> Ligne 2</span>
+        <span id="pillM2" class="status-pill status-ok">Chargement…</span>
+      </div>
+      <div class="mt-2 small text-secondary d-flex align-items-center gap-2">
+        <span id="lastUpdate">—</span>
+        <button id="btnRefresh" class="btn btn-outline-primary btn-sm">
+          <i class="bi bi-arrow-clockwise"></i> Actualiser
+        </button>
+      </div>
+    </section>
+
+    <!-- Cards lines -->
+    <section class="row g-3">
+      <div class="col-12">
+        <div class="card card-line">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+              <span class="line-chip chip-m1"><i class="bi bi-circle-fill" style="font-size:.65rem"></i> M1</span>
+              <span class="small text-secondary">Lille CHU – Villeneuve d'Ascq</span>
+            </div>
+            <div id="badgeCountM1" class="badge text-bg-light">—</div>
+          </div>
+          <ul id="listM1" class="list-group list-group-flush">
+            <li class="list-group-item skeleton">&nbsp;</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <div class="card card-line">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+              <span class="line-chip chip-m2"><i class="bi bi-circle-fill" style="font-size:.65rem"></i> M2</span>
+              <span class="small text-secondary">Lille – Tourcoing / Roubaix</span>
+            </div>
+            <div id="badgeCountM2" class="badge text-bg-light">—</div>
+          </div>
+          <ul id="listM2" class="list-group list-group-flush">
+            <li class="list-group-item skeleton">&nbsp;</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="text-center mt-4">
+      <p class="text-secondary small mb-1">Source: Open Data MEL – collection <code>ilevia:perturbations</code></p>
+      <p class="text-secondary small">Cette page est non-officielle. Les données peuvent évoluer.</p>
+    </section>
+  </main>
+
+  <!-- Toast error -->
+  <div class="position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index:1080">
+    <div id="toastErr" class="toast text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          Impossible de récupérer les données. Réessaie plus tard.
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const OGC_URL = 'https://data.lillemetropole.fr/data/ogcapi/collections/ilevia:perturbations/items?f=json&limit=500';
+
+    const pillM1 = document.getElementById('pillM1');
+    const pillM2 = document.getElementById('pillM2');
+    const listM1 = document.getElementById('listM1');
+    const listM2 = document.getElementById('listM2');
+    const badgeCountM1 = document.getElementById('badgeCountM1');
+    const badgeCountM2 = document.getElementById('badgeCountM2');
+    const lastUpdate = document.getElementById('lastUpdate');
+
+    document.getElementById('btnRefresh').addEventListener('click', load);
+
+    function fmtTime(d){
+      try{ return new Date(d).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}); }catch{ return '-'; }
+    }
+
+    const dayFmtParis = new Intl.DateTimeFormat('fr-CA', {
+      timeZone: 'Europe/Paris',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+
+    function escapeHTML(value){
+      return String(value ?? '').replace(/[&<>"']/g, (ch) => {
+        if (ch === '&') return '&amp;';
+        if (ch === '<') return '&lt;';
+        if (ch === '>') return '&gt;';
+        if (ch === '"') return '&quot;';
+        return '&#39;';
+      });
+    }
+
+    function extractLineFromCible(cible){
+      const c = (cible||'').toUpperCase();
+      if(/M[ÉE]TRO\s*1|\bM1\b|\bME1\b/.test(c)) return 'M1';
+      if(/M[ÉE]TRO\s*2|\bM2\b|\bME2\b/.test(c)) return 'M2';
+      return null;
+    }
+
+    function dayKeyParis(d){
+      try{ return dayFmtParis.format(new Date(d)); }catch{ return ''; }
+    }
+
+    function setPill(el, count){
+      el.classList.remove('status-ok','status-warn','status-err');
+      if(count === 0){ el.classList.add('status-ok'); el.innerHTML = '<i class="bi bi-check-circle"></i> Trafic normal'; return; }
+      if(count > 0){ el.classList.add(count >= 2 ? 'status-err' : 'status-warn'); el.innerHTML = `<i class="bi ${count>=2?'bi-x-octagon':'bi-exclamation-triangle'}"></i> ${count} perturbation${count>1?'s':''}`; }
+    }
+
+    function itemHTML(p){
+      const rawType = p.type_perturbation || p.statut || 'Information';
+      const rawMessage = (p.message || p.contenu || p.description || 'Perturbation signalée').toString().replace(/<[^>]*>/g,'').trim();
+      const type = escapeHTML(rawType);
+      const message = escapeHTML(rawMessage);
+      const t = p.date_modification || p.date || Date.now();
+      const badgeCls = /interruption/i.test(rawType) ? 'text-bg-danger' : /ralent|retard|deviation/i.test(rawType) ? 'text-bg-warning' : 'text-bg-info';
+      return `
+        <li class="list-group-item">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <span class="badge ${badgeCls} me-2">${type}</span>
+              <span>${message}</span>
+            </div>
+            <span class="time small">${fmtTime(t)}</span>
+          </div>
+        </li>`;
+    }
+
+    async function load(){
+      // skeletons
+      listM1.innerHTML = '<li class="list-group-item skeleton">&nbsp;</li>';
+      listM2.innerHTML = '<li class="list-group-item skeleton">&nbsp;</li>';
+      badgeCountM1.textContent = '…';
+      badgeCountM2.textContent = '…';
+      pillM1.textContent = 'Chargement…';
+      pillM2.textContent = 'Chargement…';
+
+      try{
+        const res = await fetch(OGC_URL, { cache: 'no-store' });
+        const json = await res.json();
+        const features = Array.isArray(json.features) ? json.features : [];
+        const props = features.map(f => f.properties || {});
+
+        const today = dayKeyParis(Date.now());
+        const todays = props.filter((p) => {
+          const refDate = p.date_modification || p.date;
+          if (!refDate) return true;
+          return dayKeyParis(refDate) === today;
+        });
+        const m1 = todays.filter(p => extractLineFromCible(p.cible) === 'M1');
+        const m2 = todays.filter(p => extractLineFromCible(p.cible) === 'M2');
+
+        // Update pills + badges
+        setPill(pillM1, m1.length);
+        setPill(pillM2, m2.length);
+        badgeCountM1.textContent = m1.length ? `${m1.length} événement(s)` : 'Aucun événement';
+        badgeCountM2.textContent = m2.length ? `${m2.length} événement(s)` : 'Aucun événement';
+
+        // Lists
+        listM1.innerHTML = m1.length ? m1.map(itemHTML).join('') : '<li class="list-group-item text-success"><i class="bi bi-check2-circle me-2"></i>Trafic normal sur M1</li>';
+        listM2.innerHTML = m2.length ? m2.map(itemHTML).join('') : '<li class="list-group-item text-success"><i class="bi bi-check2-circle me-2"></i>Trafic normal sur M2</li>';
+
+        lastUpdate.textContent = 'Dernière mise à jour : ' + new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+      }catch(err){
+        console.error(err);
+        const toast = bootstrap.Toast.getOrCreateInstance(document.getElementById('toastErr'));
+        toast.show();
+        // keep skeleton off
+        listM1.innerHTML = '<li class="list-group-item text-danger"><i class="bi bi-wifi-off me-2"></i>Erreur de chargement</li>';
+        listM2.innerHTML = '<li class="list-group-item text-danger"><i class="bi bi-wifi-off me-2"></i>Erreur de chargement</li>';
+        badgeCountM1.textContent = '—';
+        badgeCountM2.textContent = '—';
+        pillM1.classList.remove('status-ok','status-warn','status-err');
+        pillM2.classList.remove('status-ok','status-warn','status-err');
+        pillM1.textContent = 'Indisponible';
+        pillM2.textContent = 'Indisponible';
+      }
+    }
+
+    // initial & auto-refresh every 60s
+    document.addEventListener('DOMContentLoaded', () => {
+      load();
+      setInterval(load, 60000);
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script>
+    if (window.TempoCommon) window.TempoCommon.bindMobileNavCollapse();
+  </script>
+</body>
+</html>
