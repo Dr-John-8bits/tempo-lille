@@ -169,7 +169,7 @@
     </section>
 
     <section class="text-center mt-4">
-      <p class="text-secondary small mb-1">Source: Open Data MEL – collection <code>ilevia:perturbations</code></p>
+      <p id="dataSourceLabel" class="text-secondary small mb-1">Sources : Open Data MEL <code>ilevia:perturbations</code> + proxy transport.data.gouv.fr (GTFS-RT alerts)</p>
       <p class="text-secondary small">Cette page est non-officielle. Les données peuvent évoluer.</p>
     </section>
   </main>
@@ -188,7 +188,18 @@
   </div>
 
   <script>
-    const OGC_URL = 'https://data.lillemetropole.fr/data/ogcapi/collections/ilevia:perturbations/items?f=json&limit=500';
+    const OGC_URLS = [
+      'https://data.lillemetropole.fr/data/ogcapi/collections/ilevia:perturbations/items?f=json&limit=1000'
+    ];
+    const GTFS_ALERT_URLS = [
+      'https://proxy.transport.data.gouv.fr/resource/ilevia-gtfs-rt-service-alerts?format=json',
+      'https://proxy.transport.data.gouv.fr/resource/ilevia-gtfs-rt-service-alerts',
+      'https://proxy.transport.data.gouv.fr/resource/ilevia-gtfs-rt-alerts?format=json',
+      'https://proxy.transport.data.gouv.fr/resource/ilevia-gtfs-rt-alerts'
+    ];
+    const FETCH_TIMEOUT_MS = 10000;
+    const STALE_HOURS = 72;
+    const END_GRACE_MS = 15 * 60 * 1000;
 
     const pillM1 = document.getElementById('pillM1');
     const pillM2 = document.getElementById('pillM2');
@@ -197,19 +208,49 @@
     const badgeCountM1 = document.getElementById('badgeCountM1');
     const badgeCountM2 = document.getElementById('badgeCountM2');
     const lastUpdate = document.getElementById('lastUpdate');
+    const dataSourceLabel = document.getElementById('dataSourceLabel');
 
     document.getElementById('btnRefresh').addEventListener('click', load);
+
+    function nowMs(){
+      return Date.now();
+    }
 
     function fmtTime(d){
       try{ return new Date(d).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}); }catch{ return '-'; }
     }
 
-    const dayFmtParis = new Intl.DateTimeFormat('fr-CA', {
-      timeZone: 'Europe/Paris',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
-    });
+    function toDateMs(value){
+      if(value === null || value === undefined || value === '') return null;
+      if(typeof value === 'number' && Number.isFinite(value)){
+        if(value > 1e12) return value;
+        if(value > 1e9) return value * 1000;
+      }
+      const parsed = Date.parse(String(value));
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+
+    function parseUnixSecondsToMs(value){
+      const n = Number(value);
+      return Number.isFinite(n) ? n * 1000 : null;
+    }
+
+    function firstFilled(obj, keys){
+      for(const key of keys){
+        const value = obj?.[key];
+        if(value !== null && value !== undefined && String(value).trim() !== '') return value;
+      }
+      return null;
+    }
+
+    function textOf(value){
+      if(value === null || value === undefined) return '';
+      return String(value);
+    }
+
+    function sanitizeText(value){
+      return textOf(value).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    }
 
     function escapeHTML(value){
       return String(value ?? '').replace(/[&<>"']/g, (ch) => {
@@ -221,36 +262,253 @@
       });
     }
 
-    function extractLineFromCible(cible){
-      const c = (cible||'').toUpperCase();
-      if(/M[ÉE]TRO\s*1|\bM1\b|\bME1\b/.test(c)) return 'M1';
-      if(/M[ÉE]TRO\s*2|\bM2\b|\bME2\b/.test(c)) return 'M2';
-      return null;
+    function isMetroText(text){
+      return /\bm[ée]tro\b|\bmetro\b/i.test(textOf(text));
     }
 
-    function dayKeyParis(d){
-      try{ return dayFmtParis.format(new Date(d)); }catch{ return ''; }
+    function extractLinesFromText(text){
+      const raw = textOf(text);
+      const lines = new Set();
+      const metroMention = isMetroText(raw);
+
+      if(/\bM[ -]?1\b/i.test(raw) || /\bM[ÉE]TRO[ -]?1\b/i.test(raw) || /\bMETRO[ -]?1\b/i.test(raw)) lines.add('M1');
+      if(/\bM[ -]?2\b/i.test(raw) || /\bM[ÉE]TRO[ -]?2\b/i.test(raw) || /\bMETRO[ -]?2\b/i.test(raw)) lines.add('M2');
+      if(metroMention && /\bLIGNE[ -]?1\b/i.test(raw)) lines.add('M1');
+      if(metroMention && /\bLIGNE[ -]?2\b/i.test(raw)) lines.add('M2');
+
+      return lines;
     }
 
-    function setPill(el, count){
+    function classifySeverity(text){
+      const s = textOf(text).toLowerCase();
+      if(/interruption|panne|bloqu|suspend|arr[êe]t|no[_ ]service|service suspendu|service interrompu/i.test(s)) return 'err';
+      if(/retard|ralent|travaux|incident|perturb|d[ée]viation|deviation|significant[_ ]delays/i.test(s)) return 'warn';
+      return 'info';
+    }
+
+    function isResolvedStatus(value){
+      const s = textOf(value).toLowerCase();
+      return /(termin|resolu|r[ée]tabli|clos|fini|normalis|resolved)/i.test(s);
+    }
+
+    function eventIsActive({status, startMs, endMs, updatedMs}){
+      const now = nowMs();
+      if(isResolvedStatus(status)) return false;
+
+      if(startMs && endMs){
+        return now >= (startMs - END_GRACE_MS) && now <= (endMs + END_GRACE_MS);
+      }
+      if(startMs && !endMs){
+        return now >= (startMs - END_GRACE_MS) && (now - startMs) <= STALE_HOURS * 3600 * 1000;
+      }
+      if(!startMs && endMs){
+        return now <= (endMs + END_GRACE_MS);
+      }
+      if(updatedMs){
+        return (now - updatedMs) <= STALE_HOURS * 3600 * 1000;
+      }
+      return false;
+    }
+
+    function setPill(el, status){
       el.classList.remove('status-ok','status-warn','status-err');
-      if(count === 0){ el.classList.add('status-ok'); el.innerHTML = '<i class="bi bi-check-circle"></i> Trafic normal'; return; }
-      if(count > 0){ el.classList.add(count >= 2 ? 'status-err' : 'status-warn'); el.innerHTML = `<i class="bi ${count>=2?'bi-x-octagon':'bi-exclamation-triangle'}"></i> ${count} perturbation${count>1?'s':''}`; }
+      if(status.level === 'ok'){
+        el.classList.add('status-ok');
+        el.innerHTML = '<i class="bi bi-check-circle"></i> Trafic normal';
+        return;
+      }
+
+      const icon = status.level === 'err' ? 'bi-x-octagon' : 'bi-exclamation-triangle';
+      const label = status.level === 'err' ? 'alerte' : 'perturbation';
+      el.classList.add(status.level === 'err' ? 'status-err' : 'status-warn');
+      el.innerHTML = `<i class="bi ${icon}"></i> ${status.count} ${label}${status.count > 1 ? 's' : ''}`;
     }
 
-    function itemHTML(p){
-      const rawType = p.type_perturbation || p.statut || 'Information';
-      const rawMessage = (p.message || p.contenu || p.description || 'Perturbation signalée').toString().replace(/<[^>]*>/g,'').trim();
-      const type = escapeHTML(rawType);
-      const message = escapeHTML(rawMessage);
-      const t = p.date_modification || p.date || Date.now();
-      const badgeCls = /interruption/i.test(rawType) ? 'text-bg-danger' : /ralent|retard|deviation/i.test(rawType) ? 'text-bg-warning' : 'text-bg-info';
+    function inferLineMeta(parts){
+      const joined = parts.map((value) => sanitizeText(value)).filter(Boolean).join(' ');
+      const lines = extractLinesFromText(joined);
+      const metroRelated = lines.size > 0 || isMetroText(joined);
+      return { lines, metroRelated };
+    }
+
+    function normalizeOgcEvent(props, index){
+      const messageRaw = firstFilled(props, ['message','contenu','description','titre','resume','libelle']) || 'Perturbation signalée';
+      const typeRaw = firstFilled(props, ['type_perturbation','statut','nature','categorie']) || 'Information';
+      const statusRaw = firstFilled(props, ['statut', 'etat', 'status']) || '';
+
+      const startMs = toDateMs(firstFilled(props, ['date_debut','date_debut_perturbation','debut','start_date','date']));
+      const endMs = toDateMs(firstFilled(props, ['date_fin','date_fin_perturbation','fin','end_date']));
+      const updatedMs = toDateMs(firstFilled(props, ['date_modification','date_maj','updated_at','date'])) || nowMs();
+
+      const { lines, metroRelated } = inferLineMeta([
+        props?.cible, props?.ligne, props?.lignes, props?.reseau,
+        messageRaw, typeRaw, statusRaw
+      ]);
+      const severity = classifySeverity(`${typeRaw} ${statusRaw} ${messageRaw}`);
+
+      return {
+        id: firstFilled(props, ['id','identifiant','uuid']) || `ogc-${index}-${updatedMs}`,
+        source: 'MEL',
+        type: sanitizeText(typeRaw) || 'Information',
+        message: sanitizeText(messageRaw) || 'Perturbation signalée',
+        status: sanitizeText(statusRaw),
+        lines,
+        metroRelated,
+        severity,
+        startMs,
+        endMs,
+        updatedMs,
+        active: eventIsActive({ status: statusRaw, startMs, endMs, updatedMs })
+      };
+    }
+
+    function gtfsText(value){
+      if(!value) return '';
+      if(typeof value === 'string') return value;
+      if(Array.isArray(value)) return value.map((x) => gtfsText(x)).filter(Boolean).join(' ');
+      if(typeof value.text === 'string') return value.text;
+      if(Array.isArray(value.translation)){
+        const fr = value.translation.find((x) => /^fr/i.test(x?.language || ''));
+        return textOf(fr?.text || value.translation[0]?.text || '');
+      }
+      return '';
+    }
+
+    function normalizeGtfsAlert(entity, index){
+      const alert = entity?.alert || null;
+      if(!alert) return null;
+
+      const title = gtfsText(alert.header_text || alert.short_header_text);
+      const body = gtfsText(alert.description_text);
+      const message = sanitizeText([title, body].filter(Boolean).join(' - ')) || 'Alerte trafic';
+      const statusRaw = sanitizeText([alert.cause, alert.effect, title].filter(Boolean).join(' '));
+
+      const informed = Array.isArray(alert.informed_entity) ? alert.informed_entity : [];
+      const informedBlob = informed.map((x) => JSON.stringify(x)).join(' ');
+      const { lines, metroRelated } = inferLineMeta([message, informedBlob]);
+      const severity = classifySeverity(`${statusRaw} ${message}`);
+
+      const periods = Array.isArray(alert.active_period) ? alert.active_period : [];
+      const starts = periods.map((p) => parseUnixSecondsToMs(p?.start)).filter(Boolean);
+      const ends = periods.map((p) => parseUnixSecondsToMs(p?.end)).filter(Boolean);
+      const startMs = starts.length ? Math.min(...starts) : null;
+      const endMs = ends.length ? Math.max(...ends) : null;
+      const updatedMs = parseUnixSecondsToMs(entity?.timestamp) || nowMs();
+
+      return {
+        id: sanitizeText(entity?.id) || `gtfs-${index}-${updatedMs}`,
+        source: 'GTFS-RT',
+        type: sanitizeText(alert.effect) || 'Alerte',
+        message,
+        status: statusRaw,
+        lines,
+        metroRelated,
+        severity,
+        startMs,
+        endMs,
+        updatedMs,
+        active: eventIsActive({ status: statusRaw, startMs, endMs, updatedMs })
+      };
+    }
+
+    function computeStatus(events){
+      if(!events.length) return { level: 'ok', count: 0 };
+      if(events.some((event) => event.severity === 'err')) return { level: 'err', count: events.length };
+      return { level: 'warn', count: events.length };
+    }
+
+    function dedupeEvents(events){
+      const map = new Map();
+      for(const event of events){
+        const key = [
+          event.source,
+          [...event.lines].sort().join(','),
+          event.type,
+          event.message,
+          Math.floor((event.startMs || event.updatedMs || 0) / 60000)
+        ].join('|');
+        if(!map.has(key)) map.set(key, event);
+      }
+      return [...map.values()].sort((a, b) => (b.updatedMs || 0) - (a.updatedMs || 0));
+    }
+
+    function splitByLine(events){
+      const globals = events.filter((event) => event.lines.size === 0);
+      const m1Specific = events.filter((event) => event.lines.has('M1'));
+      const m2Specific = events.filter((event) => event.lines.has('M2'));
+      return {
+        m1: dedupeEvents([...m1Specific, ...globals]),
+        m2: dedupeEvents([...m2Specific, ...globals])
+      };
+    }
+
+    async function fetchJSONWithTimeout(url){
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+      try{
+        const res = await fetch(url, {
+          cache: 'no-store',
+          signal: controller.signal,
+          headers: { Accept: 'application/json' }
+        });
+        if(!res.ok) throw new Error(`HTTP ${res.status} sur ${url}`);
+        return await res.json();
+      }finally{
+        clearTimeout(timer);
+      }
+    }
+
+    async function fetchFirstJSON(urls){
+      let lastError = null;
+      for(const url of urls){
+        try{
+          const json = await fetchJSONWithTimeout(url);
+          return { url, json };
+        }catch(err){
+          lastError = err;
+        }
+      }
+      throw lastError || new Error('Aucune source JSON accessible');
+    }
+
+    async function fetchOgcEvents(){
+      const { json } = await fetchFirstJSON(OGC_URLS);
+      const features = Array.isArray(json?.features) ? json.features : [];
+      return features
+        .map((feature, index) => normalizeOgcEvent(feature?.properties || {}, index))
+        .filter((event) => event.metroRelated && event.active);
+    }
+
+    async function fetchGtfsAlertEvents(){
+      const { json } = await fetchFirstJSON(GTFS_ALERT_URLS);
+      const entities =
+        Array.isArray(json?.entity) ? json.entity :
+        Array.isArray(json?.entities) ? json.entities :
+        Array.isArray(json?.data?.entity) ? json.data.entity :
+        [];
+      return entities
+        .map((entity, index) => normalizeGtfsAlert(entity, index))
+        .filter((event) => event && event.metroRelated && event.active);
+    }
+
+    function itemHTML(event){
+      const type = escapeHTML(event.type || 'Information');
+      const message = escapeHTML(event.message || 'Perturbation signalée');
+      const source = escapeHTML(event.source || 'Open data');
+      const t = event.updatedMs || event.startMs || nowMs();
+      const badgeCls = event.severity === 'err'
+        ? 'text-bg-danger'
+        : event.severity === 'warn'
+        ? 'text-bg-warning'
+        : 'text-bg-info';
+
       return `
         <li class="list-group-item">
           <div class="d-flex justify-content-between align-items-start">
             <div>
               <span class="badge ${badgeCls} me-2">${type}</span>
               <span>${message}</span>
+              <span class="badge text-bg-light ms-2">${source}</span>
             </div>
             <span class="time small">${fmtTime(t)}</span>
           </div>
@@ -267,23 +525,42 @@
       pillM2.textContent = 'Chargement…';
 
       try{
-        const res = await fetch(OGC_URL, { cache: 'no-store' });
-        const json = await res.json();
-        const features = Array.isArray(json.features) ? json.features : [];
-        const props = features.map(f => f.properties || {});
+        const [ogcResult, gtfsResult] = await Promise.allSettled([
+          fetchOgcEvents(),
+          fetchGtfsAlertEvents()
+        ]);
 
-        const today = dayKeyParis(Date.now());
-        const todays = props.filter((p) => {
-          const refDate = p.date_modification || p.date;
-          if (!refDate) return true;
-          return dayKeyParis(refDate) === today;
-        });
-        const m1 = todays.filter(p => extractLineFromCible(p.cible) === 'M1');
-        const m2 = todays.filter(p => extractLineFromCible(p.cible) === 'M2');
+        const events = [];
+        const sourceFlags = [];
+
+        if(ogcResult.status === 'fulfilled'){
+          events.push(...ogcResult.value);
+          sourceFlags.push('MEL');
+        }else{
+          console.warn('Source MEL indisponible', ogcResult.reason);
+        }
+
+        if(gtfsResult.status === 'fulfilled'){
+          events.push(...gtfsResult.value);
+          sourceFlags.push('GTFS-RT');
+        }else{
+          console.warn('Source GTFS-RT indisponible', gtfsResult.reason);
+        }
+
+        if(ogcResult.status === 'rejected' && gtfsResult.status === 'rejected'){
+          throw ogcResult.reason || gtfsResult.reason || new Error('Aucune source de données disponible');
+        }
+
+        const deduped = dedupeEvents(events);
+        const byLine = splitByLine(deduped);
+        const m1 = byLine.m1;
+        const m2 = byLine.m2;
+        const statusM1 = computeStatus(m1);
+        const statusM2 = computeStatus(m2);
 
         // Update pills + badges
-        setPill(pillM1, m1.length);
-        setPill(pillM2, m2.length);
+        setPill(pillM1, statusM1);
+        setPill(pillM2, statusM2);
         badgeCountM1.textContent = m1.length ? `${m1.length} événement(s)` : 'Aucun événement';
         badgeCountM2.textContent = m2.length ? `${m2.length} événement(s)` : 'Aucun événement';
 
@@ -291,7 +568,11 @@
         listM1.innerHTML = m1.length ? m1.map(itemHTML).join('') : '<li class="list-group-item text-success"><i class="bi bi-check2-circle me-2"></i>Trafic normal sur M1</li>';
         listM2.innerHTML = m2.length ? m2.map(itemHTML).join('') : '<li class="list-group-item text-success"><i class="bi bi-check2-circle me-2"></i>Trafic normal sur M2</li>';
 
-        lastUpdate.textContent = 'Dernière mise à jour : ' + new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+        const sourceLabel = sourceFlags.length ? sourceFlags.join(' + ') : 'source indisponible';
+        lastUpdate.textContent = `Dernière mise à jour : ${new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})} (${sourceLabel})`;
+        if(dataSourceLabel){
+          dataSourceLabel.innerHTML = 'Sources : Open Data MEL <code>ilevia:perturbations</code> + proxy transport.data.gouv.fr (GTFS-RT alerts).';
+        }
       }catch(err){
         console.error(err);
         const toast = bootstrap.Toast.getOrCreateInstance(document.getElementById('toastErr'));
