@@ -48,6 +48,7 @@
     .list-group-item:last-child{border-bottom:0}
     .time{font-variant-numeric:tabular-nums;color:#6c757d}
     .skeleton{background:linear-gradient(90deg,#eee,#f8f9fa,#eee);background-size:200% 100%;animation:sh 1.2s infinite}
+    .event-message{color:inherit}
     @keyframes sh{to{background-position:-200% 0}}
 
     /* Dark mode overrides */
@@ -55,7 +56,9 @@
     html[data-theme="dark"] .navbar{background:rgba(21,21,24,.85)!important;}
     html[data-theme="dark"] .card-line{background:#151518;color:#ececec;}
     html[data-theme="dark"] .card-line .card-header{background:#151518;border-bottom-color:rgba(255,255,255,.08);}
-    html[data-theme="dark"] .list-group-item{background:#151518;border-bottom-color:rgba(255,255,255,.08);}
+    html[data-theme="dark"] .list-group-item{background:#151518;border-bottom-color:rgba(255,255,255,.08);color:#e8edf7;}
+    html[data-theme="dark"] .list-group-item .event-message{color:#e8edf7;}
+    html[data-theme="dark"] .time{color:#c3ccdd;}
     html[data-theme="dark"] .badge.text-bg-light{background:#2a2d33!important;color:#e2e8f0!important;}
     html[data-theme="dark"] .text-secondary{color:#b3b3b3!important;}
     html[data-theme="dark"] .toast.text-bg-danger{background:#7f1d1d!important;}
@@ -647,7 +650,7 @@
           <div class="d-flex justify-content-between align-items-start">
             <div>
               <span class="badge ${badgeCls} me-2">${type}</span>
-              <span>${message}</span>
+              <span class="event-message">${message}</span>
               <span class="badge text-bg-light ms-2">${source}</span>
             </div>
             <span class="time small">${fmtTime(t)}</span>
