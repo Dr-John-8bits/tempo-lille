@@ -5,13 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>État du Métro Ilévia – M1 & M2</title>
   <meta name="description" content="Statut en temps réel des lignes de métro Ilévia (M1, M2) – open data MEL." />
-  <link rel="canonical" href="https://dr-john-8bits.github.io/tempo-lille/metroilevia.html">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="fr_FR">
   <meta property="og:site_name" content="Tempo Lille">
   <meta property="og:title" content="État du Métro Ilévia – M1 & M2">
   <meta property="og:description" content="Statut en temps réel des lignes de métro Ilévia (M1, M2) – open data MEL.">
-  <meta property="og:url" content="https://dr-john-8bits.github.io/tempo-lille/metroilevia.html">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="État du Métro Ilévia – M1 & M2">
   <meta name="twitter:description" content="Statut en temps réel des lignes de métro Ilévia (M1, M2) – open data MEL.">
@@ -169,8 +167,9 @@
     </section>
 
     <section class="text-center mt-4">
-      <p id="dataSourceLabel" class="text-secondary small mb-1">Sources : Open Data MEL <code>ilevia:perturbations</code> + proxy transport.data.gouv.fr (GTFS-RT alerts)</p>
+      <p id="dataSourceLabel" class="text-secondary small mb-1">Sources : proxy ILEVIA (high severity) + Open Data MEL <code>ilevia:perturbations</code> + proxy transport.data.gouv.fr (GTFS-RT alerts)</p>
       <p id="diagLine" class="text-secondary small mb-1"></p>
+      <p class="text-secondary small mb-1">Build publie le 17/02/2026 a 17:20 (Europe/Paris) - Version 2026-02-17-1720</p>
       <p class="text-secondary small">Cette page est non-officielle. Les données peuvent évoluer.</p>
     </section>
   </main>
@@ -192,6 +191,8 @@
     const OGC_URLS = [
       'https://data.lillemetropole.fr/data/ogcapi/collections/ilevia:perturbations/items?f=json&limit=-1'
     ];
+    const ILEVIA_PROXY_URL =
+      'https://r.jina.ai/http://api.ilevia.fr/cms/api/traffic/lines-high-severity?api-key=0fb2f7a6-12b1-4b15-8d4d-6dde45fc2404';
     const GTFS_ALERT_URLS = [
       'https://proxy.transport.data.gouv.fr/resource/ilevia-gtfs-rt-service-alerts?format=json',
       'https://proxy.transport.data.gouv.fr/resource/ilevia-gtfs-rt-service-alerts',
@@ -201,7 +202,7 @@
     const FETCH_TIMEOUT_MS = 10000;
     const STALE_HOURS = 72;
     const END_GRACE_MS = 15 * 60 * 1000;
-    const BUILD_ID = '2026-02-17-1708';
+    const BUILD_ID = '2026-02-17-1720';
 
     const pillM1 = document.getElementById('pillM1');
     const pillM2 = document.getElementById('pillM2');
@@ -428,6 +429,58 @@
       };
     }
 
+    function decodeHtmlEntities(value){
+      const probe = document.createElement('textarea');
+      probe.innerHTML = textOf(value);
+      return probe.value;
+    }
+
+    function normalizeIleviaDisruption(line, disruption, index){
+      const lineCode = sanitizeText(line?.code);
+      const lineName = sanitizeText(line?.name);
+      const lines = new Set();
+      if(/^M1$/i.test(lineCode)) lines.add('M1');
+      if(/^M2$/i.test(lineCode)) lines.add('M2');
+      if(lines.size === 0) return null;
+
+      const title = sanitizeText(decodeHtmlEntities(disruption?.title || 'Perturbation'));
+      const message = sanitizeText(decodeHtmlEntities(disruption?.message || disruption?.messageHTML || 'Perturbation signalée'));
+      const statusRaw = sanitizeText([disruption?.status, disruption?.cause, disruption?.severity].filter(Boolean).join(' '));
+      const startMs = toDateMs(disruption?.periodStart);
+      const endMs = toDateMs(disruption?.periodEnd);
+      const updatedMs = toDateMs(line?.updatedAt) || startMs || nowMs();
+      const severity = classifySeverity(`${disruption?.severity || ''} ${disruption?.cause || ''} ${title} ${message}`);
+      const effectiveType = title || disruption?.cause || 'Perturbation';
+
+      return {
+        id: sanitizeText(disruption?.id) || `ilevia-${lineCode}-${index}-${updatedMs}`,
+        source: 'ILEVIA',
+        type: effectiveType,
+        message: message || 'Perturbation signalée',
+        status: statusRaw,
+        lines,
+        metroRelated: true,
+        severity,
+        startMs,
+        endMs,
+        updatedMs,
+        active: eventIsActive({ status: statusRaw, startMs, endMs, updatedMs }),
+        lineLabel: lineName
+      };
+    }
+
+    function parseIleviaProxyPayload(rawText){
+      const marker = 'Markdown Content:';
+      const markerIndex = rawText.indexOf(marker);
+      const payloadText = markerIndex >= 0 ? rawText.slice(markerIndex + marker.length).trim() : rawText.trim();
+      const start = payloadText.indexOf('[');
+      const end = payloadText.lastIndexOf(']');
+      if(start === -1 || end === -1 || end <= start) throw new Error('Payload ILEVIA proxy introuvable');
+      const jsonText = payloadText.slice(start, end + 1);
+      const parsed = JSON.parse(jsonText);
+      return Array.isArray(parsed) ? parsed : [];
+    }
+
     function computeStatus(events){
       if(!events.length) return { level: 'ok', count: 0 };
       if(events.some((event) => event.severity === 'err')) return { level: 'err', count: events.length };
@@ -449,13 +502,47 @@
       return [...map.values()].sort((a, b) => (b.updatedMs || 0) - (a.updatedMs || 0));
     }
 
+    function squashMelIncidentHistory(events){
+      const sorted = [...events].sort((a, b) => (b.updatedMs || 0) - (a.updatedMs || 0));
+      const seenIncidentByLine = new Set();
+      const keep = [];
+
+      for(const event of sorted){
+        const lineKey = event.lines.size ? [...event.lines].sort().join(',') : 'GLOBAL';
+        const incidentLike = /perturbation|interruption|incident|d[ée]faut|panne|bloquant/i.test(`${event.type} ${event.message} ${event.status}`);
+
+        if(event.source === 'MEL' && incidentLike){
+          const key = `${lineKey}|MEL|incident`;
+          if(seenIncidentByLine.has(key)) continue;
+          seenIncidentByLine.add(key);
+        }
+
+        keep.push(event);
+      }
+
+      return keep;
+    }
+
+    function sourceRank(source){
+      if(source === 'ILEVIA') return 3;
+      if(source === 'GTFS-RT') return 2;
+      return 1;
+    }
+
+    function keepBestSource(events){
+      if(!events.length) return [];
+      const bestRank = Math.max(...events.map((event) => sourceRank(event.source)));
+      return events.filter((event) => sourceRank(event.source) === bestRank);
+    }
+
     function splitByLine(events){
-      const globals = events.filter((event) => event.lines.size === 0);
-      const m1Specific = events.filter((event) => event.lines.has('M1'));
-      const m2Specific = events.filter((event) => event.lines.has('M2'));
+      const compact = squashMelIncidentHistory(events);
+      const globals = compact.filter((event) => event.lines.size === 0);
+      const m1Specific = compact.filter((event) => event.lines.has('M1'));
+      const m2Specific = compact.filter((event) => event.lines.has('M2'));
       return {
-        m1: dedupeEvents([...m1Specific, ...globals]),
-        m2: dedupeEvents([...m2Specific, ...globals])
+        m1: keepBestSource(dedupeEvents([...m1Specific, ...globals])),
+        m2: keepBestSource(dedupeEvents([...m2Specific, ...globals]))
       };
     }
 
@@ -475,6 +562,21 @@
       }
     }
 
+    async function fetchTextWithTimeout(url){
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+      try{
+        const res = await fetch(url, {
+          cache: 'no-store',
+          signal: controller.signal
+        });
+        if(!res.ok) throw new Error(`HTTP ${res.status} sur ${url}`);
+        return await res.text();
+      }finally{
+        clearTimeout(timer);
+      }
+    }
+
     async function fetchFirstJSON(urls){
       let lastError = null;
       for(const url of urls){
@@ -486,6 +588,22 @@
         }
       }
       throw lastError || new Error('Aucune source JSON accessible');
+    }
+
+    async function fetchIleviaTrafficEvents(){
+      const rawText = await fetchTextWithTimeout(ILEVIA_PROXY_URL);
+      const lines = parseIleviaProxyPayload(rawText);
+      const events = [];
+
+      for(const line of lines){
+        const disruptions = Array.isArray(line?.disruptions) ? line.disruptions : [];
+        disruptions.forEach((disruption, index) => {
+          const normalized = normalizeIleviaDisruption(line, disruption, index);
+          if(normalized && normalized.active) events.push(normalized);
+        });
+      }
+
+      return events;
     }
 
     async function fetchOgcEvents(){
@@ -547,7 +665,8 @@
       pillM2.textContent = 'Chargement…';
 
       try{
-        const [ogcResult, gtfsResult] = await Promise.allSettled([
+        const [ileviaResult, ogcResult, gtfsResult] = await Promise.allSettled([
+          fetchIleviaTrafficEvents(),
           fetchOgcEvents(),
           fetchGtfsAlertEvents()
         ]);
@@ -555,6 +674,14 @@
         const events = [];
         const sourceFlags = [];
         const sourceErrors = [];
+
+        if(ileviaResult.status === 'fulfilled'){
+          events.push(...ileviaResult.value);
+          sourceFlags.push('ILEVIA');
+        }else{
+          console.warn('Source ILEVIA indisponible', ileviaResult.reason);
+          sourceErrors.push('ILEVIA');
+        }
 
         if(ogcResult.status === 'fulfilled'){
           events.push(...ogcResult.value);
@@ -572,26 +699,28 @@
           sourceErrors.push('GTFS-RT');
         }
 
-        if(ogcResult.status === 'rejected' && gtfsResult.status === 'rejected'){
-          throw ogcResult.reason || gtfsResult.reason || new Error('Aucune source de données disponible');
+        if(ileviaResult.status === 'rejected' && ogcResult.status === 'rejected' && gtfsResult.status === 'rejected'){
+          throw ileviaResult.reason || ogcResult.reason || gtfsResult.reason || new Error('Aucune source de données disponible');
         }
 
+        const ileviaUnavailable = ileviaResult.status === 'rejected';
         const ogcUnavailable = ogcResult.status === 'rejected';
+        const ileviaActiveCount = ileviaResult.status === 'fulfilled' ? ileviaResult.value.length : 0;
         const ogcActiveCount = ogcResult.status === 'fulfilled' ? ogcResult.value.length : 0;
         const gtfsActiveCount = gtfsResult.status === 'fulfilled' ? gtfsResult.value.length : 0;
-        if(ogcUnavailable && events.length === 0){
+        if(ileviaUnavailable && ogcUnavailable && events.length === 0){
           setPillUnknown(pillM1);
           setPillUnknown(pillM2);
           badgeCountM1.textContent = 'Statut partiel';
           badgeCountM2.textContent = 'Statut partiel';
-          listM1.innerHTML = '<li class="list-group-item text-warning"><i class="bi bi-exclamation-diamond me-2"></i>Source MEL indisponible, statut M1 non fiable</li>';
-          listM2.innerHTML = '<li class="list-group-item text-warning"><i class="bi bi-exclamation-diamond me-2"></i>Source MEL indisponible, statut M2 non fiable</li>';
-          lastUpdate.textContent = `Dernière mise à jour : ${new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})} (MEL indisponible)`;
+          listM1.innerHTML = '<li class="list-group-item text-warning"><i class="bi bi-exclamation-diamond me-2"></i>Sources ILEVIA/MEL indisponibles, statut M1 non fiable</li>';
+          listM2.innerHTML = '<li class="list-group-item text-warning"><i class="bi bi-exclamation-diamond me-2"></i>Sources ILEVIA/MEL indisponibles, statut M2 non fiable</li>';
+          lastUpdate.textContent = `Dernière mise à jour : ${new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})} (sources principales indisponibles)`;
           if(dataSourceLabel){
-            dataSourceLabel.innerHTML = 'Sources : Open Data MEL <code>ilevia:perturbations</code> + proxy transport.data.gouv.fr (GTFS-RT alerts). <strong>Attention :</strong> source MEL indisponible pour cette requête.';
+            dataSourceLabel.innerHTML = 'Sources : proxy ILEVIA (high severity) + Open Data MEL <code>ilevia:perturbations</code> + proxy transport.data.gouv.fr (GTFS-RT alerts). <strong>Attention :</strong> sources principales indisponibles pour cette requête.';
           }
           if(diagLine){
-            diagLine.textContent = `Diagnostic ${BUILD_ID}: MEL KO, GTFS-RT ${gtfsActiveCount} événement(s) métro actif(s).`;
+            diagLine.textContent = `Diagnostic ${BUILD_ID}: ILEVIA KO, MEL KO, GTFS-RT ${gtfsActiveCount} événement(s) métro actif(s).`;
           }
           return;
         }
@@ -617,11 +746,12 @@
         const degradedNote = sourceErrors.length ? `, partiel: ${sourceErrors.join(' + ')}` : '';
         lastUpdate.textContent = `Dernière mise à jour : ${new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})} (${sourceLabel}${degradedNote})`;
         if(dataSourceLabel){
-          dataSourceLabel.innerHTML = 'Sources : Open Data MEL <code>ilevia:perturbations</code> + proxy transport.data.gouv.fr (GTFS-RT alerts).';
+          dataSourceLabel.innerHTML = 'Sources : proxy ILEVIA (high severity) + Open Data MEL <code>ilevia:perturbations</code> + proxy transport.data.gouv.fr (GTFS-RT alerts).';
         }
         if(diagLine){
+          const ileviaState = ileviaUnavailable ? 'KO' : 'OK';
           const melState = ogcUnavailable ? 'KO' : 'OK';
-          diagLine.textContent = `Diagnostic ${BUILD_ID}: MEL ${melState} (${ogcActiveCount}), GTFS-RT (${gtfsActiveCount}), M1=${m1.length}, M2=${m2.length}.`;
+          diagLine.textContent = `Diagnostic ${BUILD_ID}: ILEVIA ${ileviaState} (${ileviaActiveCount}), MEL ${melState} (${ogcActiveCount}), GTFS-RT (${gtfsActiveCount}), M1=${m1.length}, M2=${m2.length}.`;
         }
       }catch(err){
         console.error(err);
