@@ -1,0 +1,1728 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tempo Lille - V'Lille</title>
+  <meta name="description" content="Disponibilité en temps réel des stations V'Lille — favoris, recherche, thème sombre, sans rechargement." />
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:site_name" content="Tempo Lille">
+  <meta property="og:title" content="Tempo Lille - V'Lille">
+  <meta property="og:description" content="Disponibilité en temps réel des stations V'Lille — favoris, recherche, thème sombre, sans rechargement.">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Tempo Lille - V'Lille">
+  <meta name="twitter:description" content="Disponibilité en temps réel des stations V'Lille — favoris, recherche, thème sombre, sans rechargement.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+  <!-- Favicon & PWA meta -->
+  <link rel="icon" type="image/svg+xml" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="6" cy="17" r="4" fill="none" stroke="%23000" stroke-width="2"/><circle cx="18" cy="17" r="4" fill="none" stroke="%23000" stroke-width="2"/><path d="M6 17 L10 9 L12 13 L18 13" fill="none" stroke="%23000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 13 L14 17" fill="none" stroke="%23000" stroke-width="2" stroke-linecap="round"/></svg>'>
+  <link rel="mask-icon" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="6" cy="17" r="4" fill="%23000"/><circle cx="18" cy="17" r="4" fill="%23000"/><path d="M6 17 L10 9 L12 13 L18 13" fill="%23000"/><path d="M12 13 L14 17" fill="%23000"/></svg>' color="#0d6efd">
+  <meta name="theme-color" content="#0d6efd" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Tempo Lille" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <style>
+    :root {
+      --bg: #ffffff;
+      --fg: #121212;
+      --muted: #5a5a5a;
+      --card: #f4f4f5;
+      --accent: #0d6efd;
+      --ok: #16a34a;   /* vert */
+      --warn: #f59e0b; /* orange */
+      --bad: #ef4444;  /* rouge */
+      --border: #e5e7eb;
+      --shadow: 0 1px 2px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+    }
+    html[data-theme="dark"] {
+      --bg: #0b0b0c;
+      --fg: #ececec;
+      --muted: #b3b3b3;
+      --card: #151518;
+      --accent: #7aa2ff;
+      --border: #22242a;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.25);
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji", "Segoe UI Emoji"; background: var(--bg); color: var(--fg); overflow-x: hidden; }
+
+    header {
+      position: sticky; top: 0; z-index: 10;
+      backdrop-filter: blur(6px);
+      background: color-mix(in oklab, var(--bg) 85%, transparent);
+      border-bottom: 1px solid var(--border);
+    }
+    .bar { max-width: 900px; margin: 0 auto; padding: .8rem 1rem; display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+    .logoBike {
+      width: 24px; height: 24px; margin-right: .4rem; display: inline-block;
+      stroke: var(--fg); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .title { font-weight: 800; letter-spacing: .2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 46vw; }
+    .spacer { flex: 1; }
+    .bar > * { max-width: 100%; }
+    .pill { display: inline-flex; align-items: center; gap: .4rem; font-size: .9rem; padding: .35rem .6rem; border: 1px solid var(--border); border-radius: 999px; background: var(--card); }
+    .btn { appearance: none; border: 1px solid var(--border); padding: .55rem .8rem; background: var(--card); color: var(--fg); border-radius: .7rem; box-shadow: var(--shadow); cursor: pointer; }
+    .btn[aria-current="page"]{ outline: 2px solid var(--accent); }
+
+    .banner { display: none; background: color-mix(in oklab, var(--bad) 18%, var(--bg)); color: var(--fg); border-bottom: 1px solid var(--border); }
+    .banner .wrap { max-width: 900px; margin: 0 auto; padding: .5rem 1rem; display: flex; align-items: center; gap: .6rem; }
+
+    .ptr { display:none; background: color-mix(in oklab, var(--accent) 12%, var(--bg)); border-bottom: 1px solid var(--border); }
+    .ptr .wrap { max-width: 900px; margin: 0 auto; padding: .4rem 1rem; font-size: .9rem; }
+    .ptr.show { display:block; }
+
+    /* Filters segment */
+    .filters { position: sticky; top: calc(var(--header-h, 56px)); z-index: 6; background: var(--bg); border-bottom: 1px solid var(--border); padding: .6rem 1rem; display: flex; gap: .55rem; justify-content: flex-start; overflow-x: auto; }
+    .seg { appearance: none; border: 1px solid var(--border); background: var(--card); color: var(--fg); padding: .7rem 1rem; min-height: 3.1rem; border-radius: 999px; cursor: pointer; font: inherit; font-size: 1rem; font-weight: 700; white-space: nowrap; }
+    .seg[aria-selected="true"] { outline: 2px solid var(--accent); }
+
+    /* About modal */
+    .about-backdrop { position: fixed; inset: 0; background: color-mix(in oklab, var(--fg) 25%, transparent); backdrop-filter: blur(3px); z-index: 999; }
+    .about-panel { position: fixed; left: 0; right: 0; bottom: 0; margin: 0; background: var(--card); border-top: 1px solid var(--border); border-radius: .9rem .9rem 0 0; box-shadow: var(--shadow); z-index: 1000; max-height: 85svh; transform: translateY(100%); opacity: 0; transition: transform 220ms ease, opacity 220ms ease; display: flex; flex-direction: column; }
+    .about-panel.open { transform: translateY(0); opacity: 1; }
+    .about-head { position: sticky; top: 0; background: var(--card); padding: .6rem 1rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: .6rem; }
+    .about-handle { width: 36px; height: 4px; background: #9aa0a6; opacity: .8; border-radius: 999px; margin-right: .4rem; }
+    .about-body { padding: .8rem 1rem calc(env(safe-area-inset-bottom) + 1rem); overflow: auto; }
+    .about-close { margin-left: auto; }
+
+    @media (min-width: 640px){
+      .about-panel { left: 50%; right: auto; width: 520px; bottom: auto; top: 12vh; border-radius: .9rem; transform: translate(-50%, 10px); }
+      .about-panel.open { transform: translate(-50%, 0); }
+    }
+
+    main { max-width: 900px; margin: 0 auto; padding: 1rem; }
+
+    /* Search */
+    .search { position: sticky; top: var(--header-h, 56px); z-index: 5; background: var(--bg); padding: .6rem 0 .8rem; }
+    .search .wrap { position: relative; }
+    .suggestions { position: absolute; left: 0; right: 0; top: 100%; margin-top: .25rem; background: var(--card); border: 1px solid var(--border); border-radius: .7rem; box-shadow: var(--shadow); list-style: none; padding: .25rem 0; max-height: 280px; overflow: auto; }
+    .suggestions[hidden] { display: none; }
+    .suggestions li { padding: .55rem .9rem; cursor: pointer; }
+    .suggestions li:hover { background: color-mix(in oklab, var(--card) 80%, var(--accent) 20%); }
+
+    .nearby { margin-bottom: 1rem; }
+    .nearby h2 { margin: 0 0 .5rem 0; font-size: 1rem; font-weight: 700; }
+    .distance { margin-left: .35rem; font-size: .85rem; color: var(--muted); }
+    .search input { width: 100%; min-height: 3.45rem; padding: .95rem 3.4rem .95rem 1rem; border-radius: .9rem; border: 1px solid var(--border); background: var(--card); color: var(--fg); font-size: 1.05rem; }
+    .search-clear {
+      position: absolute;
+      top: 50%;
+      right: .55rem;
+      transform: translateY(-50%);
+      min-width: 2.35rem;
+      min-height: 2.35rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: color-mix(in oklab, var(--card) 88%, white 12%);
+      color: var(--muted);
+      display: inline-grid;
+      place-items: center;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+    }
+    .search-clear[hidden] { display: none; }
+    .meta-row { margin-top: .5rem; color: var(--muted); font-size: .92rem; display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; }
+
+    /* Cards list */
+    .list { display: grid; grid-template-columns: 1fr; gap: .8rem; }
+    @media (min-width: 640px){ .list { grid-template-columns: 1fr 1fr; } }
+
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: .9rem; padding: .9rem; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: .5rem; }
+    .card-head { display:flex; align-items: center; gap:.6rem; }
+    .station-name { font-weight: 700; line-height: 1.2; }
+    .star {
+      margin-left: auto;
+      min-width: 3.2rem;
+      min-height: 3.2rem;
+      border: 1px solid var(--border);
+      border-radius: .8rem;
+      background: color-mix(in oklab, var(--card) 88%, white 12%);
+      color: var(--fg);
+      display: inline-grid;
+      place-items: center;
+      font-size: 1.35rem;
+      cursor: pointer;
+      user-select: none;
+      box-shadow: var(--shadow);
+    }
+    .star[aria-pressed="true"] { filter: drop-shadow(0 0 6px color-mix(in oklab, var(--accent) 80%, transparent)); }
+
+    .stats { display: flex; gap: .6rem; flex-wrap: wrap; }
+    .chip { display: inline-flex; align-items: center; gap: .45rem; padding: .45rem .6rem; border-radius: .6rem; border: 1px solid var(--border); background: color-mix(in oklab, var(--card) 90%, transparent); font-variant-numeric: tabular-nums; }
+    .chip.ok { border-color: color-mix(in oklab, var(--ok) 45%, var(--border)); }
+    .chip.warn { border-color: color-mix(in oklab, var(--warn) 55%, var(--border)); }
+    .chip.bad { border-color: color-mix(in oklab, var(--bad) 55%, var(--border)); }
+
+    .updated { color: var(--muted); font-size: .85rem; }
+    .addr { color: var(--muted); font-size: .9rem; }
+    .actions { display: inline-flex; gap: .6rem; flex-wrap: wrap; margin-top: .2rem; }
+    .btn-link { display: inline-flex; align-items: center; gap: .35rem; min-height: 2.8rem; padding: .55rem .8rem; border-radius: 999px; border: 1px solid var(--border); background: color-mix(in oklab, var(--card) 92%, transparent); text-decoration: none; color: var(--fg); box-shadow: var(--shadow); font-size: .95rem; font-weight: 700; }
+    .btn-link:hover { filter: brightness(1.02); }
+    .empty { padding: 1rem; border: 1px dashed var(--border); border-radius: .9rem; background: var(--card); }
+
+    /* View toggling */
+    [data-view] { display: none; }
+    [data-view].active { display: block; }
+
+    footer { max-width: 900px; margin: 1rem auto 3rem; padding: 0 1rem; color: var(--muted); font-size: .85rem; }
+    a { color: var(--accent); }
+
+    /* Bottom bar */
+    .bottom-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 12; display: none; background: var(--card); border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom); }
+    .bottom-bar .wrap { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr 1fr; }
+    .bottom-bar a, .bottom-bar button { appearance: none; border: none; background: transparent; color: var(--fg); padding: .6rem 0; font: inherit; cursor: pointer; }
+    .bottom-bar .item { display: flex; flex-direction: column; align-items: center; gap: .25rem; padding: .5rem 0; border-radius: .9rem; }
+    .bottom-bar .item.is-active { color: var(--accent); background: color-mix(in oklab, var(--accent) 12%, var(--card) 88%); }
+    .bottom-bar .icon { font-size: 1.1rem; line-height: 1; }
+    .bottom-bar .label { font-size: .75rem; opacity: .8; }
+
+    @media (max-width: 480px){
+      .bar { padding: .6rem .6rem; }
+      .title { max-width: 56vw; font-size: .95rem; }
+      .btn { padding: .45rem .6rem; font-size: .9rem; }
+      .pill { display: none; }
+      .logoBike { width: 20px; height: 20px; }
+
+      .mobile-hide { display: none !important; }
+      .bottom-bar { display: block; }
+      .tl-subnav .nav-item { width: 100%; }
+      .tl-subnav .btn,
+      .tl-subnav .form-control { width: 100%; }
+      main { padding-bottom: 92px; }
+      footer { margin-bottom: calc(92px + env(safe-area-inset-bottom)); }
+    }
+    /* ===== Tempo Lille navbar (light like page background) ===== */
+    .tl-navbar {
+      background: rgba(248, 250, 252, .94);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 2px 14px rgba(0,0,0,.06);
+      border: 1px solid rgba(13,110,253,.15);
+      --bs-navbar-toggler-icon-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(13,110,253,.9)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+      --bs-navbar-color: #0d6efd;
+      --bs-navbar-hover-color: #0a58ca;
+    }
+    html[data-theme="dark"] .tl-navbar {
+      background: rgba(28,32,38,.92);
+      box-shadow: 0 6px 22px rgba(0,0,0,.35);
+      --bs-navbar-toggler-icon-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255,255,255,.9)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+      --bs-navbar-color: #e9eef8;
+      --bs-navbar-hover-color: #fff;
+    }
+    .tl-navbar .navbar-brand,
+    .tl-navbar .nav-link { color: #0d6efd !important; opacity:.95; transition: transform .12s ease, opacity .12s ease; }
+    .tl-navbar .nav-link:hover,
+    .tl-navbar .nav-link:focus { opacity:1; transform: translateY(-1px); background: rgba(13,110,253,.07); border-radius: .4rem; box-shadow: 0 1px 6px rgba(13,110,253,.1); }
+    .tl-navbar .nav-link.active { font-weight:700; text-decoration: underline 2px; text-underline-offset:4px; }
+    .navbar-toggler { border: 1px solid rgba(13,110,253,.35); border-radius:.6rem; padding:.35rem .6rem; }
+    html[data-theme="dark"] .navbar-toggler { border-color: rgba(255,255,255,.5); }
+
+    /* Subnav (local to V'Lille) */
+    .tl-subnav { background: color-mix(in oklab, var(--bg) 96%, transparent); border-bottom: 1px solid var(--border); }
+    .tl-subnav .form-control { max-width: 320px; min-height: 3rem; border-radius: .85rem; font-size: 1rem; }
+    .tl-subnav .btn { min-height: 3rem; border-radius: 999px; font-size: .98rem; font-weight: 700; padding-inline: 1rem; }
+    .tl-subnav .btn.is-active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .tl-subnav .nav { row-gap: .55rem; }
+    /* Subnav inline title */
+    .tl-subnav .brand-inline { font-weight: 800; color: var(--muted); display: flex; align-items: center; gap: .5rem; }
+    .tl-subnav .brand-inline .bi { font-size: 1rem; }
+
+    /* Smartphone-first app layer */
+    body.tempo-vlille {
+      background:
+        radial-gradient(circle at 18% -20%, rgba(28, 183, 255, .22), transparent 34%),
+        radial-gradient(circle at 100% -16%, rgba(16, 119, 255, .2), transparent 46%),
+        linear-gradient(180deg, #eff6ff 0%, #f8fbff 100%);
+    }
+    .app-hero {
+      border-radius: 1.25rem;
+      background: linear-gradient(135deg, #ffffff, #eef5ff);
+      border: 1px solid color-mix(in oklab, var(--accent) 22%, transparent);
+      box-shadow: 0 12px 28px rgba(13, 110, 253, .12);
+      padding: 1rem;
+      display: grid;
+      gap: .8rem;
+    }
+    .app-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .9rem;
+    }
+    .app-brand {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      min-width: 0;
+    }
+    .app-logo {
+      width: 2.7rem;
+      height: 2.7rem;
+      border-radius: .8rem;
+      display: inline-grid;
+      place-items: center;
+      font-size: 1.2rem;
+      color: #0b5ed7;
+      background: linear-gradient(145deg, #dbeafe, #eff6ff);
+      border: 1px solid rgba(13, 110, 253, .2);
+    }
+    .availability-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 2.3rem;
+      padding: .35rem .8rem;
+      border-radius: 999px;
+      font-size: .85rem;
+      font-weight: 800;
+      color: #0a4aa1;
+      background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+      border: 1px solid rgba(13, 110, 253, .22);
+      white-space: nowrap;
+    }
+    .app-subtitle {
+      font-size: .95rem;
+      color: #435a7a !important;
+    }
+    .hero-locate-btn {
+      appearance: none;
+      border: 0;
+      min-height: 3.3rem;
+      border-radius: 1rem;
+      font-weight: 800;
+      font-size: 1.02rem;
+      color: #fff;
+      background: linear-gradient(140deg, #18a757, #0f8f48);
+      box-shadow: 0 14px 20px rgba(16, 152, 80, .22);
+      width: 100%;
+    }
+    .hero-locate-btn:active {
+      transform: translateY(1px) scale(.995);
+    }
+    .section-label {
+      margin: .2rem 0 .55rem;
+      font-size: .78rem;
+      letter-spacing: .09em;
+      font-weight: 800;
+      color: #526d8f;
+      text-transform: uppercase;
+    }
+    .station-card {
+      border-radius: 1rem;
+      padding: .85rem;
+      background: linear-gradient(165deg, #ffffff, #f4f8ff);
+      border: 1px solid rgba(13, 110, 253, .12);
+      box-shadow: 0 9px 18px rgba(15, 42, 74, .09);
+      gap: .6rem;
+    }
+    .station-card .card-head {
+      align-items: flex-start;
+    }
+    .station-card .star {
+      min-width: 2.05rem;
+      min-height: 2.05rem;
+      border-radius: .58rem;
+      border: 1px solid rgba(234, 179, 8, .35);
+      background: #fff9db;
+      color: #ca8a04;
+      font-size: 1rem;
+      box-shadow: none;
+      margin-top: .1rem;
+    }
+    .station-card .star[aria-pressed="false"] {
+      background: #fffef5;
+      color: #e2b007;
+    }
+    .station-main {
+      min-width: 0;
+      flex: 1;
+    }
+    .station-title {
+      margin: 0;
+      font-size: .98rem;
+      font-weight: 800;
+      color: #1f2f4a;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .station-distance {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 1.85rem;
+      padding: .15rem .55rem;
+      border-radius: 999px;
+      font-size: .74rem;
+      font-weight: 700;
+      color: #334e74;
+      background: #edf4ff;
+      border: 1px solid rgba(13, 110, 253, .18);
+      white-space: nowrap;
+    }
+    .state-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .35rem;
+    }
+    .state-tag {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      border: 1px solid rgba(225, 29, 72, .22);
+      color: #be123c;
+      background: #fff1f2;
+      font-size: .73rem;
+      font-weight: 700;
+      padding: .2rem .55rem;
+    }
+    .metrics-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .55rem;
+    }
+    .metric {
+      border-radius: .88rem;
+      border: 1px solid transparent;
+      padding: .46rem .58rem;
+      display: flex;
+      align-items: center;
+      gap: .45rem;
+      min-height: 3.35rem;
+    }
+    .metric-icon {
+      font-size: 1.02rem;
+      opacity: .94;
+    }
+    .metric-copy {
+      display: grid;
+      gap: .05rem;
+      min-width: 0;
+    }
+    .metric-value {
+      margin: 0;
+      font-size: .98rem;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+    .metric-label {
+      margin: 0;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .02em;
+      opacity: .92;
+    }
+    .metric.is-good {
+      background: #e9fbea;
+      border-color: #86efac;
+      color: #166534;
+    }
+    .metric.is-warn {
+      background: #fff7e9;
+      border-color: #fcd34d;
+      color: #9a3412;
+    }
+    .metric.is-bad {
+      background: #ffecef;
+      border-color: #fda4af;
+      color: #b42318;
+    }
+    .station-updated {
+      font-size: .75rem;
+      color: #617799;
+      margin-top: .1rem;
+    }
+    .nearby h2 {
+      margin-bottom: .55rem;
+      font-size: .88rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #496489;
+    }
+    .map-shell {
+      border-radius: 1rem;
+      padding: .68rem;
+      border: 1px solid rgba(13, 110, 253, .16);
+      background: linear-gradient(160deg, #f9fbff, #eef5ff);
+      box-shadow: 0 8px 18px rgba(15, 42, 74, .09);
+    }
+    .map-status {
+      margin: 0 0 .55rem;
+      font-size: .82rem;
+      color: #4a6283;
+      font-weight: 700;
+    }
+    .map-canvas {
+      height: min(62vh, 540px);
+      min-height: 290px;
+      border-radius: .95rem;
+      border: 1px solid rgba(13, 110, 253, .2);
+      overflow: hidden;
+      background: #d6e5f7;
+    }
+    .map-toolbar {
+      margin-top: .6rem;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: .48rem;
+    }
+    .map-btn {
+      appearance: none;
+      border: 1px solid rgba(13, 110, 253, .26);
+      border-radius: .85rem;
+      min-height: 2.95rem;
+      font-size: .92rem;
+      font-weight: 800;
+      color: #174074;
+      background: #f8fbff;
+      box-shadow: 0 3px 10px rgba(24, 61, 106, .09);
+    }
+    .map-btn.primary {
+      border: 0;
+      color: #fff;
+      background: linear-gradient(132deg, #18a757, #0e8845);
+      box-shadow: 0 9px 18px rgba(14, 136, 69, .25);
+    }
+    .map-pin-wrap {
+      background: transparent;
+      border: 0;
+    }
+    .map-pin {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 999px;
+      border: 2px solid #fff;
+      box-shadow: 0 7px 16px rgba(15, 42, 74, .26);
+      color: #fff;
+      font-size: .73rem;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: .01em;
+    }
+    .map-pin.is-good { background: linear-gradient(145deg, #1ba24f, #11823d); }
+    .map-pin.is-warn { background: linear-gradient(145deg, #f59e0b, #dd7e0f); }
+    .map-pin.is-bad { background: linear-gradient(145deg, #ef4444, #b91c1c); }
+    .map-pin.is-fav {
+      box-shadow: 0 0 0 2px #facc15, 0 8px 16px rgba(15, 42, 74, .28);
+    }
+    .user-pin {
+      width: 1.06rem;
+      height: 1.06rem;
+      border-radius: 999px;
+      border: 2px solid #fff;
+      background: linear-gradient(145deg, #ef4444, #b91c1c);
+      box-shadow: 0 0 0 5px rgba(239, 68, 68, .28), 0 7px 16px rgba(81, 16, 16, .35);
+      display: block;
+      position: relative;
+    }
+    .user-pin::after {
+      content: "";
+      position: absolute;
+      inset: -9px;
+      border-radius: 999px;
+      border: 2px solid rgba(239, 68, 68, .42);
+      animation: userPulse 1.7s ease-out infinite;
+      pointer-events: none;
+    }
+    @keyframes userPulse {
+      0% { transform: scale(.5); opacity: .88; }
+      100% { transform: scale(1.34); opacity: 0; }
+    }
+    .leaflet-container {
+      font-family: "Nunito Sans", "Avenir Next", "Segoe UI", sans-serif;
+    }
+    .leaflet-popup-content {
+      margin: .65rem .75rem;
+      min-width: 180px;
+    }
+    .leaflet-popup-content p {
+      margin: .3rem 0;
+      color: #2d4667;
+    }
+    .leaflet-popup-content strong {
+      display: block;
+      margin-bottom: .2rem;
+      color: #152b49;
+      font-size: .93rem;
+      line-height: 1.25;
+    }
+    .leaflet-control-attribution a {
+      color: inherit;
+    }
+    .bottom-bar .wrap {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .bottom-bar .item {
+      min-height: 3.4rem;
+    }
+    .bottom-bar .icon {
+      font-size: 1.2rem;
+    }
+    .bottom-bar .label {
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .02em;
+    }
+    @media (max-width: 820px) {
+      .tempo-vlille .tl-subnav {
+        display: none;
+      }
+      .tempo-vlille .filters {
+        top: var(--nav-main-h, 56px);
+      }
+      .tempo-vlille .search {
+        top: calc(var(--nav-main-h, 56px) + var(--filters-h, 58px));
+      }
+      .tempo-vlille main {
+        padding-top: .7rem;
+      }
+    }
+    @media (max-width: 480px) {
+      .app-hero {
+        padding: .85rem;
+      }
+      .availability-pill {
+        font-size: .74rem;
+        padding-inline: .62rem;
+      }
+      .station-card {
+        padding: .78rem;
+      }
+      .star {
+        min-width: 2.8rem;
+        min-height: 2.8rem;
+      }
+      .metrics-row {
+        grid-template-columns: 1fr;
+      }
+    }
+    html[data-theme="dark"] body.tempo-vlille {
+      background:
+        radial-gradient(circle at 18% -20%, rgba(39, 115, 211, .26), transparent 36%),
+        radial-gradient(circle at 100% -16%, rgba(18, 174, 186, .18), transparent 46%),
+        linear-gradient(180deg, #0d131d 0%, #111b2a 100%);
+    }
+    html[data-theme="dark"] .app-hero,
+    html[data-theme="dark"] .station-card {
+      background: linear-gradient(160deg, #182234, #1a273b);
+      border-color: rgba(138, 173, 218, .18);
+      box-shadow: 0 12px 22px rgba(0, 0, 0, .34);
+    }
+    html[data-theme="dark"] .app-logo {
+      background: linear-gradient(145deg, #1f3a62, #1b2e4c);
+      color: #bbd4ff;
+      border-color: rgba(122, 162, 255, .26);
+    }
+    html[data-theme="dark"] .availability-pill {
+      background: linear-gradient(135deg, #22395f, #234a78);
+      color: #dbeafe;
+      border-color: rgba(122, 162, 255, .3);
+    }
+    html[data-theme="dark"] .app-subtitle,
+    html[data-theme="dark"] .section-label,
+    html[data-theme="dark"] .station-updated {
+      color: #b8cae5 !important;
+    }
+    html[data-theme="dark"] .station-title {
+      color: #e5efff;
+    }
+    html[data-theme="dark"] .station-distance {
+      background: #19263a;
+      color: #c4dcff;
+      border-color: rgba(122, 162, 255, .32);
+    }
+    html[data-theme="dark"] .metric.is-good {
+      background: #143626;
+      color: #b7f6cf;
+      border-color: #1c6745;
+    }
+    html[data-theme="dark"] .metric.is-warn {
+      background: #3d3018;
+      color: #ffe0a0;
+      border-color: #8a6632;
+    }
+    html[data-theme="dark"] .metric.is-bad {
+      background: #48202a;
+      color: #ffc9d2;
+      border-color: #874250;
+    }
+    html[data-theme="dark"] .map-shell {
+      background: linear-gradient(160deg, #182437, #172336);
+      border-color: rgba(122, 162, 255, .24);
+      box-shadow: 0 12px 22px rgba(0, 0, 0, .34);
+    }
+    html[data-theme="dark"] .map-status {
+      color: #bed0eb;
+    }
+    html[data-theme="dark"] .map-canvas {
+      border-color: rgba(122, 162, 255, .26);
+      background: #1a2639;
+    }
+    html[data-theme="dark"] .map-btn {
+      background: #1b2a3f;
+      border-color: rgba(122, 162, 255, .35);
+      color: #e0ebff;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, .25);
+    }
+    html[data-theme="dark"] .map-btn.primary {
+      background: linear-gradient(132deg, #169856, #0d7b43);
+      border-color: transparent;
+    }
+    html[data-theme="dark"] .leaflet-popup-content-wrapper,
+    html[data-theme="dark"] .leaflet-popup-tip {
+      background: #1a2a3e;
+      color: #e8f0ff;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, .28);
+    }
+    html[data-theme="dark"] .leaflet-popup-content p,
+    html[data-theme="dark"] .leaflet-popup-content strong {
+      color: #d9e8ff;
+    }
+    html[data-theme="dark"] .leaflet-control-zoom a {
+      background: #1a2a3e;
+      color: #d4e3fb;
+      border-bottom-color: rgba(122, 162, 255, .25);
+    }
+    html[data-theme="dark"] .leaflet-control-attribution {
+      background: rgba(9, 14, 22, .74);
+      color: #c4d6f2;
+    }
+    html[data-theme="dark"] .user-pin {
+      box-shadow: 0 0 0 5px rgba(248, 113, 113, .28), 0 9px 18px rgba(0, 0, 0, .36);
+    }
+  </style>
+  <link href="assets/tempo-ux.css" rel="stylesheet">
+</head>
+<body class="tempo-app tempo-vlille">
+  <a class="tempo-skip-link" href="#main-content">Aller au contenu</a>
+  <script src="assets/tempo-common.js"></script>
+  <script>
+    if (window.TempoCommon) window.TempoCommon.bindSystemTheme('data-theme');
+  </script>
+  <nav class="navbar navbar-expand-lg tl-navbar navbar-light sticky-top" aria-label="Menu principal">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="index.html"><i class="bi bi-buildings me-2"></i>Tempo Lille</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#tlNav" aria-controls="tlNav" aria-expanded="false" aria-label="Basculer la navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="tlNav">
+        <ul class="navbar-nav ms-auto align-items-lg-center">
+          <li class="nav-item"><a class="nav-link active" href="index.html"><i class="bi bi-bicycle me-1"></i>V'Lille</a></li>
+          <li class="nav-item"><a class="nav-link" href="metroilevia.html"><i class="bi bi-train-front me-1"></i>Métro Ilévia</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <nav class="tl-subnav" aria-label="Sous-menu V'Lille">
+    <div class="container" style="max-width:900px;">
+      <ul class="nav align-items-center gap-2 py-2 flex-wrap">
+        <li class="nav-item"><span class="brand-inline"><i class="bi bi-bicycle"></i> V'Lille</span></li>
+        <li class="nav-item"><button id="subFav" type="button" class="btn btn-sm btn-outline-primary">⭐ Favoris</button></li>
+        <li class="nav-item"><button id="subNear" type="button" class="btn btn-sm btn-outline-primary">📍 Autour de moi</button></li>
+        <li class="nav-item"><button id="subMap" type="button" class="btn btn-sm btn-outline-primary">🗺️ Carte</button></li>
+        <li class="nav-item d-flex align-items-center gap-2">
+          <i class="bi bi-search"></i>
+          <input id="subSearch" type="search" class="form-control form-control-sm" placeholder="Rechercher une station…">
+        </li>
+        <li class="nav-item ms-auto"><span id="lastUpdate" class="pill">⏱︎ Maj — …</span></li>
+      </ul>
+    </div>
+  </nav>
+
+
+  <!-- Filtres sous le header -->
+  <div id="filters" class="filters" role="tablist" aria-label="Filtrer les stations">
+    <button id="fltAll"   class="seg" role="tab" aria-selected="true"  data-mode="all">Tous</button>
+    <button id="fltBikes" class="seg" role="tab" aria-selected="false" data-mode="bikes">Vélos</button>
+    <button id="fltDocks" class="seg" role="tab" aria-selected="false" data-mode="docks">Places</button>
+  </div>
+
+  <div id="ptr" class="ptr" role="status" aria-live="polite"><div class="wrap">↻ Glisse vers le bas pour actualiser</div></div>
+
+  <div id="errorBanner" class="banner" role="status" aria-live="polite">
+    <div class="wrap">⚠️ Impossible d’actualiser les données pour le moment. Dernières infos affichées.</div>
+  </div>
+
+  <main id="main-content">
+    <section class="tempo-page-head mb-3 app-hero" aria-label="Présentation de l'application">
+      <div class="app-top-row">
+        <div class="app-brand">
+          <span class="app-logo"><i class="bi bi-bicycle"></i></span>
+          <div>
+            <p class="eyebrow mb-0">Tempo Lille</p>
+            <h1 class="h5 mb-0">V'Lille</h1>
+          </div>
+        </div>
+        <span id="availabilityPill" class="availability-pill">Disponibilités</span>
+      </div>
+      <p class="mb-0 app-subtitle">Recherche rapide, favoris et disponibilités en direct.</p>
+      <button id="heroLocateBtn" type="button" class="hero-locate-btn">📍 V'Lille à proximité</button>
+    </section>
+    <p id="storageNotice" class="updated mb-3" hidden></p>
+    <!-- Vue 1 : Favoris -->
+    <section id="view-fav" data-view class="active" aria-labelledby="view-fav-title">
+      <h2 id="view-fav-title" class="visually-hidden">Stations favorites</h2>
+      <p class="section-label">MES FAVORIS</p>
+      <section id="nearby" class="nearby" hidden>
+        <h2>À proximité</h2>
+        <div id="nearList" class="list" role="list"></div>
+      </section>
+      <div id="favList" class="list" role="list"></div>
+      <div id="favEmpty" class="empty" hidden>
+        Aucun favori pour le moment. Ouvre Recherche pour ajouter des stations.
+      </div>
+      <div id="favHint" class="updated mt-2" hidden></div>
+    </section>
+
+    <!-- Vue 2 : Recherche / Ajout -->
+    <section id="view-browse" data-view aria-labelledby="view-browse-title">
+      <h2 id="view-browse-title" class="visually-hidden">Recherche de stations</h2>
+      <p class="section-label">RECHERCHE</p>
+      <div class="search">
+        <div class="wrap">
+          <input id="search" type="search" placeholder="Rechercher une station… (filtre en direct)" aria-label="Rechercher une station" autocomplete="off" />
+          <button id="clearSearch" type="button" class="search-clear" aria-label="Effacer la recherche" hidden>×</button>
+          <ul id="suggestions" class="suggestions" role="listbox" hidden></ul>
+        </div>
+        <div id="browseMeta" class="meta-row" hidden></div>
+      </div>
+      <div id="allList" class="list" role="list" aria-live="polite"></div>
+    </section>
+
+    <!-- Vue 3 : Carte -->
+    <section id="view-map" data-view aria-labelledby="view-map-title">
+      <h2 id="view-map-title" class="visually-hidden">Carte des stations</h2>
+      <p class="section-label">CARTE</p>
+      <div class="map-shell">
+        <p id="mapStatus" class="map-status" role="status" aria-live="polite">Chargement de la carte…</p>
+        <div id="mapCanvas" class="map-canvas" aria-label="Carte des stations V'Lille"></div>
+        <div class="map-toolbar">
+          <button id="mapLocateBtn" type="button" class="map-btn primary">📍 Me localiser</button>
+          <button id="mapFitBtn" type="button" class="map-btn">↔ Voir toute la carte</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div>Source données : <a href="https://transport.data.gouv.fr/datasets/vlille-disponibilite-en-temps-reel-3" target="_blank" rel="noopener">GBFS Ilévia (V'Lille)</a>. Actualisation ~ 60 s. | Build publié le 13/03/2026 à 15:48 (Europe/Paris) - Version 2026-03-13-1548</div>
+  </footer>
+
+  <nav class="bottom-bar" aria-label="Actions rapides">
+    <div class="wrap">
+      <button id="mbHome" class="item" title="Favoris">
+        <span class="icon">⭐</span>
+        <span class="label">Favoris</span>
+      </button>
+      <button id="mbMap" class="item" title="Carte">
+        <span class="icon">🗺️</span>
+        <span class="label">Carte</span>
+      </button>
+      <button id="mbSearch" class="item" title="Rechercher">
+        <span class="icon">🔍</span>
+        <span class="label">Recherche</span>
+      </button>
+      <a href="metroilevia.html" class="item" title="Métro Ilévia">
+        <span class="icon">🚇</span>
+        <span class="label">Métro</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- À propos: panel + backdrop -->
+  <div id="aboutBackdrop" class="about-backdrop" hidden></div>
+  <div id="aboutPanel" class="about-panel" role="dialog" aria-modal="true" aria-labelledby="aboutTitle" hidden>
+    <div class="about-head">
+      <div class="about-handle"></div>
+      <h2 id="aboutTitle">À propos</h2>
+      <button id="aboutClose" class="btn about-close" aria-label="Fermer">✕</button>
+    </div>
+    <div class="about-body">
+      <p><strong>V'Lille</strong> affiche rapidement les disponibilités des stations V'Lille (vélos & places) et vos favoris. Données en temps quasi réel (GBFS Ilévia).
+      </p>
+      <h3>Légendes & indications</h3>
+      <ul>
+        <li>🚲 Vélos disponibles — nombre de vélos prêts à partir.</li>
+        <li>🅿️ Places vacantes — nombre d’emplacements libres pour retourner un vélo.</li>
+        <li>Badges : <em>Vide / Bientôt vide / Bientôt plein / Plein</em> selon les seuils internes.</li>
+      </ul>
+      <h3>Liens</h3>
+      <p><a href="metroilevia.html">Ouvrir Métro Ilévia</a> · <a href="https://transport.data.gouv.fr/datasets/vlille-disponibilite-en-temps-reel-3" target="_blank" rel="noopener">Source GBFS</a></p>
+      <h3>Version</h3>
+      <p id="aboutVersion">—</p>
+      <p style="color:var(--muted)">Aucune donnée personnelle n’est collectée. Vos préférences restent sur cet appareil avec un stockage de secours si nécessaire.
+      </p>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script>
+    // ====== Constantes & état ======
+    const GBFS_INDEX = 'https://media.ilevia.fr/opendata/gbfs.json';
+    const GBFS_LANG = 'fr'; // fallback to first available if missing
+
+    const APP_VERSION = '2026.03.13.1548';
+    const BUILD_LABEL = '13/03/2026 15:48 (Europe/Paris)';
+
+    const LS_KEYS = {
+      fav: 'vlille_favorites',
+      filter: 'vlille_filter',
+      sort: 'vlille_sort',
+      thr: 'vlille_thr',
+      sortAuto: 'vlille_sort_auto',
+      hist: 'vlille_hist'
+    };
+
+    function createStorageAdapter(){
+      const memory = new Map();
+      const cookieApi = {
+        name: 'cookie',
+        getItem(key){
+          const encodedKey = `${encodeURIComponent(key)}=`;
+          const hit = document.cookie.split('; ').find(part => part.startsWith(encodedKey));
+          return hit ? decodeURIComponent(hit.slice(encodedKey.length)) : null;
+        },
+        setItem(key, value){
+          document.cookie = `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
+        },
+        removeItem(key){
+          document.cookie = `${encodeURIComponent(key)}=; path=/; max-age=0; SameSite=Lax`;
+        }
+      };
+      const memoryApi = {
+        name: 'memory',
+        getItem: (key) => memory.has(key) ? memory.get(key) : null,
+        setItem: (key, value) => { memory.set(key, String(value)); },
+        removeItem: (key) => { memory.delete(key); }
+      };
+
+      try {
+        const probe = '__tempo_vlille_probe__';
+        localStorage.setItem(probe, '1');
+        localStorage.removeItem(probe);
+        return {
+          backend: 'localStorage',
+          getItem: (key) => localStorage.getItem(key),
+          setItem: (key, value) => localStorage.setItem(key, String(value)),
+          removeItem: (key) => localStorage.removeItem(key)
+        };
+      } catch {}
+
+      try {
+        cookieApi.setItem('__tempo_vlille_probe__', '1');
+        if (cookieApi.getItem('__tempo_vlille_probe__') === '1') {
+          cookieApi.removeItem('__tempo_vlille_probe__');
+          return {
+            backend: cookieApi.name,
+            getItem: cookieApi.getItem,
+            setItem: cookieApi.setItem,
+            removeItem: cookieApi.removeItem
+          };
+        }
+      } catch {}
+
+      return {
+        backend: memoryApi.name,
+        getItem: memoryApi.getItem,
+        setItem: memoryApi.setItem,
+        removeItem: memoryApi.removeItem
+      };
+    }
+
+    const storage = createStorageAdapter();
+
+    function readText(key, fallback = ''){
+      const value = storage.getItem(key);
+      return value == null ? fallback : value;
+    }
+
+    function readJSON(key, fallback){
+      const value = storage.getItem(key);
+      if (!value) return fallback;
+      try { return JSON.parse(value); } catch { return fallback; }
+    }
+
+    let volatileHistory = { ts: 0, data: {} };
+
+    const state = {
+      stations: /** @type {Array<Station>} */([]),
+      favorites: new Set(readJSON(LS_KEYS.fav, [])),
+      timer: null,
+      lastFetch: null,
+      userLoc: null,
+      currentView: 'fav',
+      sort: readText(LS_KEYS.sort, 'bikes'),
+      thr: readJSON(LS_KEYS.thr, { empty: 2, full: 2 }),
+      sortAuto: readJSON(LS_KEYS.sortAuto, true),
+      trend: {},
+      filter: readText(LS_KEYS.filter, 'all'),
+      storageBackend: storage.backend,
+      map: null,
+      mapLayer: null,
+      mapMarkers: [],
+      mapUserMarker: null,
+      mapUserAccuracyCircle: null,
+      mapHasFit: false,
+    };
+
+    /** @typedef {{ id:string, name:string, bikes:number, docks:number, updatedAt:string, lat?:number, lon?:number, address?:string }} Station */
+
+    // ====== Utilitaires ======
+    const el = (sel, root=document) => root.querySelector(sel);
+    const els = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+    const fmtTime = (iso) => {
+      try { const d = new Date(iso); return new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' }).format(d); } catch { return '—'; }
+    };
+    const normalizeSearch = (value) => String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
+
+    function storageLabel(){
+      if (state.storageBackend === 'localStorage') return 'stockage local';
+      if (state.storageBackend === 'cookie') return 'stockage de secours';
+      return 'mémoire temporaire';
+    }
+
+    function updateStorageNotice(){
+      const notice = el('#storageNotice');
+      if (!notice) return;
+      if (state.storageBackend === 'localStorage') {
+        notice.hidden = true;
+        notice.textContent = '';
+        return;
+      }
+      if (state.storageBackend === 'cookie') {
+        notice.hidden = false;
+        notice.textContent = 'Sauvegarde de secours active sur cet appareil. Les favoris restent enregistrés, mais certaines données temporaires sont limitées.';
+        return;
+      }
+      notice.hidden = false;
+      notice.textContent = 'Le navigateur bloque la sauvegarde persistante ici. Les favoris resteront jusqu\'à la fermeture de l\'onglet seulement.';
+    }
+
+    function saveFavorites(){ storage.setItem(LS_KEYS.fav, JSON.stringify([...state.favorites])); updateStorageNotice(); }
+    function saveSort(){ storage.setItem(LS_KEYS.sort, state.sort); }
+    function saveThr(){ storage.setItem(LS_KEYS.thr, JSON.stringify(state.thr)); }
+    function saveSortAuto(){ storage.setItem(LS_KEYS.sortAuto, JSON.stringify(state.sortAuto)); }
+    function loadHistory(){
+      if (state.storageBackend !== 'localStorage') return volatileHistory;
+      try { return readJSON(LS_KEYS.hist, { ts: 0, data: {} }); } catch { return { ts:0, data:{} }; }
+    }
+    function saveHistory(snapshot){
+      if (state.storageBackend !== 'localStorage') {
+        volatileHistory = snapshot;
+        return;
+      }
+      storage.setItem(LS_KEYS.hist, JSON.stringify(snapshot));
+    }
+
+    function qtyClass(n){
+      if (n >= 5) return 'ok';
+      if (n >= 1) return 'warn';
+      return 'bad';
+    }
+    function unit(n, singular, plural){ return (n === 0 || n === 1) ? singular : plural; }
+
+    function applyFilter(arr){
+      if (state.filter === 'bikes') return arr.filter(s => (s.bikes||0) > 0);
+      if (state.filter === 'docks') return arr.filter(s => (s.docks||0) > 0);
+      return arr;
+    }
+    function setFilter(mode){
+      state.filter = mode; storage.setItem(LS_KEYS.filter, mode);
+      // Update segment aria-selected
+      const map = { all: '#fltAll', bikes: '#fltBikes', docks: '#fltDocks' };
+      for (const k of Object.keys(map)){
+        const btn = el(map[k]); if (!btn) continue;
+        btn.setAttribute('aria-selected', String(k === mode));
+      }
+      render();
+    }
+
+    function toRad(d){ return d * Math.PI / 180; }
+    function haversine(a, b){
+      if (!a || !b) return Infinity;
+      const R = 6371; // km
+      const dLat = toRad((b.lat||0) - (a.lat||0));
+      const dLon = toRad((b.lon||0) - (a.lon||0));
+      const la1 = toRad(a.lat||0); const la2 = toRad(b.lat||0);
+      const x = Math.sin(dLat/2)**2 + Math.cos(la1)*Math.cos(la2)*Math.sin(dLon/2)**2;
+      return 2 * R * Math.asin(Math.min(1, Math.sqrt(x)));
+    }
+    function formatDistance(km){
+      if(!Number.isFinite(km)) return '';
+      if(km < 1) return `${Math.max(60, Math.round(km * 1000))} m`;
+      if(km < 10) return `${km.toFixed(1)} km`;
+      return `${Math.round(km)} km`;
+    }
+    function metricTone(value, threshold){
+      if(value <= 0) return 'is-bad';
+      if(value <= threshold) return 'is-warn';
+      return 'is-good';
+    }
+    function stationTone(station){
+      const bikesTone = metricTone(station.bikes, state.thr.empty);
+      const docksTone = metricTone(station.docks, state.thr.full);
+      if (bikesTone === 'is-bad' || docksTone === 'is-bad') return 'is-bad';
+      if (bikesTone === 'is-warn' || docksTone === 'is-warn') return 'is-warn';
+      return 'is-good';
+    }
+    function escapeHtml(value){
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+    function getVisibleStations(rawQuery){
+      const query = normalizeSearch(rawQuery || '');
+      const filtered = query ? state.stations.filter(s => normalizeSearch(s.name).includes(query)) : state.stations;
+      return sortStations(applyFilter(filtered));
+    }
+
+    function sortStations(arr){
+      const auto = state.sortAuto && state.userLoc;
+      const mode = auto ? 'distance' : state.sort;
+      if (mode === 'bikes') return [...arr].sort((a,b)=> b.bikes - a.bikes || a.name.localeCompare(b.name,'fr'));
+      if (mode === 'docks') return [...arr].sort((a,b)=> b.docks - a.docks || a.name.localeCompare(b.name,'fr'));
+      if (mode === 'distance' && state.userLoc) return [...arr].sort((a,b)=> haversine(state.userLoc, {lat:a.lat,lon:a.lon}) - haversine(state.userLoc, {lat:b.lat,lon:b.lon}));
+      return [...arr].sort((a,b)=> a.name.localeCompare(b.name,'fr'));
+    }
+
+    function updateTrends(newStations){
+      const prev = loadHistory();
+      const now = Date.now();
+      const within = (now - (prev.ts||0)) <= 60*60*1000; // 60 min
+      const prevMap = within ? (prev.data || {}) : {};
+      const trend = {};
+      for (const s of newStations){
+        const p = prevMap[s.id];
+        if (p){
+          trend[s.id] = {
+            bikes: Math.sign((s.bikes||0) - (p.bikes||0)),
+            docks: Math.sign((s.docks||0) - (p.docks||0))
+          };
+        }
+      }
+      state.trend = trend;
+      const snap = { ts: now, data: Object.fromEntries(newStations.map(s=> [s.id, { bikes: s.bikes, docks: s.docks }])) };
+      saveHistory(snap);
+    }
+
+    function updateHeaderHeight(){
+      const mainNav = document.querySelector('.tl-navbar');
+      const subNav = document.querySelector('.tl-subnav');
+      const filters = document.querySelector('#filters');
+      if (mainNav) document.documentElement.style.setProperty('--nav-main-h', mainNav.offsetHeight + 'px');
+      const headerHeight = (mainNav ? mainNav.offsetHeight : 0) + (subNav ? subNav.offsetHeight : 0);
+      if (headerHeight > 0) document.documentElement.style.setProperty('--header-h', headerHeight + 'px');
+      if (filters) document.documentElement.style.setProperty('--filters-h', filters.offsetHeight + 'px');
+    }
+
+    // Haptique léger (mobile)
+    function haptic(ms = 10){ try { if (navigator.vibrate) navigator.vibrate(ms); } catch {} }
+
+    function ensureMap(){
+      if (state.map) return state.map;
+      if (typeof L === 'undefined') return null;
+      const mapCanvas = el('#mapCanvas');
+      if (!mapCanvas) return null;
+
+      const map = L.map(mapCanvas, {
+        zoomControl: false,
+        attributionControl: true,
+      });
+      L.control.zoom({ position: 'bottomright' }).addTo(map);
+      const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+      });
+      tileLayer.addTo(map);
+      map.setView([50.62925, 3.057256], 13);
+      map.on('dragstart zoomstart', () => { state.mapHasFit = true; });
+      state.map = map;
+      state.mapLayer = tileLayer;
+      return map;
+    }
+
+    function fitMapToStations(stations, force = false){
+      const map = ensureMap();
+      if (!map) return;
+      const withGeo = stations.filter(s => Number.isFinite(s.lat) && Number.isFinite(s.lon));
+      if (!withGeo.length && !state.userLoc) return;
+      if (state.mapHasFit && !force) return;
+
+      const points = withGeo.map(s => [s.lat, s.lon]);
+      if (state.userLoc) points.push([state.userLoc.lat, state.userLoc.lon]);
+      if (points.length === 1) {
+        map.setView(points[0], 15);
+      } else {
+        map.fitBounds(points, { padding: [24, 24], maxZoom: 16 });
+      }
+      state.mapHasFit = true;
+    }
+
+    function centerMapOnUser(){
+      if (!state.userLoc) return;
+      const map = ensureMap();
+      if (!map) return;
+      map.setView([state.userLoc.lat, state.userLoc.lon], Math.max(map.getZoom(), 15));
+    }
+
+    function renderMap(visibleStations, rawQuery){
+      const mapStatus = el('#mapStatus');
+      const map = ensureMap();
+      if (!map) {
+        if (mapStatus) mapStatus.textContent = 'Carte indisponible pour le moment.';
+        return;
+      }
+
+      state.mapMarkers.forEach(marker => marker.remove());
+      state.mapMarkers = [];
+
+      const withGeo = visibleStations.filter(s => Number.isFinite(s.lat) && Number.isFinite(s.lon));
+
+      withGeo.forEach((station) => {
+        const tone = stationTone(station);
+        const isFav = state.favorites.has(station.id);
+        const marker = L.marker([station.lat, station.lon], {
+          icon: L.divIcon({
+            className: 'map-pin-wrap',
+            html: `<span class="map-pin ${tone}${isFav ? ' is-fav' : ''}">${station.bikes}</span>`,
+            iconSize: [32, 32],
+            iconAnchor: [16, 16],
+            popupAnchor: [0, -14]
+          })
+        });
+
+        const distance = state.userLoc ? formatDistance(haversine(state.userLoc, { lat: station.lat, lon: station.lon })) : '';
+        const popup = [
+          `<strong>${escapeHtml(station.name)}</strong>`,
+          `<p>🚲 ${station.bikes} velos · 🅿️ ${station.docks} places</p>`,
+          station.address ? `<p>${escapeHtml(station.address)}</p>` : '',
+          distance ? `<p>📍 ${distance}</p>` : ''
+        ].filter(Boolean).join('');
+        marker.bindPopup(popup, { closeButton: true });
+        marker.addTo(map);
+        state.mapMarkers.push(marker);
+      });
+
+      if (state.userLoc) {
+        if (!state.mapUserMarker) {
+          state.mapUserMarker = L.marker([state.userLoc.lat, state.userLoc.lon], {
+            zIndexOffset: 1200,
+            icon: L.divIcon({
+              className: 'map-pin-wrap',
+              html: '<span class="user-pin" aria-label="Votre position"></span>',
+              iconSize: [22, 22],
+              iconAnchor: [11, 11]
+            })
+          }).addTo(map);
+        } else {
+          state.mapUserMarker.setLatLng([state.userLoc.lat, state.userLoc.lon]).addTo(map);
+        }
+        if (Number.isFinite(state.userLoc.accuracy) && state.userLoc.accuracy > 0) {
+          if (!state.mapUserAccuracyCircle) {
+            state.mapUserAccuracyCircle = L.circle([state.userLoc.lat, state.userLoc.lon], {
+              radius: Math.min(Math.max(state.userLoc.accuracy, 20), 120),
+              color: '#ef4444',
+              fillColor: '#ef4444',
+              fillOpacity: 0.14,
+              weight: 1,
+              interactive: false
+            }).addTo(map);
+          } else {
+            state.mapUserAccuracyCircle
+              .setLatLng([state.userLoc.lat, state.userLoc.lon])
+              .setRadius(Math.min(Math.max(state.userLoc.accuracy, 20), 120))
+              .addTo(map);
+          }
+        } else if (state.mapUserAccuracyCircle) {
+          state.mapUserAccuracyCircle.remove();
+          state.mapUserAccuracyCircle = null;
+        }
+      } else {
+        if (state.mapUserMarker) {
+          state.mapUserMarker.remove();
+          state.mapUserMarker = null;
+        }
+        if (state.mapUserAccuracyCircle) {
+          state.mapUserAccuracyCircle.remove();
+          state.mapUserAccuracyCircle = null;
+        }
+      }
+
+      const queryPrefix = rawQuery ? `Recherche "${rawQuery}" · ` : '';
+      if (mapStatus) {
+        if (!withGeo.length) mapStatus.textContent = `${queryPrefix}aucune station géolocalisée avec le filtre actuel.${state.userLoc ? ' Épingle rouge : vous.' : ''}`;
+        else mapStatus.textContent = `${queryPrefix}${withGeo.length} station${withGeo.length > 1 ? 's' : ''} sur la carte.${state.userLoc ? ' Épingle rouge : vous.' : ' Appuyez sur "Me localiser".'}`;
+      }
+
+      fitMapToStations(withGeo, false);
+      requestAnimationFrame(() => map.invalidateSize({ pan: false }));
+    }
+
+    // Géolocalisation partagée (subnav + mobile bar)
+    window.requestVLilleLocation = function(){
+      if (!('geolocation' in navigator)) { alert("Géolocalisation non disponible sur cet appareil."); return; }
+      navigator.geolocation.getCurrentPosition((pos)=>{
+        state.userLoc = {
+          lat: pos.coords.latitude,
+          lon: pos.coords.longitude,
+          accuracy: Number(pos.coords.accuracy)
+        };
+        if (state.currentView === 'map') {
+          centerMapOnUser();
+          state.mapHasFit = true;
+        } else {
+          state.mapHasFit = false;
+        }
+        render();
+      }, (err)=>{
+        console.warn('Geoloc error', err);
+        alert("Impossible de récupérer la position.");
+      }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 30_000 });
+    }
+
+    // ====== Rendu ======
+    function render(){
+      // Dernière maj (header)
+      el('#lastUpdate').textContent = `⏱︎ Maj — ${state.lastFetch ? fmtTime(state.lastFetch) : '—'}`;
+      const availabilityPill = el('#availabilityPill');
+      if (availabilityPill) {
+        availabilityPill.textContent = state.lastFetch ? `Live ${fmtTime(state.lastFetch)}` : 'Disponibilités';
+      }
+
+      const searchInput = el('#search');
+      const subSearch = el('#subSearch');
+      const clearSearch = el('#clearSearch');
+      const browseMeta = el('#browseMeta');
+      const favHint = el('#favHint');
+      const rawQuery = searchInput?.value.trim() || '';
+      if (subSearch && subSearch.value !== searchInput.value) subSearch.value = searchInput.value;
+      if (clearSearch) clearSearch.hidden = rawQuery.length === 0;
+
+      // Vue Favoris
+      const favContainer = el('#favList');
+      favContainer.innerHTML = '';
+      const favs = state.stations.filter(s => state.favorites.has(s.id));
+      favHint.hidden = true;
+      favHint.textContent = '';
+
+      // Nearby
+      const nearWrap = el('#nearby');
+      const nearList = el('#nearList');
+      if (state.userLoc) {
+        const withGeo = state.stations.filter(s => Number.isFinite(s.lat) && Number.isFinite(s.lon));
+        const nearby = withGeo
+          .map(s => ({ s, d: haversine(state.userLoc, {lat:s.lat, lon:s.lon}) }))
+          .sort((a,b)=> a.d - b.d)
+          .slice(0, 6)
+          .map(x => x.s);
+        nearList.innerHTML = '';
+        applyFilter(nearby).forEach(s => nearList.appendChild(stationCard(s)));
+        nearWrap.hidden = applyFilter(nearby).length === 0;
+      } else {
+        nearWrap.hidden = true;
+      }
+
+      if (favs.length === 0) {
+        el('#favEmpty').hidden = false;
+      } else {
+        el('#favEmpty').hidden = true;
+        // Favoris : n'applique pas le filtre pour éviter l'effet "disparu" après ajout
+        sortStations(favs).forEach(s => favContainer.appendChild(stationCard(s)));
+        if (state.filter !== 'all') {
+          favHint.hidden = false;
+          favHint.textContent = 'Astuce : le filtre n\'est pas appliqué aux favoris pour éviter de masquer vos stations.';
+        }
+      }
+
+      // Vue Parcourir (filtrée)
+      const allContainer = el('#allList');
+      const visible = getVisibleStations(rawQuery);
+      allContainer.innerHTML = '';
+      visible.forEach(s => allContainer.appendChild(stationCard(s)));
+      if (browseMeta) {
+        const parts = [
+          `${visible.length} station${visible.length > 1 ? 's' : ''} affichée${visible.length > 1 ? 's' : ''}`,
+          `${state.favorites.size} favori${state.favorites.size > 1 ? 's' : ''}`
+        ];
+        if (rawQuery) parts.unshift(`Recherche : ${rawQuery}`);
+        browseMeta.textContent = parts.join(' · ');
+        browseMeta.hidden = state.stations.length === 0;
+      }
+      if (state.currentView === 'map' || state.map) renderMap(visible, rawQuery);
+      updateHeaderHeight();
+      // No-op placeholder: sticky search already uses --header-h; filters are stacked visually.
+    }
+
+    function stationCard(s){
+      const card = document.createElement('article');
+      card.className = 'card station-card';
+      card.setAttribute('role','listitem');
+
+      const head = document.createElement('div');
+      head.className = 'card-head';
+
+      const star = document.createElement('button');
+      star.className = 'star';
+      star.type = 'button';
+      const isFav = state.favorites.has(s.id);
+      star.setAttribute('aria-pressed', String(isFav));
+      star.setAttribute('aria-label', isFav ? 'Retirer des favoris' : 'Ajouter aux favoris');
+      star.textContent = isFav ? '★' : '☆';
+      star.addEventListener('click', () => {
+        if (state.favorites.has(s.id)) state.favorites.delete(s.id); else state.favorites.add(s.id);
+        saveFavorites();
+        render();
+      });
+
+      const stationMain = document.createElement('div');
+      stationMain.className = 'station-main';
+      const title = document.createElement('p');
+      title.className = 'station-title';
+      title.textContent = s.name;
+      stationMain.appendChild(title);
+
+      if (s.address) {
+        const addr = document.createElement('div');
+        addr.className = 'addr';
+        addr.textContent = s.address;
+        stationMain.appendChild(addr);
+      }
+
+      head.append(star, stationMain);
+      if (state.userLoc && Number.isFinite(s.lat) && Number.isFinite(s.lon)){
+        const distKm = haversine(state.userLoc, {lat: s.lat, lon: s.lon});
+        const d = document.createElement('span');
+        d.className = 'station-distance';
+        d.textContent = formatDistance(distKm);
+        head.appendChild(d);
+      }
+
+      card.appendChild(head);
+
+      // Badges d’état
+      const badges = [];
+      if (s.is_installed === 0) badges.push(badge('Hors service'));
+      else if (s.is_renting === 0 && s.is_returning === 0) badges.push(badge('Fermée'));
+
+      if (s.docks === 0) badges.push(badge('Plein'));
+      else if (s.docks <= state.thr.full) badges.push(badge('Bientôt plein'));
+
+      if (s.bikes === 0) badges.push(badge('Vide'));
+      else if (s.bikes <= state.thr.empty) badges.push(badge('Bientôt vide'));
+
+      function badge(txt){ const b=document.createElement('span'); b.className='state-tag'; b.textContent=txt; return b; }
+      if (badges.length){ const row=document.createElement('div'); row.className='state-tags'; badges.forEach(x=>row.appendChild(x)); card.appendChild(row); }
+
+      const metricsRow = document.createElement('div');
+      metricsRow.className = 'metrics-row';
+
+      const bikes = document.createElement('div');
+      bikes.className = `metric ${metricTone(s.bikes, state.thr.empty)}`;
+      const bikesIcon = document.createElement('span');
+      bikesIcon.className = 'metric-icon';
+      bikesIcon.textContent = '🚲';
+      const bikesCopy = document.createElement('div');
+      bikesCopy.className = 'metric-copy';
+      const bikesValue = document.createElement('p');
+      bikesValue.className = 'metric-value';
+      bikesValue.textContent = String(s.bikes);
+      const bikesLabel = document.createElement('p');
+      bikesLabel.className = 'metric-label';
+      bikesLabel.textContent = 'Vélos dispo';
+      const tb = state.trend[s.id]?.bikes || 0;
+      if (tb !== 0){
+        const arrow = document.createElement('span');
+        arrow.style.marginLeft = '.25rem';
+        arrow.textContent = tb > 0 ? '↑' : '↓';
+        bikesValue.appendChild(arrow);
+      }
+      bikesCopy.append(bikesValue, bikesLabel);
+      bikes.append(bikesIcon, bikesCopy);
+
+      const docks = document.createElement('div');
+      docks.className = `metric ${metricTone(s.docks, state.thr.full)}`;
+      const docksIcon = document.createElement('span');
+      docksIcon.className = 'metric-icon';
+      docksIcon.textContent = '🅿️';
+      const docksCopy = document.createElement('div');
+      docksCopy.className = 'metric-copy';
+      const docksValue = document.createElement('p');
+      docksValue.className = 'metric-value';
+      docksValue.textContent = String(s.docks);
+      const docksLabel = document.createElement('p');
+      docksLabel.className = 'metric-label';
+      docksLabel.textContent = 'Places libres';
+      const td = state.trend[s.id]?.docks || 0;
+      if (td !== 0){
+        const arrow = document.createElement('span');
+        arrow.style.marginLeft = '.25rem';
+        arrow.textContent = td > 0 ? '↑' : '↓';
+        docksValue.appendChild(arrow);
+      }
+      docksCopy.append(docksValue, docksLabel);
+      docks.append(docksIcon, docksCopy);
+      metricsRow.append(bikes, docks);
+
+      const upd = document.createElement('div');
+      upd.className = 'station-updated';
+      upd.textContent = `Mis à jour : ${fmtTime(s.updatedAt)}`;
+
+      card.append(metricsRow, upd);
+      return card;
+    }
+
+    // ====== Navigation de vues ======
+    function setView(which){
+      state.currentView = which;
+      const isFavView = which === 'fav';
+      const isBrowseView = which === 'browse';
+      const isMapView = which === 'map';
+      el('#view-fav').classList.toggle('active', isFavView);
+      el('#view-browse').classList.toggle('active', isBrowseView);
+      el('#view-map').classList.toggle('active', isMapView);
+      el('#mbHome')?.classList.toggle('is-active', isFavView);
+      el('#mbSearch')?.classList.toggle('is-active', isBrowseView);
+      el('#mbMap')?.classList.toggle('is-active', isMapView);
+      el('#subFav')?.classList.toggle('is-active', isFavView);
+      el('#subMap')?.classList.toggle('is-active', isMapView);
+      if (isBrowseView) {
+        el('#search').focus({ preventScroll: true });
+        el('#search').select();
+      }
+      if (isMapView) {
+        const visible = getVisibleStations(el('#search')?.value.trim() || '');
+        state.mapHasFit = false;
+        renderMap(visible, el('#search')?.value.trim() || '');
+      }
+    }
+
+    // ====== GBFS: récupération fusionnée ======
+    async function fetchStations(){
+      try {
+        const idxRes = await fetch(GBFS_INDEX, { cache: 'no-store' });
+        const idx = await idxRes.json();
+        const feeds = (idx.data?.[GBFS_LANG]?.feeds)
+          || idx.data?.[Object.keys(idx.data || {})[0]]?.feeds
+          || [];
+        const infoUrl   = feeds.find(f => f.name === 'station_information')?.url;
+        const statusUrl = feeds.find(f => f.name === 'station_status')?.url;
+        if (!infoUrl || !statusUrl) throw new Error('Flux GBFS manquants');
+
+        const [infoRes, statusRes] = await Promise.all([
+          fetch(infoUrl, { cache: 'no-store' }),
+          fetch(statusUrl, { cache: 'no-store' })
+        ]);
+        const [info, status] = await Promise.all([infoRes.json(), statusRes.json()]);
+
+        const infoById = new Map();
+        for (const s of (info.data?.stations || [])) infoById.set(String(s.station_id), s);
+
+        const out = [];
+        for (const st of (status.data?.stations || [])){
+          const id = String(st.station_id);
+          const i = infoById.get(id) || {};
+          out.push({
+            id,
+            name: i.name || `Station ${id}`,
+            bikes: Number(st.num_bikes_available ?? 0),
+            docks: Number(st.num_docks_available ?? 0),
+            updatedAt: (status?.last_updated ? new Date(status.last_updated*1000).toISOString() : new Date().toISOString()),
+            lat: Number(i.lat),
+            lon: Number(i.lon),
+            is_installed: Number(st.is_installed ?? 1),
+            is_renting: Number(st.is_renting ?? 1),
+            is_returning: Number(st.is_returning ?? 1),
+            address: String(i.address || i.adresse || i.street_address || i.rue || '')
+          });
+        }
+
+        out.sort((a,b)=> a.name.localeCompare(b.name, 'fr'));
+        state.stations = out;
+        updateTrends(out);
+        state.lastFetch = new Date().toISOString();
+        el('#errorBanner').style.display = 'none';
+        render();
+      } catch (err){
+        console.error('Erreur GBFS', err);
+        el('#errorBanner').style.display = 'block';
+      }
+    }
+
+    // ====== Auto-refresh ======
+    function startAutoRefresh(){
+      if (state.timer) clearInterval(state.timer);
+      state.timer = setInterval(fetchStations, 60_000); // 60s
+    }
+
+    // ====== Pull-to-refresh (mobile) ======
+    let ptrStartY = 0, ptrActive = false, ptrTriggered = false;
+    const PTR_THRESHOLD = 70;
+    function showPTR(msg){ const b=el('#ptr'); if(!b) return; b.querySelector('.wrap').textContent = msg; b.classList.add('show'); }
+    function hidePTR(){ const b=el('#ptr'); if(!b) return; b.classList.remove('show'); }
+
+    (function init(){
+      // Header layout helpers
+      updateHeaderHeight();
+      window.addEventListener('resize', updateHeaderHeight);
+      updateStorageNotice();
+
+      // Init filters segment
+      setFilter(state.filter);
+      el('#fltAll').addEventListener('click',   ()=> { if (typeof haptic==='function') haptic(); setFilter('all'); });
+      el('#fltBikes').addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); setFilter('bikes'); });
+      el('#fltDocks').addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); setFilter('docks'); });
+
+      // Recherche + suggestions
+      const searchInput = el('#search');
+      const clearSearch = el('#clearSearch');
+      const subSearch = el('#subSearch');
+      const sugg = el('#suggestions');
+      const onSearchInput = ()=>{
+        const raw = searchInput.value.trim();
+        const q = normalizeSearch(raw);
+        if (subSearch && subSearch.value !== searchInput.value) subSearch.value = searchInput.value;
+        if (clearSearch) clearSearch.hidden = raw.length === 0;
+        if (!q) { sugg.hidden = true; sugg.textContent = ''; render(); return; }
+        const names = state.stations
+          .map(s => s.name)
+          .filter((v,i,arr)=> arr.indexOf(v)===i)
+          .filter(n => normalizeSearch(n).includes(q))
+          .slice(0, 8);
+        sugg.textContent = '';
+        for (const n of names) {
+          const li = document.createElement('li');
+          li.setAttribute('role', 'option');
+          li.textContent = n;
+          sugg.appendChild(li);
+        }
+        sugg.hidden = names.length === 0;
+        render();
+      };
+      searchInput.addEventListener('input', onSearchInput);
+      el('#suggestions').addEventListener('mousedown', (e)=>{
+        const li = e.target.closest('li');
+        if (!li) return;
+        searchInput.value = li.textContent;
+        if (subSearch) subSearch.value = li.textContent;
+        el('#suggestions').hidden = true;
+        render();
+      });
+      searchInput.addEventListener('blur', ()=> setTimeout(()=> el('#suggestions').hidden = true, 150));
+      searchInput.addEventListener('focus', ()=>{
+        const q = searchInput.value.trim();
+        if (q) searchInput.dispatchEvent(new Event('input'));
+      });
+      clearSearch?.addEventListener('click', ()=>{
+        searchInput.value = '';
+        if (subSearch) subSearch.value = '';
+        sugg.hidden = true;
+        sugg.textContent = '';
+        render();
+        searchInput.focus({ preventScroll: true });
+      });
+
+      // À propos (sheet) — robust lazy binding
+      const aboutBtn = el('#btnAbout');
+      const openAbout = ()=>{
+        const aboutPanel = el('#aboutPanel');
+        const aboutBackdrop = el('#aboutBackdrop');
+        const aboutClose = el('#aboutClose');
+        const ver = el('#aboutVersion');
+        if (ver) ver.textContent = `Version : ${APP_VERSION} · Build : ${BUILD_LABEL} · Sauvegarde : ${storageLabel()}`;
+        if (!aboutPanel || !aboutBackdrop) return;
+        aboutPanel.hidden = false; aboutBackdrop.hidden = false;
+        requestAnimationFrame(()=> aboutPanel.classList.add('open'));
+        const onEsc = (e)=>{ if (e.key === 'Escape') close(); };
+        function close(){
+          aboutPanel.classList.remove('open');
+          setTimeout(()=> { aboutPanel.hidden = true; aboutBackdrop.hidden = true; document.removeEventListener('keydown', onEsc); }, 220);
+        }
+        aboutBackdrop.addEventListener('click', close, { once: true });
+        if (aboutClose) aboutClose.addEventListener('click', close, { once: true });
+        document.addEventListener('keydown', onEsc);
+      };
+      if (aboutBtn) aboutBtn.addEventListener('click', openAbout);
+
+      // Pull-to-refresh
+      window.addEventListener('touchstart', (e)=>{
+        if (window.scrollY === 0) { ptrStartY = e.touches[0].clientY; ptrActive = true; ptrTriggered = false; showPTR('↻ Glisse vers le bas pour actualiser'); }
+      }, { passive: true });
+      window.addEventListener('touchmove', (e)=>{
+        if (!ptrActive) return;
+        const dy = e.touches[0].clientY - ptrStartY;
+        if (dy > PTR_THRESHOLD) { showPTR('Relâcher pour actualiser'); ptrTriggered = true; }
+      }, { passive: true });
+      window.addEventListener('touchend', ()=>{
+        if (!ptrActive) return; ptrActive = false;
+        if (ptrTriggered) { showPTR('Actualisation…'); fetchStations().finally(()=> hidePTR()); }
+        else { hidePTR(); }
+      });
+
+      // Bottom bar (mobile)
+      const mbMap = el('#mbMap');
+      const mbSearch = el('#mbSearch');
+      const mbHome   = el('#mbHome');
+      const heroLocateBtn = el('#heroLocateBtn');
+      const mapLocateBtn = el('#mapLocateBtn');
+      const mapFitBtn = el('#mapFitBtn');
+
+      if (mbHome)   mbHome.addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); setView('fav'); });
+      if (mbMap)    mbMap.addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); setView('map'); });
+      if (mbSearch) mbSearch.addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); setView('browse'); });
+      if (heroLocateBtn) heroLocateBtn.addEventListener('click', ()=> { if (typeof haptic==='function') haptic(18); window.requestVLilleLocation?.(); });
+      if (mapLocateBtn) mapLocateBtn.addEventListener('click', ()=> { if (typeof haptic==='function') haptic(14); window.requestVLilleLocation?.(); });
+      if (mapFitBtn) mapFitBtn.addEventListener('click', ()=> {
+        if (typeof haptic === 'function') haptic();
+        state.mapHasFit = false;
+        fitMapToStations(getVisibleStations(el('#search')?.value.trim() || ''), true);
+      });
+
+      // Premier rendu + données
+      setView('fav');
+      render();
+      fetchStations();
+      startAutoRefresh();
+    })();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script>
+    if (window.TempoCommon) window.TempoCommon.bindMobileNavCollapse();
+
+    // Sous-menu V'Lille : actions
+    (function(){
+      const btnFav = document.getElementById('subFav');
+      const btnNear = document.getElementById('subNear');
+      const btnMap = document.getElementById('subMap');
+      const subSearch = document.getElementById('subSearch');
+      if (btnFav) btnFav.addEventListener('click', ()=> { if (typeof setView==='function') setView('fav'); });
+      if (btnNear) btnNear.addEventListener('click', ()=> { window.requestVLilleLocation?.(); });
+      if (btnMap) btnMap.addEventListener('click', ()=> { if (typeof setView==='function') setView('map'); });
+      if (subSearch) {
+        const mainSearch = document.getElementById('search');
+        subSearch.addEventListener('input', ()=> {
+          if (!mainSearch) return;
+          mainSearch.value = subSearch.value;
+          if (typeof setView==='function') setView('browse');
+          mainSearch.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
