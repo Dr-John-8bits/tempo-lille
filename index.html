@@ -316,6 +316,41 @@
       color: #526d8f;
       text-transform: uppercase;
     }
+    .station-controls {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: .55rem;
+      margin-bottom: .8rem;
+    }
+    .station-control {
+      border-radius: .9rem;
+      border: 1px solid rgba(13, 110, 253, .14);
+      background: linear-gradient(160deg, #ffffff, #f2f7ff);
+      box-shadow: 0 6px 14px rgba(15, 42, 74, .08);
+      padding: .45rem .55rem .55rem;
+    }
+    .station-control label {
+      display: inline-block;
+      font-size: .68rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-weight: 800;
+      color: #516c90;
+      margin-bottom: .32rem;
+    }
+    .station-select {
+      width: 100%;
+      min-height: 2.65rem;
+      border-radius: .72rem;
+      border: 1px solid rgba(13, 110, 253, .22);
+      background: #fff;
+      color: #1a3558;
+      font-size: .9rem;
+      font-weight: 700;
+      padding: .35rem .55rem;
+      appearance: auto;
+      box-shadow: 0 2px 8px rgba(15, 42, 74, .07);
+    }
     .station-card {
       border-radius: 1rem;
       padding: .85rem;
@@ -605,6 +640,10 @@
         min-width: 2.8rem;
         min-height: 2.8rem;
       }
+      .station-controls {
+        grid-template-columns: 1fr;
+        gap: .45rem;
+      }
       .metrics-row {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: .45rem;
@@ -669,6 +708,20 @@
       background: #48202a;
       color: #ffc9d2;
       border-color: #874250;
+    }
+    html[data-theme="dark"] .station-control {
+      background: linear-gradient(160deg, #1a2739, #172436);
+      border-color: rgba(122, 162, 255, .26);
+      box-shadow: 0 10px 18px rgba(0, 0, 0, .28);
+    }
+    html[data-theme="dark"] .station-control label {
+      color: #b9cde9;
+    }
+    html[data-theme="dark"] .station-select {
+      background: #1b2a3f;
+      border-color: rgba(122, 162, 255, .34);
+      color: #e7f0ff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, .24);
     }
     html[data-theme="dark"] .map-shell {
       background: linear-gradient(160deg, #182437, #172336);
@@ -753,14 +806,6 @@
     </div>
   </nav>
 
-
-  <!-- Filtres sous le header -->
-  <div id="filters" class="filters" role="tablist" aria-label="Filtrer les stations">
-    <button id="fltAll"   class="seg" role="tab" aria-selected="true"  data-mode="all">Tous</button>
-    <button id="fltBikes" class="seg" role="tab" aria-selected="false" data-mode="bikes">Vélos</button>
-    <button id="fltDocks" class="seg" role="tab" aria-selected="false" data-mode="docks">Places</button>
-  </div>
-
   <div id="ptr" class="ptr" role="status" aria-live="polite"><div class="wrap">↻ Glisse vers le bas pour actualiser</div></div>
 
   <div id="errorBanner" class="banner" role="status" aria-live="polite">
@@ -786,6 +831,26 @@
       </div>
     </section>
     <p id="storageNotice" class="updated mb-3" hidden></p>
+    <section id="stationControls" class="station-controls" aria-label="Filtres et tri des stations">
+      <div class="station-control">
+        <label for="filterSelect">Afficher</label>
+        <select id="filterSelect" class="station-select">
+          <option value="all">Toutes</option>
+          <option value="bikes">Avec vélos</option>
+          <option value="docks">Avec places</option>
+        </select>
+      </div>
+      <div class="station-control">
+        <label for="sortSelect">Trier</label>
+        <select id="sortSelect" class="station-select">
+          <option value="auto">Auto</option>
+          <option value="bikes">Vélos dispo</option>
+          <option value="docks">Places libres</option>
+          <option value="distance">Distance</option>
+          <option value="name">Nom A-Z</option>
+        </select>
+      </div>
+    </section>
     <!-- Vue 1 : Favoris -->
     <section id="view-fav" data-view class="active" aria-labelledby="view-fav-title">
       <h2 id="view-fav-title" class="visually-hidden">Stations favorites</h2>
@@ -831,7 +896,7 @@
   </main>
 
   <footer>
-    <div>Source données : <a href="https://transport.data.gouv.fr/datasets/vlille-disponibilite-en-temps-reel-3" target="_blank" rel="noopener">GBFS Ilévia (V'Lille)</a>. Actualisation ~ 60 s. | Build publié le 13/03/2026 à 15:55 (Europe/Paris) - Version 2026-03-13-1555</div>
+    <div>Source données : <a href="https://transport.data.gouv.fr/datasets/vlille-disponibilite-en-temps-reel-3" target="_blank" rel="noopener">GBFS Ilévia (V'Lille)</a>. Actualisation ~ 60 s. | Build publié le 13/03/2026 à 16:07 (Europe/Paris) - Version 2026-03-13-1607</div>
   </footer>
 
   <nav class="bottom-bar" aria-label="Actions rapides">
@@ -887,8 +952,8 @@
     const GBFS_INDEX = 'https://media.ilevia.fr/opendata/gbfs.json';
     const GBFS_LANG = 'fr'; // fallback to first available if missing
 
-    const APP_VERSION = '2026.03.13.1555';
-    const BUILD_LABEL = '13/03/2026 15:55 (Europe/Paris)';
+    const APP_VERSION = '2026.03.13.1607';
+    const BUILD_LABEL = '13/03/2026 16:07 (Europe/Paris)';
 
     const LS_KEYS = {
       fav: 'vlille_favorites',
@@ -1056,14 +1121,43 @@
       return arr;
     }
     function setFilter(mode){
-      state.filter = mode; storage.setItem(LS_KEYS.filter, mode);
-      // Update segment aria-selected
-      const map = { all: '#fltAll', bikes: '#fltBikes', docks: '#fltDocks' };
-      for (const k of Object.keys(map)){
-        const btn = el(map[k]); if (!btn) continue;
-        btn.setAttribute('aria-selected', String(k === mode));
+      const allowed = new Set(['all', 'bikes', 'docks']);
+      const resolved = allowed.has(mode) ? mode : 'all';
+      state.filter = resolved;
+      storage.setItem(LS_KEYS.filter, resolved);
+      const filterSelect = el('#filterSelect');
+      if (filterSelect && filterSelect.value !== resolved) filterSelect.value = resolved;
+      render();
+    }
+    function currentSortMode(){
+      return state.sortAuto ? 'auto' : (state.sort || 'name');
+    }
+    function setSortMode(mode, options = {}){
+      const allowed = new Set(['auto', 'bikes', 'docks', 'distance', 'name']);
+      const resolved = allowed.has(mode) ? mode : 'auto';
+      const shouldRequestLocation = options.requestLocation !== false;
+      if (resolved === 'auto') {
+        state.sortAuto = true;
+        if (!state.sort) state.sort = 'bikes';
+      } else {
+        state.sortAuto = false;
+        state.sort = resolved;
+      }
+      saveSort();
+      saveSortAuto();
+      const sortSelect = el('#sortSelect');
+      if (sortSelect && sortSelect.value !== resolved) sortSelect.value = resolved;
+      if (resolved === 'distance' && !state.userLoc && shouldRequestLocation) {
+        window.requestVLilleLocation?.();
       }
       render();
+    }
+    function sortLabel(mode){
+      if (mode === 'auto') return 'Auto';
+      if (mode === 'bikes') return 'Vélos dispo';
+      if (mode === 'docks') return 'Places libres';
+      if (mode === 'distance') return 'Distance';
+      return 'Nom A-Z';
     }
 
     function toRad(d){ return d * Math.PI / 180; }
@@ -1109,8 +1203,9 @@
     }
 
     function sortStations(arr){
-      const auto = state.sortAuto && state.userLoc;
-      const mode = auto ? 'distance' : state.sort;
+      const mode = state.sortAuto
+        ? (state.userLoc ? 'distance' : (state.sort || 'bikes'))
+        : (state.sort || 'name');
       if (mode === 'bikes') return [...arr].sort((a,b)=> b.bikes - a.bikes || a.name.localeCompare(b.name,'fr'));
       if (mode === 'docks') return [...arr].sort((a,b)=> b.docks - a.docks || a.name.localeCompare(b.name,'fr'));
       if (mode === 'distance' && state.userLoc) return [...arr].sort((a,b)=> haversine(state.userLoc, {lat:a.lat,lon:a.lon}) - haversine(state.userLoc, {lat:b.lat,lon:b.lon}));
@@ -1145,6 +1240,7 @@
       const headerHeight = (mainNav ? mainNav.offsetHeight : 0) + (subNav ? subNav.offsetHeight : 0);
       if (headerHeight > 0) document.documentElement.style.setProperty('--header-h', headerHeight + 'px');
       if (filters) document.documentElement.style.setProperty('--filters-h', filters.offsetHeight + 'px');
+      else document.documentElement.style.setProperty('--filters-h', '0px');
     }
 
     // Haptique léger (mobile)
@@ -1324,11 +1420,20 @@
       const searchInput = el('#search');
       const subSearch = el('#subSearch');
       const clearSearch = el('#clearSearch');
+      const filterSelect = el('#filterSelect');
+      const sortSelect = el('#sortSelect');
       const browseMeta = el('#browseMeta');
       const favHint = el('#favHint');
       const rawQuery = searchInput?.value.trim() || '';
       if (subSearch && subSearch.value !== searchInput.value) subSearch.value = searchInput.value;
       if (clearSearch) clearSearch.hidden = rawQuery.length === 0;
+      if (filterSelect && filterSelect.value !== state.filter) filterSelect.value = state.filter;
+      if (sortSelect) {
+        const currentSort = currentSortMode();
+        if (sortSelect.value !== currentSort) sortSelect.value = currentSort;
+        const distanceOption = sortSelect.querySelector('option[value="distance"]');
+        if (distanceOption) distanceOption.textContent = state.userLoc ? 'Distance' : 'Distance (activer position)';
+      }
 
       // Vue Favoris
       const favContainer = el('#favList');
@@ -1372,9 +1477,13 @@
       allContainer.innerHTML = '';
       visible.forEach(s => allContainer.appendChild(stationCard(s)));
       if (browseMeta) {
+        const filterLabelMap = { all: 'Toutes', bikes: 'Avec vélos', docks: 'Avec places' };
+        const activeSort = currentSortMode();
         const parts = [
           `${visible.length} station${visible.length > 1 ? 's' : ''} affichée${visible.length > 1 ? 's' : ''}`,
-          `${state.favorites.size} favori${state.favorites.size > 1 ? 's' : ''}`
+          `${state.favorites.size} favori${state.favorites.size > 1 ? 's' : ''}`,
+          `Filtre : ${filterLabelMap[state.filter] || 'Toutes'}`,
+          `Tri : ${sortLabel(activeSort)}`
         ];
         if (rawQuery) parts.unshift(`Recherche : ${rawQuery}`);
         browseMeta.textContent = parts.join(' · ');
@@ -1600,11 +1709,23 @@
       window.addEventListener('resize', updateHeaderHeight);
       updateStorageNotice();
 
-      // Init filters segment
+      // Init controls (filter + tri)
+      const filterSelect = el('#filterSelect');
+      const sortSelect = el('#sortSelect');
       setFilter(state.filter);
-      el('#fltAll').addEventListener('click',   ()=> { if (typeof haptic==='function') haptic(); setFilter('all'); });
-      el('#fltBikes').addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); setFilter('bikes'); });
-      el('#fltDocks').addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); setFilter('docks'); });
+      setSortMode(currentSortMode(), { requestLocation: false });
+      if (filterSelect) {
+        filterSelect.addEventListener('change', ()=>{
+          if (typeof haptic==='function') haptic();
+          setFilter(filterSelect.value);
+        });
+      }
+      if (sortSelect) {
+        sortSelect.addEventListener('change', ()=>{
+          if (typeof haptic==='function') haptic();
+          setSortMode(sortSelect.value);
+        });
+      }
 
       // Recherche + suggestions
       const searchInput = el('#search');
