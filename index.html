@@ -221,6 +221,281 @@
       .tl-navbar .nav-link.active { font-weight:700; text-decoration: underline 2px; text-underline-offset:4px; }
       .navbar-toggler { border: 1px solid rgba(13,110,253,.35); border-radius:.6rem; padding:.35rem .6rem; }
       html[data-theme="dark"] .navbar-toggler { border-color: rgba(255,255,255,.5); }
+
+      .home-quick {
+        padding: 1rem 0 0;
+      }
+      .quick-shell {
+        position: relative;
+        overflow: hidden;
+        border-radius: 1.6rem;
+        padding: 1rem;
+        background:
+          radial-gradient(circle at top right, rgba(33,194,253,.18), transparent 34%),
+          linear-gradient(145deg, rgba(255,255,255,.88), rgba(255,255,255,.72));
+        border: 1px solid rgba(13,110,253,.14);
+        box-shadow: 0 18px 42px rgba(13,110,253,.10);
+        backdrop-filter: blur(12px);
+      }
+      .quick-shell::before {
+        content:"";
+        position:absolute;
+        inset:auto auto -42px -42px;
+        width:180px;
+        height:180px;
+        border-radius:50%;
+        background: radial-gradient(circle, rgba(13,110,253,.14), transparent 68%);
+        pointer-events:none;
+      }
+      .quick-head {
+        position: relative;
+        z-index: 1;
+        display:flex;
+        flex-wrap:wrap;
+        align-items:flex-end;
+        justify-content:space-between;
+        gap:1rem;
+        margin-bottom: 1rem;
+      }
+      .quick-eyebrow {
+        margin:0 0 .35rem;
+        text-transform:uppercase;
+        letter-spacing:.16em;
+        font-size:.72rem;
+        font-weight:700;
+        color:#0d6efd;
+      }
+      .quick-title {
+        margin:0;
+        font-size: clamp(1.4rem, 2.4vw, 2rem);
+        line-height: 1.05;
+        color:#12325f;
+      }
+      .quick-copy {
+        margin:.4rem 0 0;
+        max-width: 52ch;
+        color:#425466;
+      }
+      .quick-actions {
+        display:flex;
+        flex-wrap:wrap;
+        gap:.75rem;
+      }
+      .btn-quick-secondary {
+        appearance:none;
+        border:1px solid rgba(13,110,253,.18);
+        padding:.72rem 1rem;
+        border-radius: 999px;
+        background: rgba(255,255,255,.7);
+        color:#0d4db8;
+        font: inherit;
+        font-weight:700;
+        cursor: pointer;
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        box-shadow: 0 10px 24px rgba(13,110,253,.08);
+        text-decoration:none;
+      }
+      .btn-quick-secondary:hover,
+      .btn-quick-secondary:focus-visible {
+        background:#fff;
+        color:#083d93;
+      }
+      .quick-grid {
+        position: relative;
+        z-index: 1;
+        display:grid;
+        gap:1rem;
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr);
+      }
+      .quick-panel {
+        min-width: 0;
+        border-radius: 1.25rem;
+        padding: 1rem;
+        background: rgba(255,255,255,.74);
+        border: 1px solid rgba(13,110,253,.10);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.5);
+      }
+      .panel-head {
+        display:flex;
+        flex-wrap:wrap;
+        align-items:center;
+        justify-content:space-between;
+        gap:.5rem 1rem;
+        margin-bottom:.85rem;
+      }
+      .panel-head h3 {
+        margin:0;
+        font-size:1rem;
+        color:#12325f;
+      }
+      .panel-link {
+        font-weight:700;
+        text-decoration:none;
+      }
+      .panel-meta,
+      .quick-note {
+        color:#5f6f82;
+        font-size:.92rem;
+      }
+      .quick-note {
+        margin: 0 0 1rem;
+      }
+      .actions-row {
+        display:flex;
+        flex-wrap:wrap;
+        align-items:center;
+        gap:.75rem;
+        margin-bottom:.85rem;
+      }
+      .station-stack {
+        display:grid;
+        gap:.75rem;
+      }
+      .station-mini {
+        border-radius: 1rem;
+        padding: .9rem;
+        background: linear-gradient(160deg, rgba(255,255,255,.95), rgba(235,244,255,.88));
+        border: 1px solid rgba(13,110,253,.10);
+        box-shadow: 0 10px 22px rgba(13,110,253,.07);
+      }
+      .station-mini-head {
+        display:flex;
+        align-items:flex-start;
+        justify-content:space-between;
+        gap:.75rem;
+        margin-bottom:.55rem;
+      }
+      .station-mini-title {
+        margin:0;
+        font-size:1rem;
+        color:#12325f;
+      }
+      .station-mini-subtitle {
+        margin:.2rem 0 0;
+        color:#5f6f82;
+        font-size:.88rem;
+      }
+      .station-mini-link {
+        flex: 0 0 auto;
+        font-size:.88rem;
+        font-weight:700;
+        text-decoration:none;
+      }
+      .station-mini-stats {
+        display:flex;
+        flex-wrap:wrap;
+        gap:.5rem;
+      }
+      .mini-chip {
+        display:inline-flex;
+        align-items:center;
+        gap:.35rem;
+        padding:.42rem .62rem;
+        border-radius:999px;
+        font-size:.86rem;
+        font-weight:700;
+        border:1px solid rgba(13,110,253,.08);
+        background: rgba(255,255,255,.72);
+        color:#173a6a;
+      }
+      .mini-chip.is-ok {
+        color:#0f7a36;
+        border-color: rgba(22,163,74,.20);
+      }
+      .mini-chip.is-warn {
+        color:#a16207;
+        border-color: rgba(245,158,11,.28);
+      }
+      .mini-chip.is-bad {
+        color:#b42318;
+        border-color: rgba(239,68,68,.25);
+      }
+      .station-mini-updated {
+        margin-top:.55rem;
+        font-size:.82rem;
+        color:#6c7b8a;
+      }
+      .quick-empty {
+        margin:0;
+        padding:.95rem 1rem;
+        border-radius: 1rem;
+        background: rgba(255,255,255,.65);
+        border: 1px dashed rgba(13,110,253,.18);
+        color:#4f6278;
+      }
+      @media (max-width: 991.98px) {
+        .quick-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (max-width: 575.98px) {
+        .home-quick {
+          padding-top: .75rem;
+        }
+        .quick-shell {
+          padding: .9rem;
+          border-radius: 1.3rem;
+        }
+        .quick-actions,
+        .actions-row {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .btn-quick-secondary,
+        .quick-actions .btn-comp {
+          width: 100%;
+          text-align: center;
+          justify-content: center;
+        }
+        .station-mini-head {
+          flex-direction: column;
+        }
+      }
+      html[data-theme="dark"] .quick-shell {
+        background:
+          radial-gradient(circle at top right, rgba(122,162,255,.18), transparent 34%),
+          linear-gradient(145deg, rgba(20,24,30,.92), rgba(17,19,23,.88));
+        border-color: rgba(122,162,255,.16);
+        box-shadow: 0 18px 42px rgba(0,0,0,.35);
+      }
+      html[data-theme="dark"] .quick-title,
+      html[data-theme="dark"] .panel-head h3,
+      html[data-theme="dark"] .station-mini-title {
+        color:#edf4ff;
+      }
+      html[data-theme="dark"] .quick-copy,
+      html[data-theme="dark"] .panel-meta,
+      html[data-theme="dark"] .quick-note,
+      html[data-theme="dark"] .station-mini-subtitle,
+      html[data-theme="dark"] .station-mini-updated,
+      html[data-theme="dark"] .quick-empty {
+        color:#b9c6d8;
+      }
+      html[data-theme="dark"] .quick-panel,
+      html[data-theme="dark"] .station-mini,
+      html[data-theme="dark"] .quick-empty {
+        background: rgba(24,29,36,.78);
+        border-color: rgba(122,162,255,.12);
+        box-shadow: none;
+      }
+      html[data-theme="dark"] .btn-quick-secondary {
+        background: rgba(18,22,28,.92);
+        color:#dce8ff;
+        border-color: rgba(122,162,255,.18);
+        box-shadow: none;
+      }
+      html[data-theme="dark"] .btn-quick-secondary:hover,
+      html[data-theme="dark"] .btn-quick-secondary:focus-visible {
+        background: rgba(31,38,47,.98);
+        color:#fff;
+      }
+      html[data-theme="dark"] .mini-chip {
+        background: rgba(11,15,20,.82);
+        color:#dde8fb;
+        border-color: rgba(122,162,255,.10);
+      }
     </style>
     <link href="assets/tempo-ux.css" rel="stylesheet">
   </head>
@@ -245,6 +520,45 @@
     <script>
       if (window.TempoCommon) window.TempoCommon.bindSystemTheme('data-theme');
     </script>
+    <section class="home-quick" aria-labelledby="homeQuickTitle">
+      <div class="container">
+        <div class="quick-shell">
+          <div class="quick-head">
+            <div>
+              <p class="quick-eyebrow">Accès express</p>
+              <h2 id="homeQuickTitle" class="quick-title">V'Lille</h2>
+            </div>
+            <div class="quick-actions">
+              <a href="ViteVlille.html" class="btn btn-comp">Ouvrir V’Lille 🚲</a>
+              <button id="homeLocateBtn" type="button" class="btn-quick-secondary">Autour de moi 📍</button>
+            </div>
+          </div>
+          <p id="homeStorageNotice" class="quick-note" hidden></p>
+          <div class="quick-grid">
+            <section class="quick-panel" aria-labelledby="homeFavoritesTitle">
+              <div class="panel-head">
+                <h3 id="homeFavoritesTitle">Mes favoris V’Lille</h3>
+                <a href="ViteVlille.html" class="panel-link">Gérer</a>
+              </div>
+              <p id="homeFavoritesStatus" class="quick-note">Chargement des stations…</p>
+              <div id="homeFavoritesList" class="station-stack"></div>
+            </section>
+            <section class="quick-panel" aria-labelledby="homeNearbyTitle">
+              <div class="panel-head">
+                <h3 id="homeNearbyTitle">Autour de moi</h3>
+                <span id="homeNearbyMeta" class="panel-meta">Position non utilisée</span>
+              </div>
+              <div class="actions-row">
+                <button id="homeLocateSecondary" type="button" class="btn-quick-secondary">Utiliser ma position</button>
+                <a href="ViteVlille.html" class="panel-link">Voir toute la page V’Lille</a>
+              </div>
+              <p id="homeNearbyStatus" class="quick-empty">Choisis “Autour de moi” pour afficher les stations les plus proches.</p>
+              <div id="homeNearbyList" class="station-stack"></div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
     <header>
       <h1><i class="bi bi-buildings"></i> Tempo Lille</h1>
       <p>Portail personnel d’apps urbaines & petit fablab numérique autour de Lille 🚀</p>
@@ -286,12 +600,354 @@
         </div>
       </div>
     </main>
-    <footer>
-      Tempo Lille - Build publie le 17/02/2026 a 18:37 (Europe/Paris) - Version 2026-02-17-1837
-    </footer>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <script>
-      if (window.TempoCommon) window.TempoCommon.bindMobileNavCollapse();
-    </script>
+	    <footer>
+	      Tempo Lille - Build publie le 13/03/2026 a 15:03 (Europe/Paris) - Version 2026-03-13-1503
+	    </footer>
+	    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+	    <script>
+	      if (window.TempoCommon) window.TempoCommon.bindMobileNavCollapse();
+	    </script>
+      <script>
+        (function(){
+          const GBFS_INDEX = 'https://media.ilevia.fr/opendata/gbfs.json';
+          const GBFS_LANG = 'fr';
+          const LS_KEYS = { fav: 'vlille_favorites' };
+
+          const ui = {
+            storageNotice: document.getElementById('homeStorageNotice'),
+            favoritesStatus: document.getElementById('homeFavoritesStatus'),
+            favoritesList: document.getElementById('homeFavoritesList'),
+            nearbyMeta: document.getElementById('homeNearbyMeta'),
+            nearbyStatus: document.getElementById('homeNearbyStatus'),
+            nearbyList: document.getElementById('homeNearbyList'),
+            locateButtons: [
+              document.getElementById('homeLocateBtn'),
+              document.getElementById('homeLocateSecondary')
+            ].filter(Boolean)
+          };
+
+          function createStorageAdapter(){
+            const memory = new Map();
+            const cookieApi = {
+              getItem(key){
+                const encodedKey = `${encodeURIComponent(key)}=`;
+                const hit = document.cookie.split('; ').find(part => part.startsWith(encodedKey));
+                return hit ? decodeURIComponent(hit.slice(encodedKey.length)) : null;
+              },
+              setItem(key, value){
+                document.cookie = `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
+              },
+              removeItem(key){
+                document.cookie = `${encodeURIComponent(key)}=; path=/; max-age=0; SameSite=Lax`;
+              }
+            };
+            const memoryApi = {
+              getItem: (key) => memory.has(key) ? memory.get(key) : null,
+              setItem: (key, value) => { memory.set(key, String(value)); },
+              removeItem: (key) => { memory.delete(key); }
+            };
+
+            try {
+              const probe = '__tempo_home_probe__';
+              localStorage.setItem(probe, '1');
+              localStorage.removeItem(probe);
+              return {
+                backend: 'localStorage',
+                getItem: (key) => localStorage.getItem(key),
+                setItem: (key, value) => localStorage.setItem(key, String(value)),
+                removeItem: (key) => localStorage.removeItem(key)
+              };
+            } catch {}
+
+            try {
+              cookieApi.setItem('__tempo_home_probe__', '1');
+              if (cookieApi.getItem('__tempo_home_probe__') === '1') {
+                cookieApi.removeItem('__tempo_home_probe__');
+                return {
+                  backend: 'cookie',
+                  getItem: cookieApi.getItem,
+                  setItem: cookieApi.setItem,
+                  removeItem: cookieApi.removeItem
+                };
+              }
+            } catch {}
+
+            return {
+              backend: 'memory',
+              getItem: memoryApi.getItem,
+              setItem: memoryApi.setItem,
+              removeItem: memoryApi.removeItem
+            };
+          }
+
+          const storage = createStorageAdapter();
+          const state = {
+            favorites: new Set(readJSON(LS_KEYS.fav, [])),
+            stations: [],
+            userLoc: null,
+            fetchError: false
+          };
+
+          function readJSON(key, fallback){
+            const value = storage.getItem(key);
+            if (!value) return fallback;
+            try { return JSON.parse(value); } catch { return fallback; }
+          }
+
+          function storageLabel(){
+            if (storage.backend === 'localStorage') return 'stockage local';
+            if (storage.backend === 'cookie') return 'stockage de secours';
+            return 'memoire temporaire';
+          }
+
+          function updateStorageNotice(){
+            if (!ui.storageNotice) return;
+            if (storage.backend === 'localStorage') {
+              ui.storageNotice.hidden = true;
+              return;
+            }
+            ui.storageNotice.hidden = false;
+            ui.storageNotice.textContent = storage.backend === 'cookie'
+              ? 'Les favoris V’Lille sont lus depuis le stockage de secours de cet appareil.'
+              : 'Le navigateur limite ici la sauvegarde persistante. Les favoris ne pourront pas remonter entre les pages.';
+          }
+
+          function fmtTime(iso){
+            try {
+              return new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
+            } catch {
+              return '—';
+            }
+          }
+
+          function haversine(a, b){
+            if (!a || !b) return Infinity;
+            const toRad = (d) => d * Math.PI / 180;
+            const R = 6371;
+            const dLat = toRad((b.lat || 0) - (a.lat || 0));
+            const dLon = toRad((b.lon || 0) - (a.lon || 0));
+            const la1 = toRad(a.lat || 0);
+            const la2 = toRad(b.lat || 0);
+            const x = Math.sin(dLat / 2) ** 2 + Math.cos(la1) * Math.cos(la2) * Math.sin(dLon / 2) ** 2;
+            return 2 * R * Math.asin(Math.min(1, Math.sqrt(x)));
+          }
+
+          function formatDistance(km){
+            if (!Number.isFinite(km)) return '';
+            if (km < 1) return `${Math.max(50, Math.round(km * 1000))} m`;
+            return `${km < 10 ? km.toFixed(1) : Math.round(km)} km`;
+          }
+
+          function chipTone(value){
+            if (value >= 5) return 'is-ok';
+            if (value >= 1) return 'is-warn';
+            return 'is-bad';
+          }
+
+          function stationUrl(station){
+            return 'ViteVlille.html';
+          }
+
+          function createStationCard(station, options = {}){
+            const card = document.createElement('article');
+            card.className = 'station-mini';
+
+            const head = document.createElement('div');
+            head.className = 'station-mini-head';
+
+            const text = document.createElement('div');
+            const title = document.createElement('h4');
+            title.className = 'station-mini-title';
+            title.textContent = station.name;
+            text.appendChild(title);
+
+            const subtitle = document.createElement('p');
+            subtitle.className = 'station-mini-subtitle';
+            const subtitleParts = [];
+            if (options.distanceKm != null) subtitleParts.push(`${formatDistance(options.distanceKm)} environ`);
+            if (station.address) subtitleParts.push(station.address);
+            subtitle.textContent = subtitleParts.join(' · ') || 'Disponibilité mise à jour en temps réel';
+            text.appendChild(subtitle);
+            head.appendChild(text);
+
+            const link = document.createElement('a');
+            link.className = 'station-mini-link';
+            link.href = stationUrl(station);
+            link.textContent = 'Ouvrir';
+            head.appendChild(link);
+            card.appendChild(head);
+
+            const stats = document.createElement('div');
+            stats.className = 'station-mini-stats';
+            const bikes = document.createElement('span');
+            bikes.className = `mini-chip ${chipTone(station.bikes)}`;
+            bikes.textContent = `🚲 ${station.bikes} vélos`;
+            const docks = document.createElement('span');
+            docks.className = `mini-chip ${chipTone(station.docks)}`;
+            docks.textContent = `🅿️ ${station.docks} places`;
+            stats.append(bikes, docks);
+            card.appendChild(stats);
+
+            const updated = document.createElement('div');
+            updated.className = 'station-mini-updated';
+            updated.textContent = `Mis à jour à ${fmtTime(station.updatedAt)}`;
+            card.appendChild(updated);
+
+            return card;
+          }
+
+          function renderFavorites(){
+            ui.favoritesList.textContent = '';
+            if (state.favorites.size === 0) {
+              ui.favoritesStatus.hidden = false;
+              ui.favoritesStatus.innerHTML = `Aucun favori V’Lille enregistré. <a href="ViteVlille.html">Ajoute-en depuis la page dédiée</a>.`;
+              return;
+            }
+            if (state.fetchError) {
+              ui.favoritesStatus.hidden = false;
+              ui.favoritesStatus.innerHTML = `Impossible de charger les disponibilités V’Lille pour l’instant. <a href="ViteVlille.html">Ouvrir la page dédiée</a>.`;
+              return;
+            }
+            if (state.stations.length === 0) {
+              ui.favoritesStatus.hidden = false;
+              ui.favoritesStatus.textContent = 'Chargement des disponibilités V’Lille…';
+              return;
+            }
+
+            const favorites = state.stations.filter((station) => state.favorites.has(station.id));
+            if (favorites.length === 0) {
+              ui.favoritesStatus.hidden = false;
+              ui.favoritesStatus.innerHTML = `Tes favoris sont enregistrés, mais ces stations n’ont pas encore été retrouvées dans le flux. <a href="ViteVlille.html">Ouvrir V’Lille</a>.`;
+              return;
+            }
+
+            ui.favoritesStatus.hidden = true;
+            favorites
+              .sort((a, b) => a.name.localeCompare(b.name, 'fr'))
+              .slice(0, 4)
+              .forEach((station) => ui.favoritesList.appendChild(createStationCard(station)));
+          }
+
+          function renderNearby(){
+            ui.nearbyList.textContent = '';
+            if (!state.userLoc) {
+              ui.nearbyMeta.textContent = 'Position non utilisée';
+              ui.nearbyStatus.hidden = false;
+              ui.nearbyStatus.textContent = 'Choisis “Autour de moi” pour afficher les stations les plus proches.';
+              return;
+            }
+            if (state.fetchError) {
+              ui.nearbyMeta.textContent = 'Disponibilités indisponibles';
+              ui.nearbyStatus.hidden = false;
+              ui.nearbyStatus.textContent = 'Impossible de récupérer les stations proches pour le moment.';
+              return;
+            }
+            if (state.stations.length === 0) {
+              ui.nearbyMeta.textContent = 'Position récupérée';
+              ui.nearbyStatus.hidden = false;
+              ui.nearbyStatus.textContent = 'Recherche des stations autour de toi…';
+              return;
+            }
+
+            const nearest = state.stations
+              .filter((station) => Number.isFinite(station.lat) && Number.isFinite(station.lon))
+              .map((station) => ({ station, distanceKm: haversine(state.userLoc, { lat: station.lat, lon: station.lon }) }))
+              .sort((a, b) => a.distanceKm - b.distanceKm)
+              .slice(0, 3);
+
+            if (nearest.length === 0) {
+              ui.nearbyMeta.textContent = 'Aucune station trouvée';
+              ui.nearbyStatus.hidden = false;
+              ui.nearbyStatus.textContent = 'Impossible de calculer les stations les plus proches pour le moment.';
+              return;
+            }
+
+            ui.nearbyMeta.textContent = `Les ${nearest.length} plus proches`;
+            ui.nearbyStatus.hidden = true;
+            nearest.forEach(({ station, distanceKm }) => {
+              ui.nearbyList.appendChild(createStationCard(station, { distanceKm }));
+            });
+          }
+
+          async function fetchVlilleStations(){
+            try {
+              state.fetchError = false;
+              const indexResponse = await fetch(GBFS_INDEX, { cache: 'no-store' });
+              const indexPayload = await indexResponse.json();
+              const feeds = (indexPayload.data?.[GBFS_LANG]?.feeds)
+                || indexPayload.data?.[Object.keys(indexPayload.data || {})[0]]?.feeds
+                || [];
+              const infoUrl = feeds.find((feed) => feed.name === 'station_information')?.url;
+              const statusUrl = feeds.find((feed) => feed.name === 'station_status')?.url;
+              if (!infoUrl || !statusUrl) throw new Error('Flux GBFS incomplets');
+
+              const [infoResponse, statusResponse] = await Promise.all([
+                fetch(infoUrl, { cache: 'no-store' }),
+                fetch(statusUrl, { cache: 'no-store' })
+              ]);
+              const [infoPayload, statusPayload] = await Promise.all([
+                infoResponse.json(),
+                statusResponse.json()
+              ]);
+
+              const infoById = new Map();
+              for (const station of (infoPayload.data?.stations || [])) {
+                infoById.set(String(station.station_id), station);
+              }
+
+              state.stations = (statusPayload.data?.stations || []).map((station) => {
+                const id = String(station.station_id);
+                const info = infoById.get(id) || {};
+                return {
+                  id,
+                  name: info.name || `Station ${id}`,
+                  bikes: Number(station.num_bikes_available ?? 0),
+                  docks: Number(station.num_docks_available ?? 0),
+                  updatedAt: statusPayload?.last_updated ? new Date(statusPayload.last_updated * 1000).toISOString() : new Date().toISOString(),
+                  lat: Number(info.lat),
+                  lon: Number(info.lon),
+                  address: String(info.address || info.adresse || info.street_address || '')
+                };
+              });
+            } catch (error) {
+              state.fetchError = true;
+              console.error('Accueil V’Lille', error);
+            } finally {
+              renderFavorites();
+              renderNearby();
+            }
+          }
+
+          function requestNearbyStations(){
+            if (!('geolocation' in navigator)) {
+              ui.nearbyMeta.textContent = 'Géolocalisation indisponible';
+              ui.nearbyStatus.hidden = false;
+              ui.nearbyStatus.textContent = 'La géolocalisation n’est pas disponible sur cet appareil.';
+              return;
+            }
+
+            ui.nearbyMeta.textContent = 'Localisation en cours…';
+            ui.nearbyStatus.hidden = false;
+            ui.nearbyStatus.textContent = 'Recherche de ta position…';
+            navigator.geolocation.getCurrentPosition((position) => {
+              state.userLoc = {
+                lat: position.coords.latitude,
+                lon: position.coords.longitude
+              };
+              renderNearby();
+            }, () => {
+              ui.nearbyMeta.textContent = 'Position refusée';
+              ui.nearbyStatus.hidden = false;
+              ui.nearbyStatus.textContent = 'Impossible de récupérer ta position. Tu peux ouvrir directement la page V’Lille.';
+            }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 });
+          }
+
+          updateStorageNotice();
+          renderFavorites();
+          renderNearby();
+          fetchVlilleStations();
+          ui.locateButtons.forEach((button) => button.addEventListener('click', requestNearbyStations));
+        })();
+      </script>
   </body>
 </html>

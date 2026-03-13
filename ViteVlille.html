@@ -108,7 +108,25 @@
     .nearby { margin-bottom: 1rem; }
     .nearby h2 { margin: 0 0 .5rem 0; font-size: 1rem; font-weight: 700; }
     .distance { margin-left: .35rem; font-size: .85rem; color: var(--muted); }
-    .search input { width: 100%; padding: .8rem 1rem; border-radius: .7rem; border: 1px solid var(--border); background: var(--card); color: var(--fg); font-size: 1rem; }
+    .search input { width: 100%; padding: .8rem 3rem .8rem 1rem; border-radius: .7rem; border: 1px solid var(--border); background: var(--card); color: var(--fg); font-size: 1rem; }
+    .search-clear {
+      position: absolute;
+      top: 50%;
+      right: .55rem;
+      transform: translateY(-50%);
+      min-width: 2rem;
+      min-height: 2rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: color-mix(in oklab, var(--card) 88%, white 12%);
+      color: var(--muted);
+      display: inline-grid;
+      place-items: center;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+    }
+    .search-clear[hidden] { display: none; }
+    .meta-row { margin-top: .5rem; color: var(--muted); font-size: .88rem; display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; }
 
     /* Cards list */
     .list { display: grid; grid-template-columns: 1fr; gap: .8rem; }
@@ -117,7 +135,21 @@
     .card { background: var(--card); border: 1px solid var(--border); border-radius: .9rem; padding: .9rem; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: .5rem; }
     .card-head { display:flex; align-items: center; gap:.6rem; }
     .station-name { font-weight: 700; line-height: 1.2; }
-    .star { margin-left: auto; font-size: 1.2rem; cursor: pointer; user-select: none; }
+    .star {
+      margin-left: auto;
+      min-width: 2.75rem;
+      min-height: 2.75rem;
+      border: 1px solid var(--border);
+      border-radius: .8rem;
+      background: color-mix(in oklab, var(--card) 88%, white 12%);
+      color: var(--fg);
+      display: inline-grid;
+      place-items: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+      user-select: none;
+      box-shadow: var(--shadow);
+    }
     .star[aria-pressed="true"] { filter: drop-shadow(0 0 6px color-mix(in oklab, var(--accent) 80%, transparent)); }
 
     .stats { display: flex; gap: .6rem; flex-wrap: wrap; }
@@ -144,7 +176,8 @@
     .bottom-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 12; display: none; background: var(--card); border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom); }
     .bottom-bar .wrap { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr 1fr; }
     .bottom-bar a, .bottom-bar button { appearance: none; border: none; background: transparent; color: var(--fg); padding: .6rem 0; font: inherit; cursor: pointer; }
-    .bottom-bar .item { display: flex; flex-direction: column; align-items: center; gap: .25rem; padding: .5rem 0; }
+    .bottom-bar .item { display: flex; flex-direction: column; align-items: center; gap: .25rem; padding: .5rem 0; border-radius: .9rem; }
+    .bottom-bar .item.is-active { color: var(--accent); background: color-mix(in oklab, var(--accent) 12%, var(--card) 88%); }
     .bottom-bar .icon { font-size: 1.1rem; line-height: 1; }
     .bottom-bar .label { font-size: .75rem; opacity: .8; }
 
@@ -188,6 +221,7 @@
     /* Subnav (local to V'Lille) */
     .tl-subnav { background: color-mix(in oklab, var(--bg) 96%, transparent); border-bottom: 1px solid var(--border); }
     .tl-subnav .form-control { max-width: 280px; }
+    .tl-subnav .btn.is-active { background: var(--accent); border-color: var(--accent); color: #fff; }
     /* Subnav inline title */
     .tl-subnav .brand-inline { font-weight: 800; color: var(--muted); display: flex; align-items: center; gap: .5rem; }
     .tl-subnav .brand-inline .bi { font-size: 1rem; }
@@ -250,6 +284,7 @@
       <h1 class="h5 mb-1">Trouver une station en quelques secondes</h1>
       <p class="mb-0 tempo-muted">Favoris, stations autour de vous et recherche instantanée sans rechargement.</p>
     </section>
+    <p id="storageNotice" class="updated mb-3" hidden></p>
     <!-- Vue 1 : Favoris -->
     <section id="view-fav" data-view class="active" aria-labelledby="view-fav-title">
       <h2 id="view-fav-title" class="visually-hidden">Stations favorites</h2>
@@ -261,6 +296,7 @@
       <div id="favEmpty" class="empty" hidden>
         Aucune station en favori pour l'instant. Ouvre la recherche (🔍) pour en ajouter ⭐.
       </div>
+      <div id="favHint" class="updated mt-2" hidden></div>
     </section>
 
     <!-- Vue 2 : Recherche / Ajout -->
@@ -269,15 +305,17 @@
       <div class="search">
         <div class="wrap">
           <input id="search" type="search" placeholder="Rechercher une station… (filtre en direct)" aria-label="Rechercher une station" autocomplete="off" />
+          <button id="clearSearch" type="button" class="search-clear" aria-label="Effacer la recherche" hidden>×</button>
           <ul id="suggestions" class="suggestions" role="listbox" hidden></ul>
         </div>
+        <div id="browseMeta" class="meta-row" hidden></div>
       </div>
       <div id="allList" class="list" role="list" aria-live="polite"></div>
     </section>
   </main>
 
   <footer>
-    <div>Source données : <a href="https://transport.data.gouv.fr/datasets/vlille-disponibilite-en-temps-reel-3" target="_blank" rel="noopener">GBFS Ilévia (V'Lille)</a>. Actualisation ~ 60 s. | Build publie le 17/02/2026 a 18:37 (Europe/Paris) - Version 2026-02-17-1837</div>
+    <div>Source données : <a href="https://transport.data.gouv.fr/datasets/vlille-disponibilite-en-temps-reel-3" target="_blank" rel="noopener">GBFS Ilévia (V'Lille)</a>. Actualisation ~ 60 s. | Build publie le 13/03/2026 a 14:46 (Europe/Paris) - Version 2026-03-13-1446</div>
   </footer>
 
   <nav class="bottom-bar" aria-label="Actions rapides">
@@ -318,7 +356,7 @@
       <p><a href="index.html">Retour au portail</a> · <a href="https://transport.data.gouv.fr/datasets/vlille-disponibilite-en-temps-reel-3" target="_blank" rel="noopener">Source GBFS</a></p>
       <h3>Version</h3>
       <p id="aboutVersion">—</p>
-      <p style="color:var(--muted)">Aucune donnée personnelle n’est collectée. Vos préférences (favoris) restent dans votre navigateur (<code>localStorage</code>).
+      <p style="color:var(--muted)">Aucune donnée personnelle n’est collectée. Vos préférences restent sur cet appareil avec un stockage de secours si nécessaire.
       </p>
     </div>
   </div>
@@ -328,21 +366,101 @@
     const GBFS_INDEX = 'https://media.ilevia.fr/opendata/gbfs.json';
     const GBFS_LANG = 'fr'; // fallback to first available if missing
 
-    const APP_VERSION = '2025.10.13.1';
+    const APP_VERSION = '2026.03.13.1446';
+    const BUILD_LABEL = '13/03/2026 14:46 (Europe/Paris)';
 
-    const LS_KEYS = { fav: 'vlille_favorites', filter: 'vlille_filter' };
+    const LS_KEYS = {
+      fav: 'vlille_favorites',
+      filter: 'vlille_filter',
+      sort: 'vlille_sort',
+      thr: 'vlille_thr',
+      sortAuto: 'vlille_sort_auto',
+      hist: 'vlille_hist'
+    };
+
+    function createStorageAdapter(){
+      const memory = new Map();
+      const cookieApi = {
+        name: 'cookie',
+        getItem(key){
+          const encodedKey = `${encodeURIComponent(key)}=`;
+          const hit = document.cookie.split('; ').find(part => part.startsWith(encodedKey));
+          return hit ? decodeURIComponent(hit.slice(encodedKey.length)) : null;
+        },
+        setItem(key, value){
+          document.cookie = `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
+        },
+        removeItem(key){
+          document.cookie = `${encodeURIComponent(key)}=; path=/; max-age=0; SameSite=Lax`;
+        }
+      };
+      const memoryApi = {
+        name: 'memory',
+        getItem: (key) => memory.has(key) ? memory.get(key) : null,
+        setItem: (key, value) => { memory.set(key, String(value)); },
+        removeItem: (key) => { memory.delete(key); }
+      };
+
+      try {
+        const probe = '__tempo_vlille_probe__';
+        localStorage.setItem(probe, '1');
+        localStorage.removeItem(probe);
+        return {
+          backend: 'localStorage',
+          getItem: (key) => localStorage.getItem(key),
+          setItem: (key, value) => localStorage.setItem(key, String(value)),
+          removeItem: (key) => localStorage.removeItem(key)
+        };
+      } catch {}
+
+      try {
+        cookieApi.setItem('__tempo_vlille_probe__', '1');
+        if (cookieApi.getItem('__tempo_vlille_probe__') === '1') {
+          cookieApi.removeItem('__tempo_vlille_probe__');
+          return {
+            backend: cookieApi.name,
+            getItem: cookieApi.getItem,
+            setItem: cookieApi.setItem,
+            removeItem: cookieApi.removeItem
+          };
+        }
+      } catch {}
+
+      return {
+        backend: memoryApi.name,
+        getItem: memoryApi.getItem,
+        setItem: memoryApi.setItem,
+        removeItem: memoryApi.removeItem
+      };
+    }
+
+    const storage = createStorageAdapter();
+
+    function readText(key, fallback = ''){
+      const value = storage.getItem(key);
+      return value == null ? fallback : value;
+    }
+
+    function readJSON(key, fallback){
+      const value = storage.getItem(key);
+      if (!value) return fallback;
+      try { return JSON.parse(value); } catch { return fallback; }
+    }
+
+    let volatileHistory = { ts: 0, data: {} };
 
     const state = {
       stations: /** @type {Array<Station>} */([]),
-      favorites: new Set(JSON.parse(localStorage.getItem(LS_KEYS.fav) || '[]')),
+      favorites: new Set(readJSON(LS_KEYS.fav, [])),
       timer: null,
       lastFetch: null,
       userLoc: null,
-      sort: localStorage.getItem('vlille_sort') || 'bikes',
-      thr: JSON.parse(localStorage.getItem('vlille_thr') || '{"empty":2,"full":2}'),
-      sortAuto: JSON.parse(localStorage.getItem('vlille_sort_auto') || 'true'),
+      sort: readText(LS_KEYS.sort, 'bikes'),
+      thr: readJSON(LS_KEYS.thr, { empty: 2, full: 2 }),
+      sortAuto: readJSON(LS_KEYS.sortAuto, true),
       trend: {},
-      filter: localStorage.getItem(LS_KEYS.filter) || 'all',
+      filter: readText(LS_KEYS.filter, 'all'),
+      storageBackend: storage.backend,
     };
 
     /** @typedef {{ id:string, name:string, bikes:number, docks:number, updatedAt:string, lat?:number, lon?:number, address?:string }} Station */
@@ -353,15 +471,49 @@
     const fmtTime = (iso) => {
       try { const d = new Date(iso); return new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' }).format(d); } catch { return '—'; }
     };
+    const normalizeSearch = (value) => String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
 
-    function saveFavorites(){ localStorage.setItem(LS_KEYS.fav, JSON.stringify([...state.favorites])); }
-    function saveSort(){ localStorage.setItem('vlille_sort', state.sort); }
-    function saveThr(){ localStorage.setItem('vlille_thr', JSON.stringify(state.thr)); }
-    function saveSortAuto(){ localStorage.setItem('vlille_sort_auto', JSON.stringify(state.sortAuto)); }
-    function loadHistory(){
-      try { return JSON.parse(localStorage.getItem('vlille_hist') || '{"ts":0,"data":{}}'); } catch { return { ts:0, data:{} }; }
+    function storageLabel(){
+      if (state.storageBackend === 'localStorage') return 'stockage local';
+      if (state.storageBackend === 'cookie') return 'stockage de secours';
+      return 'memoire temporaire';
     }
-    function saveHistory(snapshot){ localStorage.setItem('vlille_hist', JSON.stringify(snapshot)); }
+
+    function updateStorageNotice(){
+      const notice = el('#storageNotice');
+      if (!notice) return;
+      if (state.storageBackend === 'localStorage') {
+        notice.hidden = true;
+        notice.textContent = '';
+        return;
+      }
+      if (state.storageBackend === 'cookie') {
+        notice.hidden = false;
+        notice.textContent = 'Sauvegarde de secours active sur cet appareil. Les favoris restent enregistres, mais certaines donnees temporaires sont limitees.';
+        return;
+      }
+      notice.hidden = false;
+      notice.textContent = 'Le navigateur bloque la sauvegarde persistante ici. Les favoris resteront jusqu a la fermeture de l onglet seulement.';
+    }
+
+    function saveFavorites(){ storage.setItem(LS_KEYS.fav, JSON.stringify([...state.favorites])); updateStorageNotice(); }
+    function saveSort(){ storage.setItem(LS_KEYS.sort, state.sort); }
+    function saveThr(){ storage.setItem(LS_KEYS.thr, JSON.stringify(state.thr)); }
+    function saveSortAuto(){ storage.setItem(LS_KEYS.sortAuto, JSON.stringify(state.sortAuto)); }
+    function loadHistory(){
+      if (state.storageBackend !== 'localStorage') return volatileHistory;
+      try { return readJSON(LS_KEYS.hist, { ts: 0, data: {} }); } catch { return { ts:0, data:{} }; }
+    }
+    function saveHistory(snapshot){
+      if (state.storageBackend !== 'localStorage') {
+        volatileHistory = snapshot;
+        return;
+      }
+      storage.setItem(LS_KEYS.hist, JSON.stringify(snapshot));
+    }
 
     function qtyClass(n){
       if (n >= 5) return 'ok';
@@ -376,7 +528,7 @@
       return arr;
     }
     function setFilter(mode){
-      state.filter = mode; localStorage.setItem(LS_KEYS.filter, mode);
+      state.filter = mode; storage.setItem(LS_KEYS.filter, mode);
       // Update segment aria-selected
       const map = { all: '#fltAll', bikes: '#fltBikes', docks: '#fltDocks' };
       for (const k of Object.keys(map)){
@@ -457,10 +609,22 @@
       // Dernière maj (header)
       el('#lastUpdate').textContent = `⏱︎ Maj — ${state.lastFetch ? fmtTime(state.lastFetch) : '—'}`;
 
+      const searchInput = el('#search');
+      const subSearch = el('#subSearch');
+      const clearSearch = el('#clearSearch');
+      const browseMeta = el('#browseMeta');
+      const favHint = el('#favHint');
+      const rawQuery = searchInput?.value.trim() || '';
+      const query = normalizeSearch(rawQuery);
+      if (subSearch && subSearch.value !== searchInput.value) subSearch.value = searchInput.value;
+      if (clearSearch) clearSearch.hidden = rawQuery.length === 0;
+
       // Vue Favoris
       const favContainer = el('#favList');
       favContainer.innerHTML = '';
       const favs = state.stations.filter(s => state.favorites.has(s.id));
+      favHint.hidden = true;
+      favHint.textContent = '';
 
       // Nearby
       const nearWrap = el('#nearby');
@@ -486,22 +650,26 @@
         // Favoris : n'applique pas le filtre pour éviter l'effet "disparu" après ajout
         sortStations(favs).forEach(s => favContainer.appendChild(stationCard(s)));
         if (state.filter !== 'all') {
-          const hiddenCount = applyFilter(favs).length - favs.length; // negative value
-          if (hiddenCount !== 0) {
-            const note = document.createElement('div');
-            note.className = 'updated';
-            note.textContent = 'Astuce : le filtre n\'est pas appliqué aux favoris pour éviter de masquer vos stations.';
-            favContainer.parentElement.insertBefore(note, favContainer.nextSibling);
-          }
+          favHint.hidden = false;
+          favHint.textContent = 'Astuce : le filtre n est pas applique aux favoris pour eviter de masquer vos stations.';
         }
       }
 
       // Vue Parcourir (filtrée)
       const allContainer = el('#allList');
-      const q = el('#search').value.trim().toLowerCase();
-      const filtered = q ? state.stations.filter(s => s.name.toLowerCase().includes(q)) : state.stations;
+      const filtered = query ? state.stations.filter(s => normalizeSearch(s.name).includes(query)) : state.stations;
+      const visible = sortStations(applyFilter(filtered));
       allContainer.innerHTML = '';
-      sortStations(applyFilter(filtered)).forEach(s => allContainer.appendChild(stationCard(s)));
+      visible.forEach(s => allContainer.appendChild(stationCard(s)));
+      if (browseMeta) {
+        const parts = [
+          `${visible.length} station${visible.length > 1 ? 's' : ''} affichee${visible.length > 1 ? 's' : ''}`,
+          `${state.favorites.size} favori${state.favorites.size > 1 ? 's' : ''}`
+        ];
+        if (rawQuery) parts.unshift(`Recherche : ${rawQuery}`);
+        browseMeta.textContent = parts.join(' · ');
+        browseMeta.hidden = state.stations.length === 0;
+      }
       updateHeaderHeight();
       // No-op placeholder: sticky search already uses --header-h; filters are stacked visually.
     }
@@ -619,6 +787,9 @@
       const isFavView = which === 'fav';
       el('#view-fav').classList.toggle('active', isFavView);
       el('#view-browse').classList.toggle('active', !isFavView);
+      el('#mbHome')?.classList.toggle('is-active', isFavView);
+      el('#mbSearch')?.classList.toggle('is-active', !isFavView);
+      el('#subFav')?.classList.toggle('is-active', isFavView);
       if (!isFavView) el('#search').focus({ preventScroll: true });
       if (!isFavView) el('#search').select();
     }
@@ -691,6 +862,7 @@
       // Header layout helpers
       updateHeaderHeight();
       window.addEventListener('resize', updateHeaderHeight);
+      updateStorageNotice();
 
       // Init filters segment
       setFilter(state.filter);
@@ -699,15 +871,20 @@
       el('#fltDocks').addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); setFilter('docks'); });
 
       // Recherche + suggestions
-      el('#search').addEventListener('input', render);
+      const searchInput = el('#search');
+      const clearSearch = el('#clearSearch');
+      const subSearch = el('#subSearch');
       const sugg = el('#suggestions');
-      el('#search').addEventListener('input', ()=>{
-        const q = el('#search').value.trim().toLowerCase();
+      const onSearchInput = ()=>{
+        const raw = searchInput.value.trim();
+        const q = normalizeSearch(raw);
+        if (subSearch && subSearch.value !== searchInput.value) subSearch.value = searchInput.value;
+        if (clearSearch) clearSearch.hidden = raw.length === 0;
         if (!q) { sugg.hidden = true; sugg.textContent = ''; render(); return; }
         const names = state.stations
           .map(s => s.name)
           .filter((v,i,arr)=> arr.indexOf(v)===i)
-          .filter(n => n.toLowerCase().includes(q))
+          .filter(n => normalizeSearch(n).includes(q))
           .slice(0, 8);
         sugg.textContent = '';
         for (const n of names) {
@@ -717,18 +894,29 @@
           sugg.appendChild(li);
         }
         sugg.hidden = names.length === 0;
-      });
+        render();
+      };
+      searchInput.addEventListener('input', onSearchInput);
       el('#suggestions').addEventListener('mousedown', (e)=>{
         const li = e.target.closest('li');
         if (!li) return;
-        el('#search').value = li.textContent;
+        searchInput.value = li.textContent;
+        if (subSearch) subSearch.value = li.textContent;
         el('#suggestions').hidden = true;
         render();
       });
-      el('#search').addEventListener('blur', ()=> setTimeout(()=> el('#suggestions').hidden = true, 150));
-      el('#search').addEventListener('focus', ()=>{
-        const q = el('#search').value.trim();
-        if (q) el('#search').dispatchEvent(new Event('input'));
+      searchInput.addEventListener('blur', ()=> setTimeout(()=> el('#suggestions').hidden = true, 150));
+      searchInput.addEventListener('focus', ()=>{
+        const q = searchInput.value.trim();
+        if (q) searchInput.dispatchEvent(new Event('input'));
+      });
+      clearSearch?.addEventListener('click', ()=>{
+        searchInput.value = '';
+        if (subSearch) subSearch.value = '';
+        sugg.hidden = true;
+        sugg.textContent = '';
+        render();
+        searchInput.focus({ preventScroll: true });
       });
 
       // À propos (sheet) — robust lazy binding
@@ -738,7 +926,7 @@
         const aboutBackdrop = el('#aboutBackdrop');
         const aboutClose = el('#aboutClose');
         const ver = el('#aboutVersion');
-        if (ver) ver.textContent = `Version : ${APP_VERSION}`;
+        if (ver) ver.textContent = `Version : ${APP_VERSION} · Build : ${BUILD_LABEL} · Sauvegarde : ${storageLabel()}`;
         if (!aboutPanel || !aboutBackdrop) return;
         aboutPanel.hidden = false; aboutBackdrop.hidden = false;
         requestAnimationFrame(()=> aboutPanel.classList.add('open'));
@@ -778,6 +966,7 @@
       if (mbSearch) mbSearch.addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); setView('browse'); });
 
       // Premier rendu + données
+      setView('fav');
       render();
       fetchStations();
       startAutoRefresh();
