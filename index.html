@@ -301,6 +301,10 @@
       box-shadow: 0 14px 20px rgba(16, 152, 80, .22);
       width: 100%;
     }
+    .hero-actions {
+      display: grid;
+      gap: .55rem;
+    }
     .hero-locate-btn:active {
       transform: translateY(1px) scale(.995);
     }
@@ -469,7 +473,7 @@
     .map-toolbar {
       margin-top: .6rem;
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: 1fr;
       gap: .48rem;
     }
     .map-btn {
@@ -602,7 +606,18 @@
         min-height: 2.8rem;
       }
       .metrics-row {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: .45rem;
+      }
+      .metric {
+        min-height: 3rem;
+        padding: .42rem .5rem;
+      }
+      .metric-value {
+        font-size: .92rem;
+      }
+      .metric-label {
+        font-size: .68rem;
       }
     }
     html[data-theme="dark"] body.tempo-vlille {
@@ -765,7 +780,10 @@
         <span id="availabilityPill" class="availability-pill">Disponibilités</span>
       </div>
       <p class="mb-0 app-subtitle">Recherche rapide, favoris et disponibilités en direct.</p>
-      <button id="heroLocateBtn" type="button" class="hero-locate-btn">📍 V'Lille à proximité</button>
+      <div class="hero-actions">
+        <button id="heroLocateBtn" type="button" class="hero-locate-btn">📍 V'Lille à proximité</button>
+        <button id="heroMapLocateBtn" type="button" class="hero-locate-btn" hidden>📍 Me localiser</button>
+      </div>
     </section>
     <p id="storageNotice" class="updated mb-3" hidden></p>
     <!-- Vue 1 : Favoris -->
@@ -806,7 +824,6 @@
         <p id="mapStatus" class="map-status" role="status" aria-live="polite">Chargement de la carte…</p>
         <div id="mapCanvas" class="map-canvas" aria-label="Carte des stations V'Lille"></div>
         <div class="map-toolbar">
-          <button id="mapLocateBtn" type="button" class="map-btn primary">📍 Me localiser</button>
           <button id="mapFitBtn" type="button" class="map-btn">↔ Voir toute la carte</button>
         </div>
       </div>
@@ -814,7 +831,7 @@
   </main>
 
   <footer>
-    <div>Source données : <a href="https://transport.data.gouv.fr/datasets/vlille-disponibilite-en-temps-reel-3" target="_blank" rel="noopener">GBFS Ilévia (V'Lille)</a>. Actualisation ~ 60 s. | Build publié le 13/03/2026 à 15:48 (Europe/Paris) - Version 2026-03-13-1548</div>
+    <div>Source données : <a href="https://transport.data.gouv.fr/datasets/vlille-disponibilite-en-temps-reel-3" target="_blank" rel="noopener">GBFS Ilévia (V'Lille)</a>. Actualisation ~ 60 s. | Build publié le 13/03/2026 à 15:55 (Europe/Paris) - Version 2026-03-13-1555</div>
   </footer>
 
   <nav class="bottom-bar" aria-label="Actions rapides">
@@ -870,8 +887,8 @@
     const GBFS_INDEX = 'https://media.ilevia.fr/opendata/gbfs.json';
     const GBFS_LANG = 'fr'; // fallback to first available if missing
 
-    const APP_VERSION = '2026.03.13.1548';
-    const BUILD_LABEL = '13/03/2026 15:48 (Europe/Paris)';
+    const APP_VERSION = '2026.03.13.1555';
+    const BUILD_LABEL = '13/03/2026 15:55 (Europe/Paris)';
 
     const LS_KEYS = {
       fav: 'vlille_favorites',
@@ -1500,6 +1517,8 @@
       el('#mbMap')?.classList.toggle('is-active', isMapView);
       el('#subFav')?.classList.toggle('is-active', isFavView);
       el('#subMap')?.classList.toggle('is-active', isMapView);
+      const heroMapLocateBtn = el('#heroMapLocateBtn');
+      if (heroMapLocateBtn) heroMapLocateBtn.hidden = !isMapView;
       if (isBrowseView) {
         el('#search').focus({ preventScroll: true });
         el('#search').select();
@@ -1678,14 +1697,18 @@
       const mbSearch = el('#mbSearch');
       const mbHome   = el('#mbHome');
       const heroLocateBtn = el('#heroLocateBtn');
-      const mapLocateBtn = el('#mapLocateBtn');
+      const heroMapLocateBtn = el('#heroMapLocateBtn');
       const mapFitBtn = el('#mapFitBtn');
 
       if (mbHome)   mbHome.addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); setView('fav'); });
       if (mbMap)    mbMap.addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); setView('map'); });
       if (mbSearch) mbSearch.addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); setView('browse'); });
       if (heroLocateBtn) heroLocateBtn.addEventListener('click', ()=> { if (typeof haptic==='function') haptic(18); window.requestVLilleLocation?.(); });
-      if (mapLocateBtn) mapLocateBtn.addEventListener('click', ()=> { if (typeof haptic==='function') haptic(14); window.requestVLilleLocation?.(); });
+      if (heroMapLocateBtn) heroMapLocateBtn.addEventListener('click', ()=> {
+        if (typeof haptic==='function') haptic(14);
+        setView('map');
+        window.requestVLilleLocation?.();
+      });
       if (mapFitBtn) mapFitBtn.addEventListener('click', ()=> {
         if (typeof haptic === 'function') haptic();
         state.mapHasFit = false;
