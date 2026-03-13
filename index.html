@@ -615,11 +615,8 @@
       .tempo-vlille .tl-subnav {
         display: none;
       }
-      .tempo-vlille .filters {
-        top: var(--nav-main-h, 56px);
-      }
       .tempo-vlille .search {
-        top: calc(var(--nav-main-h, 56px) + var(--filters-h, 58px));
+        top: var(--nav-main-h, 56px);
       }
       .tempo-vlille main {
         padding-top: .7rem;
@@ -896,7 +893,7 @@
   </main>
 
   <footer>
-    <div>Source données : <a href="https://transport.data.gouv.fr/datasets/vlille-disponibilite-en-temps-reel-3" target="_blank" rel="noopener">GBFS Ilévia (V'Lille)</a>. Actualisation ~ 60 s. | Build publié le 13/03/2026 à 16:07 (Europe/Paris) - Version 2026-03-13-1607</div>
+    <div>Source données : <a href="https://transport.data.gouv.fr/datasets/vlille-disponibilite-en-temps-reel-3" target="_blank" rel="noopener">GBFS Ilévia (V'Lille)</a>. Actualisation ~ 60 s. | Build publié le 13/03/2026 à 16:18 (Europe/Paris) - Version 2026-03-13-1618</div>
   </footer>
 
   <nav class="bottom-bar" aria-label="Actions rapides">
@@ -952,8 +949,8 @@
     const GBFS_INDEX = 'https://media.ilevia.fr/opendata/gbfs.json';
     const GBFS_LANG = 'fr'; // fallback to first available if missing
 
-    const APP_VERSION = '2026.03.13.1607';
-    const BUILD_LABEL = '13/03/2026 16:07 (Europe/Paris)';
+    const APP_VERSION = '2026.03.13.1618';
+    const BUILD_LABEL = '13/03/2026 16:18 (Europe/Paris)';
 
     const LS_KEYS = {
       fav: 'vlille_favorites',
@@ -1120,14 +1117,15 @@
       if (state.filter === 'docks') return arr.filter(s => (s.docks||0) > 0);
       return arr;
     }
-    function setFilter(mode){
+    function setFilter(mode, options = {}){
       const allowed = new Set(['all', 'bikes', 'docks']);
       const resolved = allowed.has(mode) ? mode : 'all';
+      const shouldRender = options.render !== false;
       state.filter = resolved;
       storage.setItem(LS_KEYS.filter, resolved);
       const filterSelect = el('#filterSelect');
       if (filterSelect && filterSelect.value !== resolved) filterSelect.value = resolved;
-      render();
+      if (shouldRender) render();
     }
     function currentSortMode(){
       return state.sortAuto ? 'auto' : (state.sort || 'name');
@@ -1136,6 +1134,19 @@
       const allowed = new Set(['auto', 'bikes', 'docks', 'distance', 'name']);
       const resolved = allowed.has(mode) ? mode : 'auto';
       const shouldRequestLocation = options.requestLocation !== false;
+      const shouldRender = options.render !== false;
+      if (resolved === 'distance' && !state.userLoc) {
+        if (state.sort === 'distance') state.sort = 'bikes';
+        state.sortAuto = true;
+        saveSort();
+        saveSortAuto();
+        if (shouldRequestLocation) window.requestVLilleLocation?.();
+        const sortSelect = el('#sortSelect');
+        const fallbackMode = currentSortMode();
+        if (sortSelect && sortSelect.value !== fallbackMode) sortSelect.value = fallbackMode;
+        if (shouldRender) render();
+        return;
+      }
       if (resolved === 'auto') {
         state.sortAuto = true;
         if (!state.sort) state.sort = 'bikes';
@@ -1147,10 +1158,7 @@
       saveSortAuto();
       const sortSelect = el('#sortSelect');
       if (sortSelect && sortSelect.value !== resolved) sortSelect.value = resolved;
-      if (resolved === 'distance' && !state.userLoc && shouldRequestLocation) {
-        window.requestVLilleLocation?.();
-      }
-      render();
+      if (shouldRender) render();
     }
     function sortLabel(mode){
       if (mode === 'auto') return 'Auto';
@@ -1235,12 +1243,9 @@
     function updateHeaderHeight(){
       const mainNav = document.querySelector('.tl-navbar');
       const subNav = document.querySelector('.tl-subnav');
-      const filters = document.querySelector('#filters');
       if (mainNav) document.documentElement.style.setProperty('--nav-main-h', mainNav.offsetHeight + 'px');
       const headerHeight = (mainNav ? mainNav.offsetHeight : 0) + (subNav ? subNav.offsetHeight : 0);
       if (headerHeight > 0) document.documentElement.style.setProperty('--header-h', headerHeight + 'px');
-      if (filters) document.documentElement.style.setProperty('--filters-h', filters.offsetHeight + 'px');
-      else document.documentElement.style.setProperty('--filters-h', '0px');
     }
 
     // Haptique léger (mobile)
@@ -1712,8 +1717,8 @@
       // Init controls (filter + tri)
       const filterSelect = el('#filterSelect');
       const sortSelect = el('#sortSelect');
-      setFilter(state.filter);
-      setSortMode(currentSortMode(), { requestLocation: false });
+      setFilter(state.filter, { render: false });
+      setSortMode(currentSortMode(), { requestLocation: false, render: false });
       if (filterSelect) {
         filterSelect.addEventListener('change', ()=>{
           if (typeof haptic==='function') haptic();
