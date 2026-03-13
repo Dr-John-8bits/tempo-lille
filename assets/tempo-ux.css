@@ -349,17 +349,13 @@ html[data-theme="dark"] .tempo-vlille {
   border-radius: 999px;
 }
 
-.tempo-vlille .filters {
-  z-index: 8;
-}
-
 .tempo-vlille .pill {
   border: 1px solid var(--tempo-border);
   background: color-mix(in oklab, var(--tempo-surface-strong) 88%, transparent);
 }
 
 .tempo-vlille .search {
-  top: calc(var(--header-h, 56px) + var(--filters-h, 52px));
+  top: var(--header-h, 56px);
 }
 
 .tempo-vlille .search input {
