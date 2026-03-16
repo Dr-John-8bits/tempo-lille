@@ -318,7 +318,7 @@
     }
     .station-controls {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: 1fr;
       gap: .55rem;
       margin-bottom: .8rem;
     }
@@ -828,15 +828,7 @@
       </div>
     </section>
     <p id="storageNotice" class="updated mb-3" hidden></p>
-    <section id="stationControls" class="station-controls" aria-label="Filtres et tri des stations">
-      <div class="station-control">
-        <label for="filterSelect">Afficher</label>
-        <select id="filterSelect" class="station-select">
-          <option value="all">Toutes</option>
-          <option value="bikes">Avec vélos</option>
-          <option value="docks">Avec places</option>
-        </select>
-      </div>
+    <section id="stationControls" class="station-controls" aria-label="Tri des stations">
       <div class="station-control">
         <label for="sortSelect">Trier</label>
         <select id="sortSelect" class="station-select">
@@ -845,6 +837,8 @@
           <option value="docks">Places libres</option>
           <option value="distance">Distance</option>
           <option value="name">Nom A-Z</option>
+          <option value="bikesOnly">Afficher : avec vélos</option>
+          <option value="docksOnly">Afficher : avec places</option>
         </select>
       </div>
     </section>
@@ -893,7 +887,7 @@
   </main>
 
   <footer>
-    <div>Source données : <a href="https://transport.data.gouv.fr/datasets/vlille-disponibilite-en-temps-reel-3" target="_blank" rel="noopener">GBFS Ilévia (V'Lille)</a>. Actualisation ~ 60 s. | Build publié le 13/03/2026 à 16:18 (Europe/Paris) - Version 2026-03-13-1618</div>
+    <div>Source données : <a href="https://transport.data.gouv.fr/datasets/vlille-disponibilite-en-temps-reel-3" target="_blank" rel="noopener">GBFS Ilévia (V'Lille)</a>. Actualisation ~ 60 s. | Build publié le 16/03/2026 à 09:50 (Europe/Paris) - Version 2026-03-16-0950</div>
   </footer>
 
   <nav class="bottom-bar" aria-label="Actions rapides">
@@ -949,8 +943,8 @@
     const GBFS_INDEX = 'https://media.ilevia.fr/opendata/gbfs.json';
     const GBFS_LANG = 'fr'; // fallback to first available if missing
 
-    const APP_VERSION = '2026.03.13.1618';
-    const BUILD_LABEL = '13/03/2026 16:18 (Europe/Paris)';
+    const APP_VERSION = '2026.03.16.0950';
+    const BUILD_LABEL = '16/03/2026 09:50 (Europe/Paris)';
 
     const LS_KEYS = {
       fav: 'vlille_favorites',
@@ -1123,8 +1117,6 @@
       const shouldRender = options.render !== false;
       state.filter = resolved;
       storage.setItem(LS_KEYS.filter, resolved);
-      const filterSelect = el('#filterSelect');
-      if (filterSelect && filterSelect.value !== resolved) filterSelect.value = resolved;
       if (shouldRender) render();
     }
     function currentSortMode(){
@@ -1142,7 +1134,7 @@
         saveSortAuto();
         if (shouldRequestLocation) window.requestVLilleLocation?.();
         const sortSelect = el('#sortSelect');
-        const fallbackMode = currentSortMode();
+        const fallbackMode = currentDisplayMode();
         if (sortSelect && sortSelect.value !== fallbackMode) sortSelect.value = fallbackMode;
         if (shouldRender) render();
         return;
@@ -1157,7 +1149,8 @@
       saveSort();
       saveSortAuto();
       const sortSelect = el('#sortSelect');
-      if (sortSelect && sortSelect.value !== resolved) sortSelect.value = resolved;
+      const viewMode = currentDisplayMode();
+      if (sortSelect && sortSelect.value !== viewMode) sortSelect.value = viewMode;
       if (shouldRender) render();
     }
     function sortLabel(mode){
@@ -1166,6 +1159,36 @@
       if (mode === 'docks') return 'Places libres';
       if (mode === 'distance') return 'Distance';
       return 'Nom A-Z';
+    }
+    function currentDisplayMode(){
+      if (state.filter === 'bikes') return 'bikesOnly';
+      if (state.filter === 'docks') return 'docksOnly';
+      return currentSortMode();
+    }
+    function setDisplayMode(mode, options = {}){
+      const allowed = new Set(['auto', 'bikes', 'docks', 'distance', 'name', 'bikesOnly', 'docksOnly']);
+      const resolved = allowed.has(mode) ? mode : 'auto';
+      const shouldRender = options.render !== false;
+      const shouldRequestLocation = options.requestLocation !== false;
+      if (resolved === 'bikesOnly') {
+        setFilter('bikes', { render: false });
+        setSortMode('bikes', { requestLocation: false, render: false });
+      } else if (resolved === 'docksOnly') {
+        setFilter('docks', { render: false });
+        setSortMode('docks', { requestLocation: false, render: false });
+      } else {
+        setFilter('all', { render: false });
+        setSortMode(resolved, { requestLocation: shouldRequestLocation, render: false });
+      }
+      const sortSelect = el('#sortSelect');
+      const currentMode = currentDisplayMode();
+      if (sortSelect && sortSelect.value !== currentMode) sortSelect.value = currentMode;
+      if (shouldRender) render();
+    }
+    function displayModeLabel(mode){
+      if (mode === 'bikesOnly') return 'Afficher : avec vélos';
+      if (mode === 'docksOnly') return 'Afficher : avec places';
+      return `Trier : ${sortLabel(mode)}`;
     }
 
     function toRad(d){ return d * Math.PI / 180; }
@@ -1383,7 +1406,7 @@
 
       const queryPrefix = rawQuery ? `Recherche "${rawQuery}" · ` : '';
       if (mapStatus) {
-        if (!withGeo.length) mapStatus.textContent = `${queryPrefix}aucune station géolocalisée avec le filtre actuel.${state.userLoc ? ' Épingle rouge : vous.' : ''}`;
+        if (!withGeo.length) mapStatus.textContent = `${queryPrefix}aucune station géolocalisée avec le mode actuel.${state.userLoc ? ' Épingle rouge : vous.' : ''}`;
         else mapStatus.textContent = `${queryPrefix}${withGeo.length} station${withGeo.length > 1 ? 's' : ''} sur la carte.${state.userLoc ? ' Épingle rouge : vous.' : ' Appuyez sur "Me localiser".'}`;
       }
 
@@ -1425,17 +1448,15 @@
       const searchInput = el('#search');
       const subSearch = el('#subSearch');
       const clearSearch = el('#clearSearch');
-      const filterSelect = el('#filterSelect');
       const sortSelect = el('#sortSelect');
       const browseMeta = el('#browseMeta');
       const favHint = el('#favHint');
       const rawQuery = searchInput?.value.trim() || '';
       if (subSearch && subSearch.value !== searchInput.value) subSearch.value = searchInput.value;
       if (clearSearch) clearSearch.hidden = rawQuery.length === 0;
-      if (filterSelect && filterSelect.value !== state.filter) filterSelect.value = state.filter;
       if (sortSelect) {
-        const currentSort = currentSortMode();
-        if (sortSelect.value !== currentSort) sortSelect.value = currentSort;
+        const currentMode = currentDisplayMode();
+        if (sortSelect.value !== currentMode) sortSelect.value = currentMode;
         const distanceOption = sortSelect.querySelector('option[value="distance"]');
         if (distanceOption) distanceOption.textContent = state.userLoc ? 'Distance' : 'Distance (activer position)';
       }
@@ -1468,11 +1489,11 @@
         el('#favEmpty').hidden = false;
       } else {
         el('#favEmpty').hidden = true;
-        // Favoris : n'applique pas le filtre pour éviter l'effet "disparu" après ajout
+        // Favoris : n'applique pas le mode "afficher" pour éviter l'effet "disparu" après ajout
         sortStations(favs).forEach(s => favContainer.appendChild(stationCard(s)));
         if (state.filter !== 'all') {
           favHint.hidden = false;
-          favHint.textContent = 'Astuce : le filtre n\'est pas appliqué aux favoris pour éviter de masquer vos stations.';
+          favHint.textContent = 'Astuce : le mode "Afficher" ne s\'applique pas aux favoris pour éviter de masquer vos stations.';
         }
       }
 
@@ -1482,13 +1503,11 @@
       allContainer.innerHTML = '';
       visible.forEach(s => allContainer.appendChild(stationCard(s)));
       if (browseMeta) {
-        const filterLabelMap = { all: 'Toutes', bikes: 'Avec vélos', docks: 'Avec places' };
-        const activeSort = currentSortMode();
+        const activeMode = currentDisplayMode();
         const parts = [
           `${visible.length} station${visible.length > 1 ? 's' : ''} affichée${visible.length > 1 ? 's' : ''}`,
           `${state.favorites.size} favori${state.favorites.size > 1 ? 's' : ''}`,
-          `Filtre : ${filterLabelMap[state.filter] || 'Toutes'}`,
-          `Tri : ${sortLabel(activeSort)}`
+          `${displayModeLabel(activeMode)}`
         ];
         if (rawQuery) parts.unshift(`Recherche : ${rawQuery}`);
         browseMeta.textContent = parts.join(' · ');
@@ -1714,21 +1733,13 @@
       window.addEventListener('resize', updateHeaderHeight);
       updateStorageNotice();
 
-      // Init controls (filter + tri)
-      const filterSelect = el('#filterSelect');
+      // Init control (tri + affichage fusionnés)
       const sortSelect = el('#sortSelect');
-      setFilter(state.filter, { render: false });
-      setSortMode(currentSortMode(), { requestLocation: false, render: false });
-      if (filterSelect) {
-        filterSelect.addEventListener('change', ()=>{
-          if (typeof haptic==='function') haptic();
-          setFilter(filterSelect.value);
-        });
-      }
+      setDisplayMode(currentDisplayMode(), { requestLocation: false, render: false });
       if (sortSelect) {
         sortSelect.addEventListener('change', ()=>{
           if (typeof haptic==='function') haptic();
-          setSortMode(sortSelect.value);
+          setDisplayMode(sortSelect.value);
         });
       }
 
