@@ -497,6 +497,174 @@
       color: #4a6283;
       font-weight: 700;
     }
+    .map-address-search {
+      position: relative;
+      margin-bottom: .6rem;
+    }
+    .map-address-label {
+      display: inline-block;
+      margin: 0 0 .32rem;
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      font-weight: 800;
+      color: #506b90;
+    }
+    .map-address-wrap {
+      position: relative;
+    }
+    .map-address-input {
+      width: 100%;
+      min-height: 2.95rem;
+      padding: .72rem 2.8rem .72rem .85rem;
+      border-radius: .82rem;
+      border: 1px solid rgba(13, 110, 253, .22);
+      background: #fff;
+      color: #173760;
+      font-size: .92rem;
+      font-weight: 700;
+      box-shadow: 0 3px 10px rgba(15, 42, 74, .08);
+    }
+    .map-address-clear {
+      position: absolute;
+      top: 50%;
+      right: .45rem;
+      transform: translateY(-50%);
+      min-width: 2rem;
+      min-height: 2rem;
+      border: 1px solid rgba(13, 110, 253, .22);
+      border-radius: 999px;
+      background: #f8fbff;
+      color: #446188;
+      font-weight: 800;
+      box-shadow: 0 3px 8px rgba(15, 42, 74, .08);
+    }
+    .map-address-suggestions {
+      list-style: none;
+      margin: .35rem 0 0;
+      padding: .22rem 0;
+      border-radius: .8rem;
+      border: 1px solid rgba(13, 110, 253, .2);
+      background: #fff;
+      box-shadow: 0 8px 18px rgba(15, 42, 74, .12);
+      max-height: 220px;
+      overflow: auto;
+      position: absolute;
+      left: 0;
+      right: 0;
+      z-index: 30;
+    }
+    .map-address-suggestions[hidden] {
+      display: none;
+    }
+    .map-address-suggestions li {
+      padding: .55rem .72rem;
+      cursor: pointer;
+      display: grid;
+      gap: .12rem;
+    }
+    .map-address-suggestions li:hover {
+      background: #eef5ff;
+    }
+    .map-address-suggestions strong {
+      margin: 0;
+      font-size: .88rem;
+      color: #1b375c;
+      line-height: 1.25;
+    }
+    .map-address-suggestions span {
+      margin: 0;
+      font-size: .76rem;
+      color: #5e7698;
+      line-height: 1.25;
+    }
+    .map-address-help {
+      margin: .38rem 0 0;
+      font-size: .75rem;
+      color: #5e7698;
+      font-weight: 600;
+    }
+    .map-address-nearby {
+      margin-top: .75rem;
+      border-top: 1px solid rgba(13, 110, 253, .16);
+      padding-top: .7rem;
+    }
+    .map-address-nearby-meta {
+      margin: 0 0 .45rem;
+      font-size: .8rem;
+      color: #4a6487;
+      font-weight: 700;
+    }
+    .map-nearby-list {
+      display: grid;
+      gap: .45rem;
+    }
+    .map-nearby-item {
+      border-radius: .8rem;
+      border: 1px solid rgba(13, 110, 253, .14);
+      background: linear-gradient(160deg, #ffffff, #f6f9ff);
+      padding: .6rem .65rem;
+      box-shadow: 0 5px 12px rgba(15, 42, 74, .08);
+      display: grid;
+      gap: .35rem;
+    }
+    .map-nearby-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: .65rem;
+    }
+    .map-nearby-name {
+      margin: 0;
+      font-size: .86rem;
+      font-weight: 800;
+      color: #1c3458;
+      line-height: 1.25;
+    }
+    .map-nearby-distance {
+      margin: 0;
+      border-radius: 999px;
+      border: 1px solid rgba(13, 110, 253, .19);
+      background: #eef4ff;
+      color: #355276;
+      font-size: .72rem;
+      font-weight: 700;
+      padding: .12rem .48rem;
+      white-space: nowrap;
+    }
+    .map-nearby-metrics {
+      display: flex;
+      gap: .38rem;
+      flex-wrap: wrap;
+    }
+    .map-near-chip {
+      border-radius: 999px;
+      border: 1px solid rgba(13, 110, 253, .18);
+      background: #f3f7ff;
+      color: #2d4c72;
+      font-size: .74rem;
+      font-weight: 700;
+      padding: .18rem .5rem;
+    }
+    .map-address-pin {
+      width: 1.1rem;
+      height: 1.1rem;
+      border-radius: 999px;
+      border: 2px solid #fff;
+      background: linear-gradient(145deg, #0d6efd, #0847b7);
+      box-shadow: 0 0 0 5px rgba(13, 110, 253, .22), 0 8px 14px rgba(12, 54, 119, .3);
+      display: block;
+      position: relative;
+    }
+    .map-address-pin::after {
+      content: "";
+      position: absolute;
+      inset: -9px;
+      border-radius: 999px;
+      border: 2px solid rgba(13, 110, 253, .35);
+      animation: userPulse 1.7s ease-out infinite;
+      pointer-events: none;
+    }
     .map-canvas {
       height: min(62vh, 540px);
       min-height: 290px;
@@ -738,6 +906,58 @@
       color: #e0ebff;
       box-shadow: 0 6px 14px rgba(0, 0, 0, .25);
     }
+    html[data-theme="dark"] .map-address-label,
+    html[data-theme="dark"] .map-address-help,
+    html[data-theme="dark"] .map-address-nearby-meta {
+      color: #bed0eb;
+    }
+    html[data-theme="dark"] .map-address-input {
+      background: #1b2a3f;
+      border-color: rgba(122, 162, 255, .35);
+      color: #e6efff;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, .25);
+    }
+    html[data-theme="dark"] .map-address-clear {
+      background: #1c2c42;
+      border-color: rgba(122, 162, 255, .35);
+      color: #d4e3fb;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, .25);
+    }
+    html[data-theme="dark"] .map-address-suggestions {
+      background: #1a2a3e;
+      border-color: rgba(122, 162, 255, .3);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, .35);
+    }
+    html[data-theme="dark"] .map-address-suggestions li:hover {
+      background: #223555;
+    }
+    html[data-theme="dark"] .map-address-suggestions strong {
+      color: #e3edff;
+    }
+    html[data-theme="dark"] .map-address-suggestions span {
+      color: #b8cdea;
+    }
+    html[data-theme="dark"] .map-address-nearby {
+      border-top-color: rgba(122, 162, 255, .24);
+    }
+    html[data-theme="dark"] .map-nearby-item {
+      background: linear-gradient(160deg, #1a2a3f, #19283b);
+      border-color: rgba(122, 162, 255, .24);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, .3);
+    }
+    html[data-theme="dark"] .map-nearby-name {
+      color: #e4eeff;
+    }
+    html[data-theme="dark"] .map-nearby-distance {
+      background: #1d304a;
+      border-color: rgba(122, 162, 255, .32);
+      color: #c7dcff;
+    }
+    html[data-theme="dark"] .map-near-chip {
+      background: #1c304a;
+      border-color: rgba(122, 162, 255, .3);
+      color: #d3e4ff;
+    }
     html[data-theme="dark"] .map-btn.primary {
       background: linear-gradient(132deg, #169856, #0d7b43);
       border-color: transparent;
@@ -877,8 +1097,21 @@
       <h2 id="view-map-title" class="visually-hidden">Carte des stations</h2>
       <p class="section-label">CARTE</p>
       <div class="map-shell">
+        <div class="map-address-search">
+          <label for="mapAddressInput" class="map-address-label">Adresse postale</label>
+          <div class="map-address-wrap">
+            <input id="mapAddressInput" class="map-address-input" type="search" placeholder="Saisis une adresse (ex: 12 rue Nationale, Lille)" autocomplete="off" />
+            <button id="mapAddressClear" class="map-address-clear" type="button" aria-label="Effacer l'adresse" hidden>×</button>
+          </div>
+          <ul id="mapAddressSuggestions" class="map-address-suggestions" role="listbox" hidden></ul>
+          <p class="map-address-help">Choisis une suggestion pour afficher les V'Lille autour.</p>
+        </div>
         <p id="mapStatus" class="map-status" role="status" aria-live="polite">Chargement de la carte…</p>
         <div id="mapCanvas" class="map-canvas" aria-label="Carte des stations V'Lille"></div>
+        <div id="mapAddressNearby" class="map-address-nearby" hidden>
+          <p id="mapAddressNearbyMeta" class="map-address-nearby-meta"></p>
+          <div id="mapAddressNearbyList" class="map-nearby-list" role="list"></div>
+        </div>
         <div class="map-toolbar">
           <button id="mapFitBtn" type="button" class="map-btn">↔ Voir toute la carte</button>
         </div>
@@ -887,7 +1120,7 @@
   </main>
 
   <footer>
-    <div>Source données : <a href="https://transport.data.gouv.fr/datasets/vlille-disponibilite-en-temps-reel-3" target="_blank" rel="noopener">GBFS Ilévia (V'Lille)</a>. Actualisation ~ 60 s. | Build publié le 16/03/2026 à 09:50 (Europe/Paris) - Version 2026-03-16-0950</div>
+    <div>Source données : <a href="https://transport.data.gouv.fr/datasets/vlille-disponibilite-en-temps-reel-3" target="_blank" rel="noopener">GBFS Ilévia (V'Lille)</a>. Actualisation ~ 60 s. | Build publié le 09/05/2026 à 13:15 (Europe/Paris) - Version 2026-05-09-1315</div>
   </footer>
 
   <nav class="bottom-bar" aria-label="Actions rapides">
@@ -942,9 +1175,10 @@
     // ====== Constantes & état ======
     const GBFS_INDEX = 'https://media.ilevia.fr/opendata/gbfs.json';
     const GBFS_LANG = 'fr'; // fallback to first available if missing
+    const GEO_SEARCH_URL = 'https://data.geopf.fr/geocodage/search';
 
-    const APP_VERSION = '2026.03.16.0950';
-    const BUILD_LABEL = '16/03/2026 09:50 (Europe/Paris)';
+    const APP_VERSION = '2026.05.09.1315';
+    const BUILD_LABEL = '09/05/2026 13:15 (Europe/Paris)';
 
     const LS_KEYS = {
       fav: 'vlille_favorites',
@@ -1044,6 +1278,12 @@
       mapMarkers: [],
       mapUserMarker: null,
       mapUserAccuracyCircle: null,
+      mapAddressTarget: null,
+      mapAddressMarker: null,
+      mapAddressSuggestions: [],
+      mapAddressAbortController: null,
+      mapAddressRequestToken: 0,
+      mapAddressDebounceTimer: null,
       mapHasFit: false,
     };
 
@@ -1274,6 +1514,193 @@
     // Haptique léger (mobile)
     function haptic(ms = 10){ try { if (navigator.vibrate) navigator.vibrate(ms); } catch {} }
 
+    function mapAddressSearchUrl(query){
+      const params = new URLSearchParams({
+        q: query,
+        limit: '6',
+        autocomplete: '1',
+        lat: '50.62925',
+        lon: '3.057256',
+      });
+      return `${GEO_SEARCH_URL}?${params.toString()}`;
+    }
+
+    function parseAddressFeatures(payload){
+      const features = Array.isArray(payload?.features) ? payload.features : [];
+      return features
+        .map((feature) => {
+          const coords = Array.isArray(feature?.geometry?.coordinates) ? feature.geometry.coordinates : [];
+          const lon = Number(coords[0]);
+          const lat = Number(coords[1]);
+          if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+          const props = feature?.properties || {};
+          const label = String(props.label || props.name || '').trim();
+          if (!label) return null;
+          const subtitleParts = [props.postcode, props.city, props.context]
+            .map(v => String(v || '').trim())
+            .filter(Boolean);
+          return {
+            id: String(props.id || `${lat},${lon}`),
+            label,
+            subtitle: subtitleParts.join(' · '),
+            lat,
+            lon,
+          };
+        })
+        .filter(Boolean);
+    }
+
+    function closeMapAddressSuggestions(){
+      const list = el('#mapAddressSuggestions');
+      if (!list) return;
+      if (state.mapAddressAbortController) {
+        state.mapAddressAbortController.abort();
+        state.mapAddressAbortController = null;
+      }
+      list.hidden = true;
+      list.textContent = '';
+      state.mapAddressSuggestions = [];
+    }
+
+    function renderMapAddressSuggestions(items){
+      const list = el('#mapAddressSuggestions');
+      if (!list) return;
+      if (!Array.isArray(items) || items.length === 0) {
+        list.hidden = true;
+        list.textContent = '';
+        return;
+      }
+      list.textContent = '';
+      items.forEach((item, idx) => {
+        const li = document.createElement('li');
+        li.setAttribute('role', 'option');
+        li.dataset.idx = String(idx);
+        const strong = document.createElement('strong');
+        strong.textContent = item.label;
+        const sub = document.createElement('span');
+        sub.textContent = item.subtitle || 'Adresse';
+        li.append(strong, sub);
+        list.appendChild(li);
+      });
+      list.hidden = false;
+    }
+
+    function clearMapAddressTarget(options = {}){
+      const keepInput = options.keepInput === true;
+      state.mapAddressTarget = null;
+      if (state.mapAddressMarker) {
+        state.mapAddressMarker.remove();
+        state.mapAddressMarker = null;
+      }
+      if (!keepInput) {
+        const input = el('#mapAddressInput');
+        if (input) input.value = '';
+      }
+      const clearBtn = el('#mapAddressClear');
+      const input = el('#mapAddressInput');
+      if (clearBtn) clearBtn.hidden = !(input && input.value.trim().length);
+      render();
+    }
+
+    function selectMapAddressTarget(target){
+      if (!target || !Number.isFinite(target.lat) || !Number.isFinite(target.lon)) return;
+      state.mapAddressTarget = {
+        id: target.id,
+        label: target.label,
+        subtitle: target.subtitle || '',
+        lat: target.lat,
+        lon: target.lon
+      };
+      const input = el('#mapAddressInput');
+      const clearBtn = el('#mapAddressClear');
+      if (input) input.value = target.label;
+      if (clearBtn) clearBtn.hidden = false;
+      closeMapAddressSuggestions();
+      const map = ensureMap();
+      if (map) {
+        map.setView([target.lat, target.lon], Math.max(map.getZoom(), 15));
+        state.mapHasFit = true;
+      }
+      render();
+    }
+
+    async function fetchMapAddressSuggestions(query){
+      const clean = String(query || '').trim();
+      if (clean.length < 3) {
+        closeMapAddressSuggestions();
+        return;
+      }
+      const token = ++state.mapAddressRequestToken;
+      if (state.mapAddressAbortController) state.mapAddressAbortController.abort();
+      const controller = new AbortController();
+      state.mapAddressAbortController = controller;
+
+      try {
+        const response = await fetch(mapAddressSearchUrl(clean), { cache: 'no-store', signal: controller.signal });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const payload = await response.json();
+        if (token !== state.mapAddressRequestToken) return;
+        const items = parseAddressFeatures(payload);
+        state.mapAddressSuggestions = items;
+        renderMapAddressSuggestions(items);
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        console.warn('Adresse lookup error', error);
+        if (token !== state.mapAddressRequestToken) return;
+        state.mapAddressSuggestions = [];
+        closeMapAddressSuggestions();
+      } finally {
+        if (state.mapAddressAbortController === controller) state.mapAddressAbortController = null;
+      }
+    }
+
+    function renderMapAddressNearby(stations){
+      const panel = el('#mapAddressNearby');
+      const meta = el('#mapAddressNearbyMeta');
+      const list = el('#mapAddressNearbyList');
+      if (!panel || !meta || !list) return;
+      const target = state.mapAddressTarget;
+      if (!target) {
+        panel.hidden = true;
+        meta.textContent = '';
+        list.textContent = '';
+        return;
+      }
+
+      const withGeo = stations.filter(s => Number.isFinite(s.lat) && Number.isFinite(s.lon));
+      const around = withGeo
+        .map(station => ({
+          station,
+          distanceKm: haversine({ lat: target.lat, lon: target.lon }, { lat: station.lat, lon: station.lon })
+        }))
+        .sort((a,b)=> a.distanceKm - b.distanceKm);
+
+      const closest = around.slice(0, 6);
+      const within500 = around.filter(x => x.distanceKm <= 0.5).length;
+      panel.hidden = false;
+      meta.textContent = `${closest.length} station${closest.length > 1 ? 's' : ''} la${closest.length > 1 ? 's' : ''} plus proche${closest.length > 1 ? 's' : ''} de "${target.label}" · ${within500} à moins de 500 m`;
+
+      list.textContent = '';
+      if (!closest.length) return;
+
+      closest.forEach(({ station, distanceKm }) => {
+        const item = document.createElement('article');
+        item.className = 'map-nearby-item';
+        item.setAttribute('role', 'listitem');
+        item.innerHTML = `
+          <div class="map-nearby-head">
+            <p class="map-nearby-name">${escapeHtml(station.name)}</p>
+            <p class="map-nearby-distance">${escapeHtml(formatDistance(distanceKm))}</p>
+          </div>
+          <div class="map-nearby-metrics">
+            <span class="map-near-chip">🚲 ${station.bikes} vélos</span>
+            <span class="map-near-chip">🅿️ ${station.docks} places</span>
+          </div>
+        `;
+        list.appendChild(item);
+      });
+    }
+
     function ensureMap(){
       if (state.map) return state.map;
       if (typeof L === 'undefined') return null;
@@ -1301,11 +1728,13 @@
       const map = ensureMap();
       if (!map) return;
       const withGeo = stations.filter(s => Number.isFinite(s.lat) && Number.isFinite(s.lon));
-      if (!withGeo.length && !state.userLoc) return;
+      const hasAddressTarget = Boolean(state.mapAddressTarget && Number.isFinite(state.mapAddressTarget.lat) && Number.isFinite(state.mapAddressTarget.lon));
+      if (!withGeo.length && !state.userLoc && !hasAddressTarget) return;
       if (state.mapHasFit && !force) return;
 
       const points = withGeo.map(s => [s.lat, s.lon]);
       if (state.userLoc) points.push([state.userLoc.lat, state.userLoc.lon]);
+      if (hasAddressTarget) points.push([state.mapAddressTarget.lat, state.mapAddressTarget.lon]);
       if (points.length === 1) {
         map.setView(points[0], 15);
       } else {
@@ -1350,7 +1779,7 @@
         const distance = state.userLoc ? formatDistance(haversine(state.userLoc, { lat: station.lat, lon: station.lon })) : '';
         const popup = [
           `<strong>${escapeHtml(station.name)}</strong>`,
-          `<p>🚲 ${station.bikes} velos · 🅿️ ${station.docks} places</p>`,
+          `<p>🚲 ${station.bikes} vélos · 🅿️ ${station.docks} places</p>`,
           station.address ? `<p>${escapeHtml(station.address)}</p>` : '',
           distance ? `<p>📍 ${distance}</p>` : ''
         ].filter(Boolean).join('');
@@ -1358,6 +1787,27 @@
         marker.addTo(map);
         state.mapMarkers.push(marker);
       });
+
+      if (state.mapAddressTarget && Number.isFinite(state.mapAddressTarget.lat) && Number.isFinite(state.mapAddressTarget.lon)) {
+        const target = state.mapAddressTarget;
+        if (!state.mapAddressMarker) {
+          state.mapAddressMarker = L.marker([target.lat, target.lon], {
+            zIndexOffset: 1300,
+            icon: L.divIcon({
+              className: 'map-pin-wrap',
+              html: '<span class="map-address-pin" aria-label="Adresse sélectionnée"></span>',
+              iconSize: [24, 24],
+              iconAnchor: [12, 12]
+            })
+          }).addTo(map);
+        } else {
+          state.mapAddressMarker.setLatLng([target.lat, target.lon]).addTo(map);
+        }
+        state.mapAddressMarker.bindPopup(`<strong>Adresse choisie</strong><p>${escapeHtml(target.label)}</p>`);
+      } else if (state.mapAddressMarker) {
+        state.mapAddressMarker.remove();
+        state.mapAddressMarker = null;
+      }
 
       if (state.userLoc) {
         if (!state.mapUserMarker) {
@@ -1405,11 +1855,13 @@
       }
 
       const queryPrefix = rawQuery ? `Recherche "${rawQuery}" · ` : '';
+      const addressNote = state.mapAddressTarget ? ' Épingle bleue : adresse recherchée.' : '';
       if (mapStatus) {
-        if (!withGeo.length) mapStatus.textContent = `${queryPrefix}aucune station géolocalisée avec le mode actuel.${state.userLoc ? ' Épingle rouge : vous.' : ''}`;
-        else mapStatus.textContent = `${queryPrefix}${withGeo.length} station${withGeo.length > 1 ? 's' : ''} sur la carte.${state.userLoc ? ' Épingle rouge : vous.' : ' Appuyez sur "Me localiser".'}`;
+        if (!withGeo.length) mapStatus.textContent = `${queryPrefix}Aucune station géolocalisée avec le mode actuel.${state.userLoc ? ' Épingle rouge : vous.' : ''}${addressNote}`;
+        else mapStatus.textContent = `${queryPrefix}${withGeo.length} station${withGeo.length > 1 ? 's' : ''} sur la carte.${state.userLoc ? ' Épingle rouge : vous.' : ' Appuyez sur "Me localiser".'}${addressNote}`;
       }
 
+      renderMapAddressNearby(visibleStations);
       fitMapToStations(withGeo, false);
       requestAnimationFrame(() => map.invalidateSize({ pan: false }));
     }
@@ -1790,6 +2242,56 @@
         sugg.textContent = '';
         render();
         searchInput.focus({ preventScroll: true });
+      });
+
+      // Recherche d'adresse (vue carte)
+      const mapAddressInput = el('#mapAddressInput');
+      const mapAddressClear = el('#mapAddressClear');
+      const mapAddressSuggestions = el('#mapAddressSuggestions');
+      if (mapAddressInput) {
+        const onMapAddressInput = ()=>{
+          const raw = mapAddressInput.value.trim();
+          if (mapAddressClear) mapAddressClear.hidden = raw.length === 0;
+          if (state.mapAddressTarget && raw !== state.mapAddressTarget.label) {
+            clearMapAddressTarget({ keepInput: true });
+          }
+          if (state.mapAddressDebounceTimer) clearTimeout(state.mapAddressDebounceTimer);
+          if (raw.length < 3) {
+            closeMapAddressSuggestions();
+            return;
+          }
+          state.mapAddressDebounceTimer = setTimeout(()=> {
+            fetchMapAddressSuggestions(raw);
+          }, 220);
+        };
+        mapAddressInput.addEventListener('input', onMapAddressInput);
+        mapAddressInput.addEventListener('focus', ()=>{
+          const raw = mapAddressInput.value.trim();
+          if (raw.length >= 3) fetchMapAddressSuggestions(raw);
+        });
+        mapAddressInput.addEventListener('blur', ()=> setTimeout(closeMapAddressSuggestions, 150));
+      }
+      if (mapAddressSuggestions) {
+        mapAddressSuggestions.addEventListener('mousedown', (e)=>{
+          const li = e.target.closest('li[data-idx]');
+          if (!li) return;
+          const idx = Number(li.dataset.idx);
+          if (!Number.isInteger(idx) || !state.mapAddressSuggestions[idx]) return;
+          selectMapAddressTarget(state.mapAddressSuggestions[idx]);
+        });
+      }
+      if (mapAddressClear) {
+        mapAddressClear.addEventListener('click', ()=>{
+          if (typeof haptic === 'function') haptic(8);
+          closeMapAddressSuggestions();
+          clearMapAddressTarget({ keepInput: false });
+          if (mapAddressInput) mapAddressInput.focus({ preventScroll: true });
+        });
+      }
+      document.addEventListener('click', (e)=>{
+        if (!mapAddressInput || !mapAddressSuggestions) return;
+        const within = e.target.closest('.map-address-search');
+        if (!within) closeMapAddressSuggestions();
       });
 
       // À propos (sheet) — robust lazy binding
