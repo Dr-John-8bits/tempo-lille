@@ -27,12 +27,8 @@ Webapp urbaine mobile-first pour Lille, centrée sur V'Lille et le métro Ilévi
 - `index.html` - app principale V'Lille
 - `ViteVlille.html` - alias de redirection vers `index.html`
 - `metroilevia.html` - app métro
-- `airdelille.html` - alias de redirection (section météo retirée)
 - `assets/tempo-ux.css` - design system commun
 - `assets/tempo-common.js` - logique commune (thème + navigation)
-- `citiz.html` - page existante non prioritaire actuellement
-- `parcels.html` - page existante non prioritaire actuellement
-- `OLD*.html` - versions historiques conservées
 
 ## Lancer en local
 1. Depuis le dossier du projet:
