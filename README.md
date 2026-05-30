@@ -65,7 +65,7 @@ Voir [CONTRIBUTING.md](CONTRIBUTING.md).
 Voir [SECURITY.md](SECURITY.md).
 
 ## Licence
-Ce projet est sous licence **CC BY-SA 4.0**.
+Ce projet est sous licence **MIT**.
 Voir [LICENSE.md](LICENSE.md).
 
 ## Crédits

@@ -19,4 +19,4 @@
 - Météo et qualité de l'air (Open-Meteo)
 
 ## Licence
-- [CC BY-SA 4.0](LICENSE.md)
+- [MIT](LICENSE.md)
