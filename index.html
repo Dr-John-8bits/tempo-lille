@@ -1601,7 +1601,7 @@
       }
     }
 
-    function renderMapAddressNearby(stations){
+    function renderMapAddressNearby(){
       const panel = el('#mapAddressNearby');
       const meta = el('#mapAddressNearbyMeta');
       const list = el('#mapAddressNearbyList');
@@ -1614,7 +1614,8 @@
         return;
       }
 
-      const withGeo = stations.filter(s => Number.isFinite(s.lat) && Number.isFinite(s.lon));
+      // La proximité d'adresse ignore la recherche texte pour éviter les résultats trompeurs.
+      const withGeo = applyFilter(state.stations).filter(s => Number.isFinite(s.lat) && Number.isFinite(s.lon));
       const around = withGeo
         .map(station => ({
           station,
@@ -1705,10 +1706,12 @@
         return;
       }
 
+      const mapStations = state.mapAddressTarget ? sortStations(applyFilter(state.stations)) : visibleStations;
+
       state.mapMarkers.forEach(marker => marker.remove());
       state.mapMarkers = [];
 
-      const withGeo = visibleStations.filter(s => Number.isFinite(s.lat) && Number.isFinite(s.lon));
+      const withGeo = mapStations.filter(s => Number.isFinite(s.lat) && Number.isFinite(s.lon));
 
       withGeo.forEach((station) => {
         const tone = stationTone(station);
@@ -1801,14 +1804,15 @@
         }
       }
 
-      const queryPrefix = rawQuery ? `Recherche "${rawQuery}" · ` : '';
+      const queryPrefix = rawQuery && !state.mapAddressTarget ? `Recherche "${rawQuery}" · ` : '';
+      const addressPrefix = state.mapAddressTarget ? 'Adresse choisie · ' : '';
       const addressNote = state.mapAddressTarget ? ' Épingle bleue : adresse recherchée.' : '';
       if (mapStatus) {
-        if (!withGeo.length) mapStatus.textContent = `${queryPrefix}Aucune station géolocalisée avec le mode actuel.${state.userLoc ? ' Épingle rouge : vous.' : ''}${addressNote}`;
-        else mapStatus.textContent = `${queryPrefix}${withGeo.length} station${withGeo.length > 1 ? 's' : ''} sur la carte.${state.userLoc ? ' Épingle rouge : vous.' : ' Appuyez sur "Me localiser".'}${addressNote}`;
+        if (!withGeo.length) mapStatus.textContent = `${queryPrefix}${addressPrefix}Aucune station géolocalisée avec le mode actuel.${state.userLoc ? ' Épingle rouge : vous.' : ''}${addressNote}`;
+        else mapStatus.textContent = `${queryPrefix}${addressPrefix}${withGeo.length} station${withGeo.length > 1 ? 's' : ''} sur la carte.${state.userLoc ? ' Épingle rouge : vous.' : ' Appuyez sur "Me localiser".'}${addressNote}`;
       }
 
-      renderMapAddressNearby(visibleStations);
+      renderMapAddressNearby();
       fitMapToStations(withGeo, false);
       requestAnimationFrame(() => map.invalidateSize({ pan: false }));
     }
