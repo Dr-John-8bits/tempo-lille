@@ -15,8 +15,8 @@
 
 ## Sources de données
 - V'Lille (GBFS Ilévia)
-- Perturbations métro Ilévia (Open Data MEL)
-- Météo et qualité de l'air (Open-Meteo)
+- Géocodage d'adresses via data.geopf.fr
+- Fond de carte OpenStreetMap
 
 ## Licence
 - [MIT](LICENSE.md)

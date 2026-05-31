@@ -200,8 +200,7 @@ html[data-bs-theme="dark"] {
 
 .tempo-app .card,
 .tempo-app .card-line,
-.tempo-app .weather-card,
-.tempo-app .about-panel {
+.tempo-app .weather-card {
   border: 1px solid var(--tempo-border-soft);
   box-shadow: var(--tempo-shadow-md);
 }
@@ -391,48 +390,6 @@ html[data-theme="dark"] .tempo-vlille {
 }
 
 .tempo-vlille .btn-link {
-  border-radius: 999px;
-}
-
-.tempo-vlille .about-panel {
-  border-radius: 1rem 1rem 0 0;
-}
-
-.tempo-metro {
-  background: var(--tempo-bg-gradient);
-}
-
-.tempo-metro .line-chip {
-  border: 1px solid color-mix(in oklab, var(--tempo-text) 14%, transparent);
-}
-
-.tempo-metro .status-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.38rem;
-  border: 1px solid var(--tempo-border-soft);
-  box-shadow: var(--tempo-shadow-xs);
-}
-
-.tempo-metro .card-line {
-  border-radius: 1.05rem;
-  border: 1px solid var(--tempo-border-soft);
-  background: color-mix(in oklab, var(--tempo-surface-strong) 92%, transparent);
-}
-
-.tempo-metro .card-line .card-header {
-  background: color-mix(in oklab, var(--tempo-surface-strong) 95%, transparent);
-}
-
-.tempo-metro .list-group-item {
-  background: transparent;
-}
-
-.tempo-metro .badge {
-  border-radius: 999px;
-}
-
-.tempo-metro #btnRefresh {
   border-radius: 999px;
 }
 

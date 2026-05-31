@@ -1,16 +1,15 @@
 # Tempo Lille
 
-Webapp urbaine mobile-first pour Lille, centrée sur V'Lille et le métro Ilévia.
+Webapp urbaine mobile-first pour Lille, centrée sur V'Lille.
 
 ## Démo
 - [https://dr-john-8bits.github.io/tempo-lille/](https://dr-john-8bits.github.io/tempo-lille/)
 
 ## Applications actives
 - **V'Lille** (`index.html`): disponibilité des vélos et places en temps réel, favoris, recherche, géolocalisation, vue carte OpenStreetMap.
-- **Métro Ilévia** (`metroilevia.html`): état M1/M2 à partir des perturbations open data MEL.
 
 ## Expérience UX
-- Design premium et uniforme entre pages.
+- Design premium et cohérent.
 - Responsive web design, mobile-first.
 - Dark mode automatique (préférence système).
 - Navigation cohérente et ergonomique (menu principal + interactions tactiles).
@@ -26,7 +25,6 @@ Webapp urbaine mobile-first pour Lille, centrée sur V'Lille et le métro Ilévi
 ## Structure du projet
 - `index.html` - app principale V'Lille
 - `ViteVlille.html` - alias de redirection vers `index.html`
-- `metroilevia.html` - app métro
 - `assets/tempo-ux.css` - design system commun
 - `assets/tempo-common.js` - logique commune (thème + navigation)
 
@@ -45,7 +43,7 @@ Aucune étape de build n'est nécessaire.
 
 ## Sources de données
 - V'Lille (GBFS Ilévia)
-- Open Data MEL (perturbations Ilévia)
+- Géocodage d'adresses via data.geopf.fr
 - Fond de carte OpenStreetMap (tuiles publiques)
 
 ## Confidentialité et limites

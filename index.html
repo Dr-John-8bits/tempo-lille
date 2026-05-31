@@ -82,20 +82,6 @@
     .seg { appearance: none; border: 1px solid var(--border); background: var(--card); color: var(--fg); padding: .7rem 1rem; min-height: 3.1rem; border-radius: 999px; cursor: pointer; font: inherit; font-size: 1rem; font-weight: 700; white-space: nowrap; }
     .seg[aria-selected="true"] { outline: 2px solid var(--accent); }
 
-    /* About modal */
-    .about-backdrop { position: fixed; inset: 0; background: color-mix(in oklab, var(--fg) 25%, transparent); backdrop-filter: blur(3px); z-index: 999; }
-    .about-panel { position: fixed; left: 0; right: 0; bottom: 0; margin: 0; background: var(--card); border-top: 1px solid var(--border); border-radius: .9rem .9rem 0 0; box-shadow: var(--shadow); z-index: 1000; max-height: 85svh; transform: translateY(100%); opacity: 0; transition: transform 220ms ease, opacity 220ms ease; display: flex; flex-direction: column; }
-    .about-panel.open { transform: translateY(0); opacity: 1; }
-    .about-head { position: sticky; top: 0; background: var(--card); padding: .6rem 1rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: .6rem; }
-    .about-handle { width: 36px; height: 4px; background: #9aa0a6; opacity: .8; border-radius: 999px; margin-right: .4rem; }
-    .about-body { padding: .8rem 1rem calc(env(safe-area-inset-bottom) + 1rem); overflow: auto; }
-    .about-close { margin-left: auto; }
-
-    @media (min-width: 640px){
-      .about-panel { left: 50%; right: auto; width: 520px; bottom: auto; top: 12vh; border-radius: .9rem; transform: translate(-50%, 10px); }
-      .about-panel.open { transform: translate(-50%, 0); }
-    }
-
     main { max-width: 900px; margin: 0 auto; padding: 1rem; }
 
     /* Search */
@@ -766,7 +752,7 @@
       color: inherit;
     }
     .bottom-bar .wrap {
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
     }
     .bottom-bar .item {
       min-height: 3.4rem;
@@ -996,15 +982,6 @@
   <nav class="navbar navbar-expand-lg tl-navbar navbar-light sticky-top" aria-label="Menu principal">
     <div class="container">
       <a class="navbar-brand fw-bold" href="index.html"><i class="bi bi-buildings me-2"></i>Tempo Lille</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#tlNav" aria-controls="tlNav" aria-expanded="false" aria-label="Basculer la navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="tlNav">
-        <ul class="navbar-nav ms-auto align-items-lg-center">
-          <li class="nav-item"><a class="nav-link active" href="index.html"><i class="bi bi-bicycle me-1"></i>V'Lille</a></li>
-          <li class="nav-item"><a class="nav-link" href="metroilevia.html"><i class="bi bi-train-front me-1"></i>Métro Ilévia</a></li>
-        </ul>
-      </div>
     </div>
   </nav>
   <nav class="tl-subnav" aria-label="Sous-menu V'Lille">
@@ -1120,7 +1097,7 @@
   </main>
 
   <footer>
-    <div>Source données : <a href="https://transport.data.gouv.fr/datasets/vlille-disponibilite-en-temps-reel-3" target="_blank" rel="noopener">GBFS Ilévia (V'Lille)</a>. Actualisation ~ 60 s. | Build publié le 09/05/2026 à 13:15 (Europe/Paris) - Version 2026-05-09-1315</div>
+    <div>Source données : <a href="https://transport.data.gouv.fr/datasets/vlille-disponibilite-en-temps-reel-3" target="_blank" rel="noopener">GBFS Ilévia (V'Lille)</a>. Actualisation ~ 60 s. | Build publié le 31/05/2026 à 16:46 (Europe/Paris) - Version 2026-05-31-1646</div>
   </footer>
 
   <nav class="bottom-bar" aria-label="Actions rapides">
@@ -1137,38 +1114,8 @@
         <span class="icon">🔍</span>
         <span class="label">Recherche</span>
       </button>
-      <a href="metroilevia.html" class="item" title="Métro Ilévia">
-        <span class="icon">🚇</span>
-        <span class="label">Métro</span>
-      </a>
     </div>
   </nav>
-
-  <!-- À propos: panel + backdrop -->
-  <div id="aboutBackdrop" class="about-backdrop" hidden></div>
-  <div id="aboutPanel" class="about-panel" role="dialog" aria-modal="true" aria-labelledby="aboutTitle" hidden>
-    <div class="about-head">
-      <div class="about-handle"></div>
-      <h2 id="aboutTitle">À propos</h2>
-      <button id="aboutClose" class="btn about-close" aria-label="Fermer">✕</button>
-    </div>
-    <div class="about-body">
-      <p><strong>V'Lille</strong> affiche rapidement les disponibilités des stations V'Lille (vélos & places) et vos favoris. Données en temps quasi réel (GBFS Ilévia).
-      </p>
-      <h3>Légendes & indications</h3>
-      <ul>
-        <li>🚲 Vélos disponibles — nombre de vélos prêts à partir.</li>
-        <li>🅿️ Places vacantes — nombre d’emplacements libres pour retourner un vélo.</li>
-        <li>Badges : <em>Vide / Bientôt vide / Bientôt plein / Plein</em> selon les seuils internes.</li>
-      </ul>
-      <h3>Liens</h3>
-      <p><a href="metroilevia.html">Ouvrir Métro Ilévia</a> · <a href="https://transport.data.gouv.fr/datasets/vlille-disponibilite-en-temps-reel-3" target="_blank" rel="noopener">Source GBFS</a></p>
-      <h3>Version</h3>
-      <p id="aboutVersion">—</p>
-      <p style="color:var(--muted)">Aucune donnée personnelle n’est collectée. Vos préférences restent sur cet appareil avec un stockage de secours si nécessaire.
-      </p>
-    </div>
-  </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script>
@@ -1177,8 +1124,8 @@
     const GBFS_LANG = 'fr'; // fallback to first available if missing
     const GEO_SEARCH_URL = 'https://data.geopf.fr/geocodage/search';
 
-    const APP_VERSION = '2026.05.09.1315';
-    const BUILD_LABEL = '09/05/2026 13:15 (Europe/Paris)';
+    const APP_VERSION = '2026.05.31.1646';
+    const BUILD_LABEL = '31/05/2026 16:46 (Europe/Paris)';
 
     const LS_KEYS = {
       fav: 'vlille_favorites',
@@ -1678,7 +1625,7 @@
       const closest = around.slice(0, 6);
       const within500 = around.filter(x => x.distanceKm <= 0.5).length;
       panel.hidden = false;
-      meta.textContent = `${closest.length} station${closest.length > 1 ? 's' : ''} la${closest.length > 1 ? 's' : ''} plus proche${closest.length > 1 ? 's' : ''} de "${target.label}" · ${within500} à moins de 500 m`;
+      meta.textContent = `${closest.length} station${closest.length > 1 ? 's' : ''} ${closest.length > 1 ? 'les' : 'la'} plus proche${closest.length > 1 ? 's' : ''} de "${target.label}" · ${within500} à moins de 500 m`;
 
       list.textContent = '';
       if (!closest.length) return;
@@ -2293,28 +2240,6 @@
         const within = e.target.closest('.map-address-search');
         if (!within) closeMapAddressSuggestions();
       });
-
-      // À propos (sheet) — robust lazy binding
-      const aboutBtn = el('#btnAbout');
-      const openAbout = ()=>{
-        const aboutPanel = el('#aboutPanel');
-        const aboutBackdrop = el('#aboutBackdrop');
-        const aboutClose = el('#aboutClose');
-        const ver = el('#aboutVersion');
-        if (ver) ver.textContent = `Version : ${APP_VERSION} · Build : ${BUILD_LABEL} · Sauvegarde : ${storageLabel()}`;
-        if (!aboutPanel || !aboutBackdrop) return;
-        aboutPanel.hidden = false; aboutBackdrop.hidden = false;
-        requestAnimationFrame(()=> aboutPanel.classList.add('open'));
-        const onEsc = (e)=>{ if (e.key === 'Escape') close(); };
-        function close(){
-          aboutPanel.classList.remove('open');
-          setTimeout(()=> { aboutPanel.hidden = true; aboutBackdrop.hidden = true; document.removeEventListener('keydown', onEsc); }, 220);
-        }
-        aboutBackdrop.addEventListener('click', close, { once: true });
-        if (aboutClose) aboutClose.addEventListener('click', close, { once: true });
-        document.addEventListener('keydown', onEsc);
-      };
-      if (aboutBtn) aboutBtn.addEventListener('click', openAbout);
 
       // Pull-to-refresh
       window.addEventListener('touchstart', (e)=>{
