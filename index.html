@@ -1003,7 +1003,7 @@
   <div id="ptr" class="ptr" role="status" aria-live="polite"><div class="wrap">↻ Glisse vers le bas pour actualiser</div></div>
 
   <div id="errorBanner" class="banner" role="status" aria-live="polite">
-    <div class="wrap">⚠️ Impossible d’actualiser les données pour le moment. Dernières infos affichées.</div>
+    <div class="wrap"><span aria-hidden="true">⚠️</span><span data-error-message>Impossible d’actualiser les données pour le moment.</span></div>
   </div>
 
   <main id="main-content">
@@ -1126,6 +1126,7 @@
 
     const APP_VERSION = '2026.05.31.1646';
     const BUILD_LABEL = '31/05/2026 16:46 (Europe/Paris)';
+    const API_TIMEOUT_MS = 10_000;
 
     const LS_KEYS = {
       fav: 'vlille_favorites',
@@ -1284,6 +1285,39 @@
         return;
       }
       storage.setItem(LS_KEYS.hist, JSON.stringify(snapshot));
+    }
+
+    async function fetchJson(url, label, timeoutMs = API_TIMEOUT_MS){
+      if (!url) throw new Error(`${label} introuvable`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const response = await fetch(url, { cache: 'no-store', signal: controller.signal });
+        if (!response.ok) throw new Error(`${label}: HTTP ${response.status}`);
+        try {
+          return await response.json();
+        } catch {
+          throw new Error(`${label}: JSON invalide`);
+        }
+      } catch (error) {
+        if (error?.name === 'AbortError') throw new Error(`${label}: délai dépassé`);
+        throw error;
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    }
+
+    function setErrorBanner(message){
+      const banner = el('#errorBanner');
+      if (!banner) return;
+      const messageEl = banner.querySelector('[data-error-message]') || banner.querySelector('.wrap');
+      if (messageEl) messageEl.textContent = message;
+      banner.style.display = 'block';
+    }
+
+    function hideErrorBanner(){
+      const banner = el('#errorBanner');
+      if (banner) banner.style.display = 'none';
     }
 
     function qtyClass(n){
@@ -2069,34 +2103,47 @@
     // ====== GBFS: récupération fusionnée ======
     async function fetchStations(){
       try {
-        const idxRes = await fetch(GBFS_INDEX, { cache: 'no-store' });
-        const idx = await idxRes.json();
-        const feeds = (idx.data?.[GBFS_LANG]?.feeds)
-          || idx.data?.[Object.keys(idx.data || {})[0]]?.feeds
+        const idx = await fetchJson(GBFS_INDEX, 'Index GBFS');
+        const feedsByLang = idx?.data || {};
+        const fallbackLang = Object.keys(feedsByLang)[0];
+        const feeds = feedsByLang?.[GBFS_LANG]?.feeds
+          || feedsByLang?.[fallbackLang]?.feeds
           || [];
+        if (!Array.isArray(feeds)) throw new Error('Index GBFS invalide');
         const infoUrl   = feeds.find(f => f.name === 'station_information')?.url;
         const statusUrl = feeds.find(f => f.name === 'station_status')?.url;
         if (!infoUrl || !statusUrl) throw new Error('Flux GBFS manquants');
 
-        const [infoRes, statusRes] = await Promise.all([
-          fetch(infoUrl, { cache: 'no-store' }),
-          fetch(statusUrl, { cache: 'no-store' })
+        const [info, status] = await Promise.all([
+          fetchJson(infoUrl, 'Flux station_information'),
+          fetchJson(statusUrl, 'Flux station_status')
         ]);
-        const [info, status] = await Promise.all([infoRes.json(), statusRes.json()]);
+        const infoStations = info?.data?.stations;
+        const statusStations = status?.data?.stations;
+        if (!Array.isArray(infoStations) || !Array.isArray(statusStations)) throw new Error('Flux stations invalide');
 
         const infoById = new Map();
-        for (const s of (info.data?.stations || [])) infoById.set(String(s.station_id), s);
+        for (const s of infoStations) {
+          if (s?.station_id != null) infoById.set(String(s.station_id), s);
+        }
 
         const out = [];
-        for (const st of (status.data?.stations || [])){
+        const lastUpdated = Number(status?.last_updated);
+        const updatedAt = Number.isFinite(lastUpdated)
+          ? new Date(lastUpdated * 1000).toISOString()
+          : new Date().toISOString();
+        for (const st of statusStations){
+          if (st?.station_id == null) continue;
           const id = String(st.station_id);
           const i = infoById.get(id) || {};
+          const bikes = Number(st.num_bikes_available);
+          const docks = Number(st.num_docks_available);
           out.push({
             id,
             name: i.name || `Station ${id}`,
-            bikes: Number(st.num_bikes_available ?? 0),
-            docks: Number(st.num_docks_available ?? 0),
-            updatedAt: (status?.last_updated ? new Date(status.last_updated*1000).toISOString() : new Date().toISOString()),
+            bikes: Number.isFinite(bikes) ? bikes : 0,
+            docks: Number.isFinite(docks) ? docks : 0,
+            updatedAt,
             lat: Number(i.lat),
             lon: Number(i.lon),
             is_installed: Number(st.is_installed ?? 1),
@@ -2105,16 +2152,21 @@
             address: String(i.address || i.adresse || i.street_address || i.rue || '')
           });
         }
+        if (!out.length) throw new Error('Aucune station reçue');
 
         out.sort((a,b)=> a.name.localeCompare(b.name, 'fr'));
         state.stations = out;
         updateTrends(out);
         state.lastFetch = new Date().toISOString();
-        el('#errorBanner').style.display = 'none';
+        hideErrorBanner();
         render();
       } catch (err){
         console.error('Erreur GBFS', err);
-        el('#errorBanner').style.display = 'block';
+        const hasStations = state.stations.length > 0;
+        setErrorBanner(hasStations
+          ? 'Impossible d’actualiser les données pour le moment. Les dernières infos restent affichées.'
+          : 'Impossible de charger les disponibilités V’Lille pour le moment. Réessaie dans un instant.');
+        if (!hasStations) render();
       }
     }
 
