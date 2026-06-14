@@ -407,26 +407,6 @@
     .station-action:focus-visible {
       background: var(--accent-soft);
     }
-    .hero-install-btn {
-      appearance: none;
-      width: 100%;
-      min-height: 2.6rem;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: .5rem;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--accent);
-      font-weight: 700;
-      font-size: var(--fs-sm);
-      cursor: pointer;
-    }
-    .hero-install-btn:hover,
-    .hero-install-btn:focus-visible {
-      background: var(--accent-soft);
-    }
     .nearby h3 {
       margin: 0 0 .55rem;
       font-size: var(--fs-xs);
@@ -826,9 +806,7 @@
       <div class="hero-actions">
         <button id="heroLocateBtn" type="button" class="hero-locate-btn"><svg class="ic" width="1.1rem" height="1.1rem" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false"><path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/></svg><span>V'Lille à proximité</span></button>
         <button id="heroMapLocateBtn" type="button" class="hero-locate-btn" hidden><svg class="ic" width="1.1rem" height="1.1rem" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false"><path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/></svg><span>Me localiser</span></button>
-        <button id="installBtn" type="button" class="hero-install-btn" hidden><svg class="ic" width="1rem" height="1rem" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/></svg><span>Installer l'app</span></button>
       </div>
-      <p id="installHint" class="updated" hidden style="margin:.4rem 0 0;"></p>
     </section>
     <p id="storageNotice" class="updated mb-3" hidden></p>
     <section id="stationControls" class="station-controls" aria-label="Tri des stations">
@@ -1801,7 +1779,6 @@
       'caret-up-fill': '<path d="m7.247 4.86-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/>',
       'caret-down-fill': '<path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>',
       'cursor-fill': '<path d="M14.082 2.182a.5.5 0 0 1 .103.557L8.528 15.467a.5.5 0 0 1-.917-.007L5.57 10.694.803 8.652a.5.5 0 0 1-.006-.916l12.728-5.657a.5.5 0 0 1 .556.103z"/>',
-      'download': '<path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>',
     };
     function iconSvg(name, opts){
       const o = opts || {};
@@ -2282,41 +2259,6 @@
         if (typeof haptic === 'function') haptic();
         state.mapHasFit = false;
         fitMapToStations(getVisibleStations(el('#search')?.value.trim() || ''), true);
-      });
-
-      // Installation PWA (bouton « Installer l'app »).
-      const installBtn = el('#installBtn');
-      const installHint = el('#installHint');
-      let deferredPrompt = null;
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-      // Chrome / Edge / Android : on capte l'invite native et on révèle le bouton.
-      window.addEventListener('beforeinstallprompt', (e)=>{
-        e.preventDefault();
-        deferredPrompt = e;
-        if (installBtn && !isStandalone) installBtn.hidden = false;
-      });
-      // iOS Safari : pas d'invite programmatique → on montre le bouton avec une consigne au tap.
-      if (installBtn && isIOS && !isStandalone) installBtn.hidden = false;
-      if (installBtn) {
-        installBtn.addEventListener('click', async ()=>{
-          if (typeof haptic==='function') haptic();
-          if (deferredPrompt) {
-            deferredPrompt.prompt();
-            try { await deferredPrompt.userChoice; } catch {}
-            deferredPrompt = null;
-            installBtn.hidden = true;
-          } else if (installHint) {
-            installHint.hidden = false;
-            installHint.textContent = isIOS
-              ? 'Pour installer : appuie sur le bouton Partager, puis « Sur l\'écran d\'accueil ».'
-              : 'Pour installer : ouvre le menu du navigateur, puis « Installer l\'application ».';
-          }
-        });
-      }
-      window.addEventListener('appinstalled', ()=>{
-        if (installBtn) installBtn.hidden = true;
-        if (installHint) installHint.hidden = true;
       });
 
       // Premier rendu + données
