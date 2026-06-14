@@ -1,0 +1,32 @@
+{
+  "name": "Tempo Lille — V'Lille",
+  "short_name": "V'Lille",
+  "description": "Disponibilité en temps réel des stations V'Lille à Lille — favoris, recherche, carte.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "lang": "fr",
+  "background_color": "#F7F8FA",
+  "theme_color": "#F7F8FA",
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

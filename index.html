@@ -18,37 +18,20 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
   <!-- Favicon & PWA meta -->
   <link rel="icon" type="image/svg+xml" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="6" cy="17" r="4" fill="none" stroke="%23000" stroke-width="2"/><circle cx="18" cy="17" r="4" fill="none" stroke="%23000" stroke-width="2"/><path d="M6 17 L10 9 L12 13 L18 13" fill="none" stroke="%23000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 13 L14 17" fill="none" stroke="%23000" stroke-width="2" stroke-linecap="round"/></svg>'>
-  <link rel="mask-icon" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="6" cy="17" r="4" fill="%23000"/><circle cx="18" cy="17" r="4" fill="%23000"/><path d="M6 17 L10 9 L12 13 L18 13" fill="%23000"/><path d="M12 13 L14 17" fill="%23000"/></svg>' color="#0d6efd">
-  <meta name="theme-color" content="#0d6efd" />
+  <link rel="mask-icon" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="6" cy="17" r="4" fill="%23000"/><circle cx="18" cy="17" r="4" fill="%23000"/><path d="M6 17 L10 9 L12 13 L18 13" fill="%23000"/><path d="M12 13 L14 17" fill="%23000"/></svg>' color="#1F5FE0">
+  <meta name="theme-color" content="#F7F8FA" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0E1116" media="(prefers-color-scheme: dark)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Tempo Lille" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="assets/icon-180.png" />
+  <!-- Bootstrap CSS + Bootstrap Icons retirés (étape 3b) : remplacés par du CSS natif (assets/tempo-ux.css) et des icônes SVG inline. -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
   <style>
-    :root {
-      --bg: #ffffff;
-      --fg: #121212;
-      --muted: #5a5a5a;
-      --card: #f4f4f5;
-      --accent: #0d6efd;
-      --ok: #16a34a;   /* vert */
-      --warn: #f59e0b; /* orange */
-      --bad: #ef4444;  /* rouge */
-      --border: #e5e7eb;
-      --shadow: 0 1px 2px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
-    }
-    html[data-theme="dark"] {
-      --bg: #0b0b0c;
-      --fg: #ececec;
-      --muted: #b3b3b3;
-      --card: #151518;
-      --accent: #7aa2ff;
-      --border: #22242a;
-      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.25);
-    }
+    /* Tokens de couleur : source unique dans assets/tempo-ux.css (plus de :root dupliqué ici). */
 
     * { box-sizing: border-box; }
+    .ic { display: inline-block; vertical-align: -0.125em; flex: none; }
     body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji", "Segoe UI Emoji"; background: var(--bg); color: var(--fg); overflow-x: hidden; }
 
     header {
@@ -57,18 +40,7 @@
       background: color-mix(in oklab, var(--bg) 85%, transparent);
       border-bottom: 1px solid var(--border);
     }
-    .bar { max-width: 900px; margin: 0 auto; padding: .8rem 1rem; display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
-    .logoBike {
-      width: 24px; height: 24px; margin-right: .4rem; display: inline-block;
-      stroke: var(--fg); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
-    }
-
-    .title { font-weight: 800; letter-spacing: .2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 46vw; }
-    .spacer { flex: 1; }
-    .bar > * { max-width: 100%; }
-    .pill { display: inline-flex; align-items: center; gap: .4rem; font-size: .9rem; padding: .35rem .6rem; border: 1px solid var(--border); border-radius: 999px; background: var(--card); }
-    .btn { appearance: none; border: 1px solid var(--border); padding: .55rem .8rem; background: var(--card); color: var(--fg); border-radius: .7rem; box-shadow: var(--shadow); cursor: pointer; }
-    .btn[aria-current="page"]{ outline: 2px solid var(--accent); }
+    /* Anciennes classes "vanilla" (bar/title/spacer/logoBike/pill/btn) retirées : non utilisées. */
 
     .banner { display: none; background: color-mix(in oklab, var(--bad) 18%, var(--bg)); color: var(--fg); border-bottom: 1px solid var(--border); }
     .banner .wrap { max-width: 900px; margin: 0 auto; padding: .5rem 1rem; display: flex; align-items: center; gap: .6rem; }
@@ -77,12 +49,8 @@
     .ptr .wrap { max-width: 900px; margin: 0 auto; padding: .4rem 1rem; font-size: .9rem; }
     .ptr.show { display:block; }
 
-    /* Filters segment */
-    .filters { position: sticky; top: calc(var(--header-h, 56px)); z-index: 6; background: var(--bg); border-bottom: 1px solid var(--border); padding: .6rem 1rem; display: flex; gap: .55rem; justify-content: flex-start; overflow-x: auto; }
-    .seg { appearance: none; border: 1px solid var(--border); background: var(--card); color: var(--fg); padding: .7rem 1rem; min-height: 3.1rem; border-radius: 999px; cursor: pointer; font: inherit; font-size: 1rem; font-weight: 700; white-space: nowrap; }
-    .seg[aria-selected="true"] { outline: 2px solid var(--accent); }
 
-    main { max-width: 900px; margin: 0 auto; padding: 1rem; }
+    main { max-width: 900px; margin: 0 auto; padding: 1rem 1rem calc(84px + env(safe-area-inset-bottom)); }
 
     /* Search */
     .search { position: sticky; top: var(--header-h, 56px); z-index: 5; background: var(--bg); padding: .6rem 0 .8rem; }
@@ -90,10 +58,10 @@
     .suggestions { position: absolute; left: 0; right: 0; top: 100%; margin-top: .25rem; background: var(--card); border: 1px solid var(--border); border-radius: .7rem; box-shadow: var(--shadow); list-style: none; padding: .25rem 0; max-height: 280px; overflow: auto; }
     .suggestions[hidden] { display: none; }
     .suggestions li { padding: .55rem .9rem; cursor: pointer; }
-    .suggestions li:hover { background: color-mix(in oklab, var(--card) 80%, var(--accent) 20%); }
+    .suggestions li:hover,
+    .suggestions li.is-active { background: var(--accent-soft); }
 
     .nearby { margin-bottom: 1rem; }
-    .nearby h2 { margin: 0 0 .5rem 0; font-size: 1rem; font-weight: 700; }
     .distance { margin-left: .35rem; font-size: .85rem; color: var(--muted); }
     .search input { width: 100%; min-height: 3.45rem; padding: .95rem 3.4rem .95rem 1rem; border-radius: .9rem; border: 1px solid var(--border); background: var(--card); color: var(--fg); font-size: 1.05rem; }
     .search-clear {
@@ -101,8 +69,8 @@
       top: 50%;
       right: .55rem;
       transform: translateY(-50%);
-      min-width: 2.35rem;
-      min-height: 2.35rem;
+      min-width: 2.75rem;
+      min-height: 2.75rem;
       border: 1px solid var(--border);
       border-radius: 999px;
       background: color-mix(in oklab, var(--card) 88%, white 12%);
@@ -121,7 +89,6 @@
 
     .card { background: var(--card); border: 1px solid var(--border); border-radius: .9rem; padding: .9rem; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: .5rem; }
     .card-head { display:flex; align-items: center; gap:.6rem; }
-    .station-name { font-weight: 700; line-height: 1.2; }
     .star {
       margin-left: auto;
       min-width: 3.2rem;
@@ -137,17 +104,10 @@
       user-select: none;
       box-shadow: var(--shadow);
     }
-    .star[aria-pressed="true"] { filter: drop-shadow(0 0 6px color-mix(in oklab, var(--accent) 80%, transparent)); }
-
-    .stats { display: flex; gap: .6rem; flex-wrap: wrap; }
-    .chip { display: inline-flex; align-items: center; gap: .45rem; padding: .45rem .6rem; border-radius: .6rem; border: 1px solid var(--border); background: color-mix(in oklab, var(--card) 90%, transparent); font-variant-numeric: tabular-nums; }
-    .chip.ok { border-color: color-mix(in oklab, var(--ok) 45%, var(--border)); }
-    .chip.warn { border-color: color-mix(in oklab, var(--warn) 55%, var(--border)); }
-    .chip.bad { border-color: color-mix(in oklab, var(--bad) 55%, var(--border)); }
+    /* Halo bleu de l'étoile favorite retiré (étape 3a) — l'étoile dorée + sa bordure suffisent. */
 
     .updated { color: var(--muted); font-size: .85rem; }
     .addr { color: var(--muted); font-size: .9rem; }
-    .actions { display: inline-flex; gap: .6rem; flex-wrap: wrap; margin-top: .2rem; }
     .btn-link { display: inline-flex; align-items: center; gap: .35rem; min-height: 2.8rem; padding: .55rem .8rem; border-radius: 999px; border: 1px solid var(--border); background: color-mix(in oklab, var(--card) 92%, transparent); text-decoration: none; color: var(--fg); box-shadow: var(--shadow); font-size: .95rem; font-weight: 700; }
     .btn-link:hover { filter: brightness(1.02); }
     .empty { padding: 1rem; border: 1px dashed var(--border); border-radius: .9rem; background: var(--card); }
@@ -156,83 +116,40 @@
     [data-view] { display: none; }
     [data-view].active { display: block; }
 
-    footer { max-width: 900px; margin: 1rem auto 3rem; padding: 0 1rem; color: var(--muted); font-size: .85rem; }
+    footer { max-width: 900px; margin: 1rem auto calc(84px + env(safe-area-inset-bottom)); padding: 0 1rem; color: var(--muted); font-size: .85rem; }
     a { color: var(--accent); }
 
     /* Bottom bar */
-    .bottom-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 12; display: none; background: var(--card); border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom); }
+    .bottom-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 12; display: block; background: var(--surface); border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom); }
     .bottom-bar .wrap { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr 1fr; }
-    .bottom-bar a, .bottom-bar button { appearance: none; border: none; background: transparent; color: var(--fg); padding: .6rem 0; font: inherit; cursor: pointer; }
-    .bottom-bar .item { display: flex; flex-direction: column; align-items: center; gap: .25rem; padding: .5rem 0; border-radius: .9rem; }
-    .bottom-bar .item.is-active { color: var(--accent); background: color-mix(in oklab, var(--accent) 12%, var(--card) 88%); }
-    .bottom-bar .icon { font-size: 1.1rem; line-height: 1; }
-    .bottom-bar .label { font-size: .75rem; opacity: .8; }
+    .bottom-bar a, .bottom-bar button { appearance: none; border: none; background: transparent; color: var(--text-muted); padding: .35rem 0; font: inherit; cursor: pointer; }
+    .bottom-bar .item { display: flex; flex-direction: column; align-items: center; gap: .15rem; padding: .3rem 0; color: var(--text-muted); }
+    .bottom-bar .item.is-active { color: var(--accent); background: transparent; }
+    .bottom-bar .icon { display: inline-flex; align-items: center; justify-content: center; padding: .2rem 1.1rem; border-radius: var(--radius-md); line-height: 1; transition: background .15s ease; }
+    .bottom-bar .item.is-active .icon { background: var(--accent-soft); }
+    .bottom-bar .label { font-size: var(--fs-xs); opacity: .9; }
 
     @media (max-width: 480px){
-      .bar { padding: .6rem .6rem; }
-      .title { max-width: 56vw; font-size: .95rem; }
-      .btn { padding: .45rem .6rem; font-size: .9rem; }
-      .pill { display: none; }
-      .logoBike { width: 20px; height: 20px; }
-
-      .mobile-hide { display: none !important; }
       .bottom-bar { display: block; }
-      .tl-subnav .nav-item { width: 100%; }
-      .tl-subnav .btn,
-      .tl-subnav .form-control { width: 100%; }
       main { padding-bottom: 92px; }
       footer { margin-bottom: calc(92px + env(safe-area-inset-bottom)); }
     }
-    /* ===== Tempo Lille navbar (light like page background) ===== */
-    .tl-navbar {
-      background: rgba(248, 250, 252, .94);
-      backdrop-filter: blur(6px);
-      box-shadow: 0 2px 14px rgba(0,0,0,.06);
-      border: 1px solid rgba(13,110,253,.15);
-      --bs-navbar-toggler-icon-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(13,110,253,.9)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
-      --bs-navbar-color: #0d6efd;
-      --bs-navbar-hover-color: #0a58ca;
-    }
-    html[data-theme="dark"] .tl-navbar {
-      background: rgba(28,32,38,.92);
-      box-shadow: 0 6px 22px rgba(0,0,0,.35);
-      --bs-navbar-toggler-icon-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255,255,255,.9)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
-      --bs-navbar-color: #e9eef8;
-      --bs-navbar-hover-color: #fff;
-    }
-    .tl-navbar .navbar-brand,
-    .tl-navbar .nav-link { color: #0d6efd !important; opacity:.95; transition: transform .12s ease, opacity .12s ease; }
-    .tl-navbar .nav-link:hover,
-    .tl-navbar .nav-link:focus { opacity:1; transform: translateY(-1px); background: rgba(13,110,253,.07); border-radius: .4rem; box-shadow: 0 1px 6px rgba(13,110,253,.1); }
-    .tl-navbar .nav-link.active { font-weight:700; text-decoration: underline 2px; text-underline-offset:4px; }
-    .navbar-toggler { border: 1px solid rgba(13,110,253,.35); border-radius:.6rem; padding:.35rem .6rem; }
-    html[data-theme="dark"] .navbar-toggler { border-color: rgba(255,255,255,.5); }
+    /* Styles .tl-navbar inline retirés : la navbar est entièrement stylée par assets/tempo-ux.css (tokens). */
 
-    /* Subnav (local to V'Lille) */
-    .tl-subnav { background: color-mix(in oklab, var(--bg) 96%, transparent); border-bottom: 1px solid var(--border); }
-    .tl-subnav .form-control { max-width: 320px; min-height: 3rem; border-radius: .85rem; font-size: 1rem; }
-    .tl-subnav .btn { min-height: 3rem; border-radius: 999px; font-size: .98rem; font-weight: 700; padding-inline: 1rem; }
-    .tl-subnav .btn.is-active { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .tl-subnav .nav { row-gap: .55rem; }
-    /* Subnav inline title */
-    .tl-subnav .brand-inline { font-weight: 800; color: var(--muted); display: flex; align-items: center; gap: .5rem; }
-    .tl-subnav .brand-inline .bi { font-size: 1rem; }
+    /* Sous-nav retirée (étape 4) — styles supprimés. */
 
     /* Smartphone-first app layer */
     body.tempo-vlille {
-      background:
-        radial-gradient(circle at 18% -20%, rgba(28, 183, 255, .22), transparent 34%),
-        radial-gradient(circle at 100% -16%, rgba(16, 119, 255, .2), transparent 46%),
-        linear-gradient(180deg, #eff6ff 0%, #f8fbff 100%);
+      background: var(--bg);
     }
     .app-hero {
-      border-radius: 1.25rem;
-      background: linear-gradient(135deg, #ffffff, #eef5ff);
-      border: 1px solid color-mix(in oklab, var(--accent) 22%, transparent);
-      box-shadow: 0 12px 28px rgba(13, 110, 253, .12);
-      padding: 1rem;
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-xs);
+      padding: var(--sp-4);
       display: grid;
-      gap: .8rem;
+      gap: var(--sp-3);
     }
     .app-top-row {
       display: flex;
@@ -247,45 +164,46 @@
       min-width: 0;
     }
     .app-logo {
-      width: 2.7rem;
-      height: 2.7rem;
-      border-radius: .8rem;
+      width: 2.6rem;
+      height: 2.6rem;
+      border-radius: var(--radius-md);
       display: inline-grid;
       place-items: center;
-      font-size: 1.2rem;
-      color: #0b5ed7;
-      background: linear-gradient(145deg, #dbeafe, #eff6ff);
-      border: 1px solid rgba(13, 110, 253, .2);
+      color: var(--accent);
+      background: var(--accent-soft);
+      border: 1px solid var(--border);
     }
     .availability-pill {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      min-height: 2.3rem;
-      padding: .35rem .8rem;
-      border-radius: 999px;
-      font-size: .85rem;
-      font-weight: 800;
-      color: #0a4aa1;
-      background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-      border: 1px solid rgba(13, 110, 253, .22);
+      gap: .4rem;
+      min-height: 2.1rem;
+      padding: .3rem .7rem;
+      border-radius: var(--radius-pill);
+      font-size: var(--fs-sm);
+      font-weight: 700;
+      color: var(--text-muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
       white-space: nowrap;
-    }
-    .app-subtitle {
-      font-size: .95rem;
-      color: #435a7a !important;
     }
     .hero-locate-btn {
       appearance: none;
       border: 0;
-      min-height: 3.3rem;
-      border-radius: 1rem;
-      font-weight: 800;
-      font-size: 1.02rem;
-      color: #fff;
-      background: linear-gradient(140deg, #18a757, #0f8f48);
-      box-shadow: 0 14px 20px rgba(16, 152, 80, .22);
+      min-height: 3rem;
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      font-size: var(--fs-md);
+      color: var(--on-accent);
+      background: var(--accent);
       width: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+    }
+    .hero-locate-btn:hover {
+      background: var(--accent-hover);
     }
     .hero-actions {
       display: grid;
@@ -296,10 +214,10 @@
     }
     .section-label {
       margin: .2rem 0 .55rem;
-      font-size: .78rem;
+      font-size: var(--fs-xs);
       letter-spacing: .09em;
       font-weight: 800;
-      color: #526d8f;
+      color: var(--text-muted);
       text-transform: uppercase;
     }
     .station-controls {
@@ -309,59 +227,60 @@
       margin-bottom: .8rem;
     }
     .station-control {
-      border-radius: .9rem;
-      border: 1px solid rgba(13, 110, 253, .14);
-      background: linear-gradient(160deg, #ffffff, #f2f7ff);
-      box-shadow: 0 6px 14px rgba(15, 42, 74, .08);
-      padding: .45rem .55rem .55rem;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
     }
     .station-control label {
-      display: inline-block;
-      font-size: .68rem;
+      flex: none;
+      font-size: var(--fs-xs);
       text-transform: uppercase;
       letter-spacing: .08em;
       font-weight: 800;
-      color: #516c90;
-      margin-bottom: .32rem;
+      color: var(--text-muted);
+      margin-bottom: 0;
     }
     .station-select {
+      flex: 1;
+      min-width: 0;
       width: 100%;
       min-height: 2.65rem;
-      border-radius: .72rem;
-      border: 1px solid rgba(13, 110, 253, .22);
-      background: #fff;
-      color: #1a3558;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
       font-size: .9rem;
       font-weight: 700;
       padding: .35rem .55rem;
       appearance: auto;
-      box-shadow: 0 2px 8px rgba(15, 42, 74, .07);
+      box-shadow: var(--shadow-xs);
     }
     .station-card {
-      border-radius: 1rem;
-      padding: .85rem;
-      background: linear-gradient(165deg, #ffffff, #f4f8ff);
-      border: 1px solid rgba(13, 110, 253, .12);
-      box-shadow: 0 9px 18px rgba(15, 42, 74, .09);
+      border-radius: var(--radius-lg);
+      padding: var(--sp-4);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-xs);
       gap: .6rem;
     }
     .station-card .card-head {
       align-items: flex-start;
     }
     .station-card .star {
-      min-width: 2.05rem;
-      min-height: 2.05rem;
-      border-radius: .58rem;
-      border: 1px solid rgba(234, 179, 8, .35);
-      background: #fff9db;
-      color: #ca8a04;
-      font-size: 1rem;
+      min-width: 2.75rem;
+      min-height: 2.75rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
       box-shadow: none;
-      margin-top: .1rem;
+      margin-top: 0;
+      display: inline-grid;
+      place-items: center;
     }
-    .station-card .star[aria-pressed="false"] {
-      background: #fffef5;
-      color: #e2b007;
+    .station-card .star[aria-pressed="true"] {
+      color: var(--fav);
+      border-color: var(--fav);
     }
     .station-main {
       min-width: 0;
@@ -369,9 +288,11 @@
     }
     .station-title {
       margin: 0;
-      font-size: .98rem;
-      font-weight: 800;
-      color: #1f2f4a;
+      font-size: var(--fs-lg);
+      font-weight: 700;
+      font-family: var(--font-heading);
+      letter-spacing: -.01em;
+      color: var(--text);
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
@@ -380,15 +301,15 @@
     .station-distance {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
+      gap: .25rem;
       min-height: 1.85rem;
       padding: .15rem .55rem;
-      border-radius: 999px;
-      font-size: .74rem;
+      border-radius: var(--radius-pill);
+      font-size: var(--fs-xs);
       font-weight: 700;
-      color: #334e74;
-      background: #edf4ff;
-      border: 1px solid rgba(13, 110, 253, .18);
+      color: var(--text-muted);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
       white-space: nowrap;
     }
     .state-tags {
@@ -399,31 +320,32 @@
     .state-tag {
       display: inline-flex;
       align-items: center;
-      border-radius: 999px;
-      border: 1px solid rgba(225, 29, 72, .22);
-      color: #be123c;
-      background: #fff1f2;
-      font-size: .73rem;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--bad-border);
+      color: var(--bad);
+      background: var(--bad-soft);
+      font-size: var(--fs-xs);
       font-weight: 700;
       padding: .2rem .55rem;
     }
     .metrics-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: .55rem;
+      gap: var(--sp-2);
     }
     .metric {
-      border-radius: .88rem;
+      border-radius: var(--radius-md);
       border: 1px solid transparent;
-      padding: .46rem .58rem;
+      padding: .5rem .65rem;
       display: flex;
       align-items: center;
-      gap: .45rem;
+      gap: .55rem;
       min-height: 3.35rem;
     }
     .metric-icon {
-      font-size: 1.02rem;
-      opacity: .94;
+      display: inline-flex;
+      align-items: center;
+      opacity: .95;
     }
     .metric-copy {
       display: grid;
@@ -432,55 +354,56 @@
     }
     .metric-value {
       margin: 0;
-      font-size: .98rem;
-      font-weight: 800;
-      line-height: 1.1;
+      font-size: var(--fs-2xl);
+      font-weight: 700;
+      font-family: var(--font-heading);
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      gap: .15rem;
     }
     .metric-label {
       margin: 0;
-      font-size: .72rem;
+      font-size: var(--fs-xs);
       font-weight: 700;
       letter-spacing: .02em;
       opacity: .92;
     }
     .metric.is-good {
-      background: #e9fbea;
-      border-color: #86efac;
-      color: #166534;
+      background: var(--ok-soft);
+      border-color: var(--ok-border);
+      color: var(--ok);
     }
     .metric.is-warn {
-      background: #fff7e9;
-      border-color: #fcd34d;
-      color: #9a3412;
+      background: var(--warn-soft);
+      border-color: var(--warn-border);
+      color: var(--warn);
     }
     .metric.is-bad {
-      background: #ffecef;
-      border-color: #fda4af;
-      color: #b42318;
+      background: var(--bad-soft);
+      border-color: var(--bad-border);
+      color: var(--bad);
     }
-    .station-updated {
-      font-size: .75rem;
-      color: #617799;
-      margin-top: .1rem;
-    }
-    .nearby h2 {
-      margin-bottom: .55rem;
-      font-size: .88rem;
+    .nearby h3 {
+      margin: 0 0 .55rem;
+      font-size: var(--fs-xs);
+      font-weight: 800;
       letter-spacing: .08em;
       text-transform: uppercase;
-      color: #496489;
+      color: var(--text-muted);
     }
     .map-shell {
-      border-radius: 1rem;
+      border-radius: var(--radius-lg);
       padding: .68rem;
-      border: 1px solid rgba(13, 110, 253, .16);
-      background: linear-gradient(160deg, #f9fbff, #eef5ff);
-      box-shadow: 0 8px 18px rgba(15, 42, 74, .09);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      box-shadow: var(--shadow-xs);
     }
     .map-status {
       margin: 0 0 .55rem;
       font-size: .82rem;
-      color: #4a6283;
+      color: var(--text-muted);
       font-weight: 700;
     }
     .map-address-search {
@@ -490,11 +413,11 @@
     .map-address-label {
       display: inline-block;
       margin: 0 0 .32rem;
-      font-size: .72rem;
+      font-size: var(--fs-xs);
       text-transform: uppercase;
       letter-spacing: .07em;
       font-weight: 800;
-      color: #506b90;
+      color: var(--text-muted);
     }
     .map-address-wrap {
       position: relative;
@@ -503,36 +426,41 @@
       width: 100%;
       min-height: 2.95rem;
       padding: .72rem 2.8rem .72rem .85rem;
-      border-radius: .82rem;
-      border: 1px solid rgba(13, 110, 253, .22);
-      background: #fff;
-      color: #173760;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
       font-size: .92rem;
       font-weight: 700;
-      box-shadow: 0 3px 10px rgba(15, 42, 74, .08);
+      box-shadow: var(--shadow-xs);
+    }
+    .map-address-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
     }
     .map-address-clear {
       position: absolute;
       top: 50%;
       right: .45rem;
       transform: translateY(-50%);
-      min-width: 2rem;
-      min-height: 2rem;
-      border: 1px solid rgba(13, 110, 253, .22);
+      min-width: 2.75rem;
+      min-height: 2.75rem;
+      border: 1px solid var(--border);
       border-radius: 999px;
-      background: #f8fbff;
-      color: #446188;
+      background: var(--surface-2);
+      color: var(--text-muted);
       font-weight: 800;
-      box-shadow: 0 3px 8px rgba(15, 42, 74, .08);
+      box-shadow: var(--shadow-xs);
     }
     .map-address-suggestions {
       list-style: none;
       margin: .35rem 0 0;
       padding: .22rem 0;
-      border-radius: .8rem;
-      border: 1px solid rgba(13, 110, 253, .2);
-      background: #fff;
-      box-shadow: 0 8px 18px rgba(15, 42, 74, .12);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
       max-height: 220px;
       overflow: auto;
       position: absolute;
@@ -549,36 +477,37 @@
       display: grid;
       gap: .12rem;
     }
-    .map-address-suggestions li:hover {
-      background: #eef5ff;
+    .map-address-suggestions li:hover,
+    .map-address-suggestions li.is-active {
+      background: var(--accent-soft);
     }
     .map-address-suggestions strong {
       margin: 0;
       font-size: .88rem;
-      color: #1b375c;
+      color: var(--text);
       line-height: 1.25;
     }
     .map-address-suggestions span {
       margin: 0;
       font-size: .76rem;
-      color: #5e7698;
+      color: var(--text-muted);
       line-height: 1.25;
     }
     .map-address-help {
       margin: .38rem 0 0;
       font-size: .75rem;
-      color: #5e7698;
+      color: var(--text-muted);
       font-weight: 600;
     }
     .map-address-nearby {
       margin-top: .75rem;
-      border-top: 1px solid rgba(13, 110, 253, .16);
+      border-top: 1px solid var(--border);
       padding-top: .7rem;
     }
     .map-address-nearby-meta {
       margin: 0 0 .45rem;
       font-size: .8rem;
-      color: #4a6487;
+      color: var(--text-muted);
       font-weight: 700;
     }
     .map-nearby-list {
@@ -586,11 +515,11 @@
       gap: .45rem;
     }
     .map-nearby-item {
-      border-radius: .8rem;
-      border: 1px solid rgba(13, 110, 253, .14);
-      background: linear-gradient(160deg, #ffffff, #f6f9ff);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--surface);
       padding: .6rem .65rem;
-      box-shadow: 0 5px 12px rgba(15, 42, 74, .08);
+      box-shadow: var(--shadow-xs);
       display: grid;
       gap: .35rem;
     }
@@ -604,15 +533,15 @@
       margin: 0;
       font-size: .86rem;
       font-weight: 800;
-      color: #1c3458;
+      color: var(--text);
       line-height: 1.25;
     }
     .map-nearby-distance {
       margin: 0;
       border-radius: 999px;
-      border: 1px solid rgba(13, 110, 253, .19);
-      background: #eef4ff;
-      color: #355276;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-muted);
       font-size: .72rem;
       font-weight: 700;
       padding: .12rem .48rem;
@@ -624,10 +553,13 @@
       flex-wrap: wrap;
     }
     .map-near-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .25rem;
       border-radius: 999px;
-      border: 1px solid rgba(13, 110, 253, .18);
-      background: #f3f7ff;
-      color: #2d4c72;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-muted);
       font-size: .74rem;
       font-weight: 700;
       padding: .18rem .5rem;
@@ -637,27 +569,17 @@
       height: 1.1rem;
       border-radius: 999px;
       border: 2px solid #fff;
-      background: linear-gradient(145deg, #0d6efd, #0847b7);
-      box-shadow: 0 0 0 5px rgba(13, 110, 253, .22), 0 8px 14px rgba(12, 54, 119, .3);
+      background: var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-soft), var(--shadow-sm);
       display: block;
-      position: relative;
-    }
-    .map-address-pin::after {
-      content: "";
-      position: absolute;
-      inset: -9px;
-      border-radius: 999px;
-      border: 2px solid rgba(13, 110, 253, .35);
-      animation: userPulse 1.7s ease-out infinite;
-      pointer-events: none;
     }
     .map-canvas {
       height: min(62vh, 540px);
       min-height: 290px;
-      border-radius: .95rem;
-      border: 1px solid rgba(13, 110, 253, .2);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
       overflow: hidden;
-      background: #d6e5f7;
+      background: var(--surface-2);
     }
     .map-toolbar {
       margin-top: .6rem;
@@ -667,20 +589,20 @@
     }
     .map-btn {
       appearance: none;
-      border: 1px solid rgba(13, 110, 253, .26);
-      border-radius: .85rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
       min-height: 2.95rem;
       font-size: .92rem;
-      font-weight: 800;
-      color: #174074;
-      background: #f8fbff;
-      box-shadow: 0 3px 10px rgba(24, 61, 106, .09);
+      font-weight: 700;
+      color: var(--text);
+      background: var(--surface);
+      box-shadow: var(--shadow-xs);
     }
     .map-btn.primary {
       border: 0;
-      color: #fff;
-      background: linear-gradient(132deg, #18a757, #0e8845);
-      box-shadow: 0 9px 18px rgba(14, 136, 69, .25);
+      color: var(--on-accent);
+      background: var(--accent);
+      box-shadow: var(--shadow-sm);
     }
     .map-pin-wrap {
       background: transparent;
@@ -691,29 +613,29 @@
       height: 2rem;
       border-radius: 999px;
       border: 2px solid #fff;
-      box-shadow: 0 7px 16px rgba(15, 42, 74, .26);
+      box-shadow: var(--shadow-sm);
       color: #fff;
-      font-size: .73rem;
-      font-weight: 900;
+      font-size: .78rem;
+      font-weight: 700;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       font-variant-numeric: tabular-nums;
       letter-spacing: .01em;
     }
-    .map-pin.is-good { background: linear-gradient(145deg, #1ba24f, #11823d); }
-    .map-pin.is-warn { background: linear-gradient(145deg, #f59e0b, #dd7e0f); }
-    .map-pin.is-bad { background: linear-gradient(145deg, #ef4444, #b91c1c); }
+    .map-pin.is-good { background: var(--ok); }
+    .map-pin.is-warn { background: var(--warn); }
+    .map-pin.is-bad { background: var(--bad); }
     .map-pin.is-fav {
-      box-shadow: 0 0 0 2px #facc15, 0 8px 16px rgba(15, 42, 74, .28);
+      box-shadow: 0 0 0 2px var(--fav), var(--shadow-sm);
     }
     .user-pin {
       width: 1.06rem;
       height: 1.06rem;
       border-radius: 999px;
       border: 2px solid #fff;
-      background: linear-gradient(145deg, #ef4444, #b91c1c);
-      box-shadow: 0 0 0 5px rgba(239, 68, 68, .28), 0 7px 16px rgba(81, 16, 16, .35);
+      background: var(--accent);
+      box-shadow: 0 0 0 5px var(--accent-soft), var(--shadow-sm);
       display: block;
       position: relative;
     }
@@ -722,7 +644,7 @@
       position: absolute;
       inset: -9px;
       border-radius: 999px;
-      border: 2px solid rgba(239, 68, 68, .42);
+      border: 2px solid color-mix(in oklab, var(--accent) 45%, transparent);
       animation: userPulse 1.7s ease-out infinite;
       pointer-events: none;
     }
@@ -733,20 +655,35 @@
     .leaflet-container {
       font-family: "Nunito Sans", "Avenir Next", "Segoe UI", sans-serif;
     }
+    .leaflet-popup-content-wrapper,
+    .leaflet-popup-tip {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: var(--shadow-md);
+    }
     .leaflet-popup-content {
       margin: .65rem .75rem;
       min-width: 180px;
     }
     .leaflet-popup-content p {
       margin: .3rem 0;
-      color: #2d4667;
+      color: var(--text-muted);
     }
     .leaflet-popup-content strong {
       display: block;
       margin-bottom: .2rem;
-      color: #152b49;
+      color: var(--text);
       font-size: .93rem;
       line-height: 1.25;
+    }
+    .leaflet-control-zoom a {
+      background: var(--surface);
+      color: var(--text);
+      border-bottom-color: var(--border);
+    }
+    .leaflet-control-attribution {
+      background: color-mix(in oklab, var(--surface) 82%, transparent);
+      color: var(--text-muted);
     }
     .leaflet-control-attribution a {
       color: inherit;
@@ -757,18 +694,12 @@
     .bottom-bar .item {
       min-height: 3.4rem;
     }
-    .bottom-bar .icon {
-      font-size: 1.2rem;
-    }
     .bottom-bar .label {
-      font-size: .72rem;
-      font-weight: 800;
+      font-size: var(--fs-xs);
+      font-weight: 700;
       letter-spacing: .02em;
     }
     @media (max-width: 820px) {
-      .tempo-vlille .tl-subnav {
-        display: none;
-      }
       .tempo-vlille .search {
         top: var(--nav-main-h, 56px);
       }
@@ -804,172 +735,18 @@
         padding: .42rem .5rem;
       }
       .metric-value {
-        font-size: .92rem;
+        font-size: var(--fs-xl);
       }
       .metric-label {
-        font-size: .68rem;
+        font-size: var(--fs-xs);
       }
     }
     html[data-theme="dark"] body.tempo-vlille {
-      background:
-        radial-gradient(circle at 18% -20%, rgba(39, 115, 211, .26), transparent 36%),
-        radial-gradient(circle at 100% -16%, rgba(18, 174, 186, .18), transparent 46%),
-        linear-gradient(180deg, #0d131d 0%, #111b2a 100%);
+      background: var(--bg);
     }
-    html[data-theme="dark"] .app-hero,
-    html[data-theme="dark"] .station-card {
-      background: linear-gradient(160deg, #182234, #1a273b);
-      border-color: rgba(138, 173, 218, .18);
-      box-shadow: 0 12px 22px rgba(0, 0, 0, .34);
-    }
-    html[data-theme="dark"] .app-logo {
-      background: linear-gradient(145deg, #1f3a62, #1b2e4c);
-      color: #bbd4ff;
-      border-color: rgba(122, 162, 255, .26);
-    }
-    html[data-theme="dark"] .availability-pill {
-      background: linear-gradient(135deg, #22395f, #234a78);
-      color: #dbeafe;
-      border-color: rgba(122, 162, 255, .3);
-    }
-    html[data-theme="dark"] .app-subtitle,
-    html[data-theme="dark"] .section-label,
-    html[data-theme="dark"] .station-updated {
-      color: #b8cae5 !important;
-    }
-    html[data-theme="dark"] .station-title {
-      color: #e5efff;
-    }
-    html[data-theme="dark"] .station-distance {
-      background: #19263a;
-      color: #c4dcff;
-      border-color: rgba(122, 162, 255, .32);
-    }
-    html[data-theme="dark"] .metric.is-good {
-      background: #143626;
-      color: #b7f6cf;
-      border-color: #1c6745;
-    }
-    html[data-theme="dark"] .metric.is-warn {
-      background: #3d3018;
-      color: #ffe0a0;
-      border-color: #8a6632;
-    }
-    html[data-theme="dark"] .metric.is-bad {
-      background: #48202a;
-      color: #ffc9d2;
-      border-color: #874250;
-    }
-    html[data-theme="dark"] .station-control {
-      background: linear-gradient(160deg, #1a2739, #172436);
-      border-color: rgba(122, 162, 255, .26);
-      box-shadow: 0 10px 18px rgba(0, 0, 0, .28);
-    }
-    html[data-theme="dark"] .station-control label {
-      color: #b9cde9;
-    }
-    html[data-theme="dark"] .station-select {
-      background: #1b2a3f;
-      border-color: rgba(122, 162, 255, .34);
-      color: #e7f0ff;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, .24);
-    }
-    html[data-theme="dark"] .map-shell {
-      background: linear-gradient(160deg, #182437, #172336);
-      border-color: rgba(122, 162, 255, .24);
-      box-shadow: 0 12px 22px rgba(0, 0, 0, .34);
-    }
-    html[data-theme="dark"] .map-status {
-      color: #bed0eb;
-    }
-    html[data-theme="dark"] .map-canvas {
-      border-color: rgba(122, 162, 255, .26);
-      background: #1a2639;
-    }
-    html[data-theme="dark"] .map-btn {
-      background: #1b2a3f;
-      border-color: rgba(122, 162, 255, .35);
-      color: #e0ebff;
-      box-shadow: 0 6px 14px rgba(0, 0, 0, .25);
-    }
-    html[data-theme="dark"] .map-address-label,
-    html[data-theme="dark"] .map-address-help,
-    html[data-theme="dark"] .map-address-nearby-meta {
-      color: #bed0eb;
-    }
-    html[data-theme="dark"] .map-address-input {
-      background: #1b2a3f;
-      border-color: rgba(122, 162, 255, .35);
-      color: #e6efff;
-      box-shadow: 0 6px 14px rgba(0, 0, 0, .25);
-    }
-    html[data-theme="dark"] .map-address-clear {
-      background: #1c2c42;
-      border-color: rgba(122, 162, 255, .35);
-      color: #d4e3fb;
-      box-shadow: 0 6px 14px rgba(0, 0, 0, .25);
-    }
-    html[data-theme="dark"] .map-address-suggestions {
-      background: #1a2a3e;
-      border-color: rgba(122, 162, 255, .3);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, .35);
-    }
-    html[data-theme="dark"] .map-address-suggestions li:hover {
-      background: #223555;
-    }
-    html[data-theme="dark"] .map-address-suggestions strong {
-      color: #e3edff;
-    }
-    html[data-theme="dark"] .map-address-suggestions span {
-      color: #b8cdea;
-    }
-    html[data-theme="dark"] .map-address-nearby {
-      border-top-color: rgba(122, 162, 255, .24);
-    }
-    html[data-theme="dark"] .map-nearby-item {
-      background: linear-gradient(160deg, #1a2a3f, #19283b);
-      border-color: rgba(122, 162, 255, .24);
-      box-shadow: 0 8px 18px rgba(0, 0, 0, .3);
-    }
-    html[data-theme="dark"] .map-nearby-name {
-      color: #e4eeff;
-    }
-    html[data-theme="dark"] .map-nearby-distance {
-      background: #1d304a;
-      border-color: rgba(122, 162, 255, .32);
-      color: #c7dcff;
-    }
-    html[data-theme="dark"] .map-near-chip {
-      background: #1c304a;
-      border-color: rgba(122, 162, 255, .3);
-      color: #d3e4ff;
-    }
-    html[data-theme="dark"] .map-btn.primary {
-      background: linear-gradient(132deg, #169856, #0d7b43);
-      border-color: transparent;
-    }
-    html[data-theme="dark"] .leaflet-popup-content-wrapper,
-    html[data-theme="dark"] .leaflet-popup-tip {
-      background: #1a2a3e;
-      color: #e8f0ff;
-      box-shadow: 0 10px 20px rgba(0, 0, 0, .28);
-    }
-    html[data-theme="dark"] .leaflet-popup-content p,
-    html[data-theme="dark"] .leaflet-popup-content strong {
-      color: #d9e8ff;
-    }
-    html[data-theme="dark"] .leaflet-control-zoom a {
-      background: #1a2a3e;
-      color: #d4e3fb;
-      border-bottom-color: rgba(122, 162, 255, .25);
-    }
-    html[data-theme="dark"] .leaflet-control-attribution {
-      background: rgba(9, 14, 22, .74);
-      color: #c4d6f2;
-    }
-    html[data-theme="dark"] .user-pin {
-      box-shadow: 0 0 0 5px rgba(248, 113, 113, .28), 0 9px 18px rgba(0, 0, 0, .36);
-    }
+    /* Surcharges sombres du hero, des cartes, métriques et du contrôle de tri
+       supprimées : ces composants utilisent désormais les tokens (gérés en clair/sombre). */
+    /* Surcharges sombres carte + Leaflet supprimées : les tokens (clair/sombre) sont appliqués en base. */
   </style>
   <link href="assets/tempo-ux.css" rel="stylesheet">
 </head>
@@ -981,47 +758,32 @@
   </script>
   <nav class="navbar navbar-expand-lg tl-navbar navbar-light sticky-top" aria-label="Menu principal">
     <div class="container">
-      <a class="navbar-brand fw-bold" href="index.html"><i class="bi bi-buildings me-2"></i>Tempo Lille</a>
+      <a class="navbar-brand fw-bold" href="index.html"><svg class="ic" width="1.05rem" height="1.05rem" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M14.763.075A.5.5 0 0 1 15 .5v15a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5V14h-1v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V10a.5.5 0 0 1 .342-.474L6 7.64V4.5a.5.5 0 0 1 .276-.447l8-4a.5.5 0 0 1 .487.022M6 8.694 1 10.36V15h5zM7 15h2v-1.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5V15h2V1.309l-7 3.5z"/><path d="M2 11h1v1H2zm2 0h1v1H4zm-2 2h1v1H2zm2 0h1v1H4zm4-4h1v1H8zm2 0h1v1h-1zm-2 2h1v1H8zm2 0h1v1h-1zm2-2h1v1h-1zm0 2h1v1h-1zM8 7h1v1H8zm2 0h1v1h-1zm2 0h1v1h-1zM8 5h1v1H8zm2 0h1v1h-1zm2 0h1v1h-1zm0-2h1v1h-1z"/></svg>Tempo Lille</a>
     </div>
   </nav>
-  <nav class="tl-subnav" aria-label="Sous-menu V'Lille">
-    <div class="container" style="max-width:900px;">
-      <ul class="nav align-items-center gap-2 py-2 flex-wrap">
-        <li class="nav-item"><span class="brand-inline"><i class="bi bi-bicycle"></i> V'Lille</span></li>
-        <li class="nav-item"><button id="subFav" type="button" class="btn btn-sm btn-outline-primary">⭐ Favoris</button></li>
-        <li class="nav-item"><button id="subNear" type="button" class="btn btn-sm btn-outline-primary">📍 Autour de moi</button></li>
-        <li class="nav-item"><button id="subMap" type="button" class="btn btn-sm btn-outline-primary">🗺️ Carte</button></li>
-        <li class="nav-item d-flex align-items-center gap-2">
-          <i class="bi bi-search"></i>
-          <input id="subSearch" type="search" class="form-control form-control-sm" placeholder="Rechercher une station…">
-        </li>
-        <li class="nav-item ms-auto"><span id="lastUpdate" class="pill">⏱︎ Maj — …</span></li>
-      </ul>
-    </div>
-  </nav>
+  <!-- Sous-nav V'Lille retirée (étape 4) : sur mobile la navigation unique est la barre du bas. -->
+
 
   <div id="ptr" class="ptr" role="status" aria-live="polite"><div class="wrap">↻ Glisse vers le bas pour actualiser</div></div>
 
   <div id="errorBanner" class="banner" role="status" aria-live="polite">
-    <div class="wrap"><span aria-hidden="true">⚠️</span><span data-error-message>Impossible d’actualiser les données pour le moment.</span></div>
+    <div class="wrap"><span aria-hidden="true" style="color:var(--bad);display:inline-flex"><svg class="ic" width="1.05rem" height="1.05rem" viewBox="0 0 16 16" fill="currentColor"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/></svg></span><span data-error-message>Impossible d’actualiser les données pour le moment.</span></div>
   </div>
 
   <main id="main-content">
     <section class="tempo-page-head mb-3 app-hero" aria-label="Présentation de l'application">
       <div class="app-top-row">
         <div class="app-brand">
-          <span class="app-logo"><i class="bi bi-bicycle"></i></span>
+          <span class="app-logo"><svg class="ic" width="1.3rem" height="1.3rem" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false"><path d="M4 4.5a.5.5 0 0 1 .5-.5H6a.5.5 0 0 1 0 1v.5h4.14l.386-1.158A.5.5 0 0 1 11 4h1a.5.5 0 0 1 0 1h-.64l-.311.935.807 1.29a3 3 0 1 1-.848.53l-.508-.812-2.076 3.322A.5.5 0 0 1 8 10.5H5.959a3 3 0 1 1-1.815-3.274L5 5.856V5h-.5a.5.5 0 0 1-.5-.5m1.5 2.443-.508.814c.5.444.85 1.054.967 1.743h1.139zM8 9.057 9.598 6.5H6.402zM4.937 9.5a2 2 0 0 0-.487-.877l-.548.877zM3.603 8.092A2 2 0 1 0 4.937 10.5H3a.5.5 0 0 1-.424-.765zm7.947.53a2 2 0 1 0 .848-.53l1.026 1.643a.5.5 0 1 1-.848.53z"/></svg></span>
           <div>
-            <p class="eyebrow mb-0">Tempo Lille</p>
             <h1 class="h5 mb-0">V'Lille</h1>
           </div>
         </div>
         <span id="availabilityPill" class="availability-pill">Disponibilités</span>
       </div>
-      <p class="mb-0 app-subtitle">Recherche rapide, favoris et disponibilités en direct.</p>
       <div class="hero-actions">
-        <button id="heroLocateBtn" type="button" class="hero-locate-btn">📍 V'Lille à proximité</button>
-        <button id="heroMapLocateBtn" type="button" class="hero-locate-btn" hidden>📍 Me localiser</button>
+        <button id="heroLocateBtn" type="button" class="hero-locate-btn"><svg class="ic" width="1.1rem" height="1.1rem" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false"><path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/></svg><span>V'Lille à proximité</span></button>
+        <button id="heroMapLocateBtn" type="button" class="hero-locate-btn" hidden><svg class="ic" width="1.1rem" height="1.1rem" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false"><path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/></svg><span>Me localiser</span></button>
       </div>
     </section>
     <p id="storageNotice" class="updated mb-3" hidden></p>
@@ -1041,10 +803,10 @@
     </section>
     <!-- Vue 1 : Favoris -->
     <section id="view-fav" data-view class="active" aria-labelledby="view-fav-title">
-      <h2 id="view-fav-title" class="visually-hidden">Stations favorites</h2>
+      <h2 id="view-fav-title" class="visually-hidden" tabindex="-1">Stations favorites</h2>
       <p class="section-label">MES FAVORIS</p>
       <section id="nearby" class="nearby" hidden>
-        <h2>À proximité</h2>
+        <h3>À proximité</h3>
         <div id="nearList" class="list" role="list"></div>
       </section>
       <div id="favList" class="list" role="list"></div>
@@ -1056,31 +818,31 @@
 
     <!-- Vue 2 : Recherche / Ajout -->
     <section id="view-browse" data-view aria-labelledby="view-browse-title">
-      <h2 id="view-browse-title" class="visually-hidden">Recherche de stations</h2>
+      <h2 id="view-browse-title" class="visually-hidden" tabindex="-1">Recherche de stations</h2>
       <p class="section-label">RECHERCHE</p>
       <div class="search">
         <div class="wrap">
-          <input id="search" type="search" placeholder="Rechercher une station… (filtre en direct)" aria-label="Rechercher une station" autocomplete="off" />
+          <input id="search" type="search" placeholder="Rechercher une station… (filtre en direct)" aria-label="Rechercher une station" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="suggestions" aria-autocomplete="list" aria-haspopup="listbox" />
           <button id="clearSearch" type="button" class="search-clear" aria-label="Effacer la recherche" hidden>×</button>
-          <ul id="suggestions" class="suggestions" role="listbox" hidden></ul>
+          <ul id="suggestions" class="suggestions" role="listbox" aria-label="Suggestions de stations" hidden></ul>
         </div>
-        <div id="browseMeta" class="meta-row" hidden></div>
+        <div id="browseMeta" class="meta-row" role="status" aria-live="polite" hidden></div>
       </div>
-      <div id="allList" class="list" role="list" aria-live="polite"></div>
+      <div id="allList" class="list" role="list"></div>
     </section>
 
     <!-- Vue 3 : Carte -->
     <section id="view-map" data-view aria-labelledby="view-map-title">
-      <h2 id="view-map-title" class="visually-hidden">Carte des stations</h2>
+      <h2 id="view-map-title" class="visually-hidden" tabindex="-1">Carte des stations</h2>
       <p class="section-label">CARTE</p>
       <div class="map-shell">
         <div class="map-address-search">
           <label for="mapAddressInput" class="map-address-label">Adresse postale</label>
           <div class="map-address-wrap">
-            <input id="mapAddressInput" class="map-address-input" type="search" placeholder="Saisis une adresse (ex: 12 rue Nationale, Lille)" autocomplete="off" />
+            <input id="mapAddressInput" class="map-address-input" type="search" placeholder="Saisis une adresse (ex: 12 rue Nationale, Lille)" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="mapAddressSuggestions" aria-autocomplete="list" aria-haspopup="listbox" />
             <button id="mapAddressClear" class="map-address-clear" type="button" aria-label="Effacer l'adresse" hidden>×</button>
           </div>
-          <ul id="mapAddressSuggestions" class="map-address-suggestions" role="listbox" hidden></ul>
+          <ul id="mapAddressSuggestions" class="map-address-suggestions" role="listbox" aria-label="Suggestions d'adresses" hidden></ul>
           <p class="map-address-help">Choisis une suggestion pour afficher les V'Lille autour.</p>
         </div>
         <p id="mapStatus" class="map-status" role="status" aria-live="polite">Chargement de la carte…</p>
@@ -1097,21 +859,21 @@
   </main>
 
   <footer>
-    <div>Source données : <a href="https://transport.data.gouv.fr/datasets/vlille-disponibilite-en-temps-reel-3" target="_blank" rel="noopener">GBFS Ilévia (V'Lille)</a>. Actualisation ~ 60 s. | Build publié le 31/05/2026 à 16:46 (Europe/Paris) - Version 2026-05-31-1646</div>
+    <div>Source données : <a href="https://transport.data.gouv.fr/datasets/vlille-disponibilite-en-temps-reel-3" target="_blank" rel="noopener" aria-label="GBFS Ilévia (V'Lille) — ouvre un nouvel onglet">GBFS Ilévia (V'Lille)</a>. Actualisation ~ 60 s. | Build publié le 31/05/2026 à 16:46 (Europe/Paris) - Version 2026-05-31-1646</div>
   </footer>
 
   <nav class="bottom-bar" aria-label="Actions rapides">
     <div class="wrap">
       <button id="mbHome" class="item" title="Favoris">
-        <span class="icon">⭐</span>
+        <span class="icon"><svg class="ic" width="1.4rem" height="1.4rem" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z"/></svg></span>
         <span class="label">Favoris</span>
       </button>
       <button id="mbMap" class="item" title="Carte">
-        <span class="icon">🗺️</span>
+        <span class="icon"><svg class="ic" width="1.4rem" height="1.4rem" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M15.817.113A.5.5 0 0 1 16 .5v14a.5.5 0 0 1-.402.49l-5 1a.5.5 0 0 1-.196 0L5.5 15.01l-4.902.98A.5.5 0 0 1 0 15.5v-14a.5.5 0 0 1 .402-.49l5-1a.5.5 0 0 1 .196 0L10.5.99l4.902-.98a.5.5 0 0 1 .415.103M10 1.91l-4-.8v12.98l4 .8zm1 12.98 4-.8V1.11l-4 .8zm-6-.8V1.11l-4 .8v12.98z"/></svg></span>
         <span class="label">Carte</span>
       </button>
       <button id="mbSearch" class="item" title="Rechercher">
-        <span class="icon">🔍</span>
+        <span class="icon"><svg class="ic" width="1.4rem" height="1.4rem" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/></svg></span>
         <span class="label">Recherche</span>
       </button>
     </div>
@@ -1211,7 +973,9 @@
     const state = {
       stations: /** @type {Array<Station>} */([]),
       favorites: new Set(readJSON(LS_KEYS.fav, [])),
-      timer: null,
+      refreshTimer: null,
+      fetchFailures: 0,
+      autoRefreshOn: false,
       lastFetch: null,
       userLoc: null,
       currentView: 'fav',
@@ -1233,6 +997,7 @@
       mapAddressRequestToken: 0,
       mapAddressDebounceTimer: null,
       mapHasFit: false,
+      fetchInFlight: false,
     };
 
     /** @typedef {{ id:string, name:string, bikes:number, docks:number, updatedAt:string, lat?:number, lon?:number, address?:string }} Station */
@@ -1486,10 +1251,11 @@
 
     function updateHeaderHeight(){
       const mainNav = document.querySelector('.tl-navbar');
-      const subNav = document.querySelector('.tl-subnav');
-      if (mainNav) document.documentElement.style.setProperty('--nav-main-h', mainNav.offsetHeight + 'px');
-      const headerHeight = (mainNav ? mainNav.offsetHeight : 0) + (subNav ? subNav.offsetHeight : 0);
-      if (headerHeight > 0) document.documentElement.style.setProperty('--header-h', headerHeight + 'px');
+      const navHeight = mainNav ? mainNav.offsetHeight : 0;
+      if (navHeight > 0) {
+        document.documentElement.style.setProperty('--nav-main-h', navHeight + 'px');
+        document.documentElement.style.setProperty('--header-h', navHeight + 'px');
+      }
     }
 
     // Haptique léger (mobile)
@@ -1615,6 +1381,7 @@
       if (state.mapAddressAbortController) state.mapAddressAbortController.abort();
       const controller = new AbortController();
       state.mapAddressAbortController = controller;
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
 
       try {
         const response = await fetch(mapAddressSearchUrl(clean), { cache: 'no-store', signal: controller.signal });
@@ -1631,6 +1398,7 @@
         state.mapAddressSuggestions = [];
         closeMapAddressSuggestions();
       } finally {
+        clearTimeout(timeoutId);
         if (state.mapAddressAbortController === controller) state.mapAddressAbortController = null;
       }
     }
@@ -1675,8 +1443,8 @@
             <p class="map-nearby-distance">${escapeHtml(formatDistance(distanceKm))}</p>
           </div>
           <div class="map-nearby-metrics">
-            <span class="map-near-chip">🚲 ${station.bikes} vélos</span>
-            <span class="map-near-chip">🅿️ ${station.docks} places</span>
+            <span class="map-near-chip">${iconSvg('bicycle', { size: '.85em' })} ${station.bikes} vélos</span>
+            <span class="map-near-chip">${iconSvg('parking', { size: '.85em' })} ${station.docks} places</span>
           </div>
         `;
         list.appendChild(item);
@@ -1763,9 +1531,9 @@
         const distance = state.userLoc ? formatDistance(haversine(state.userLoc, { lat: station.lat, lon: station.lon })) : '';
         const popup = [
           `<strong>${escapeHtml(station.name)}</strong>`,
-          `<p>🚲 ${station.bikes} vélos · 🅿️ ${station.docks} places</p>`,
+          `<p>${iconSvg('bicycle', { size: '.85em' })} ${station.bikes} vélos · ${iconSvg('parking', { size: '.85em' })} ${station.docks} places</p>`,
           station.address ? `<p>${escapeHtml(station.address)}</p>` : '',
-          distance ? `<p>📍 ${distance}</p>` : ''
+          distance ? `<p>${iconSvg('geo-alt-fill', { size: '.85em' })} ${distance}</p>` : ''
         ].filter(Boolean).join('');
         marker.bindPopup(popup, { closeButton: true });
         marker.addTo(map);
@@ -1809,11 +1577,12 @@
         }
         if (Number.isFinite(state.userLoc.accuracy) && state.userLoc.accuracy > 0) {
           if (!state.mapUserAccuracyCircle) {
+            const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#1F5FE0';
             state.mapUserAccuracyCircle = L.circle([state.userLoc.lat, state.userLoc.lon], {
               radius: Math.min(Math.max(state.userLoc.accuracy, 20), 120),
-              color: '#ef4444',
-              fillColor: '#ef4444',
-              fillOpacity: 0.14,
+              color: accentColor,
+              fillColor: accentColor,
+              fillOpacity: 0.12,
               weight: 1,
               interactive: false
             }).addTo(map);
@@ -1853,13 +1622,17 @@
 
     // Géolocalisation partagée (subnav + mobile bar)
     window.requestVLilleLocation = function(){
-      if (!('geolocation' in navigator)) { alert("Géolocalisation non disponible sur cet appareil."); return; }
+      if (!('geolocation' in navigator)) {
+        setErrorBanner("Géolocalisation non disponible sur cet appareil.");
+        return;
+      }
       navigator.geolocation.getCurrentPosition((pos)=>{
         state.userLoc = {
           lat: pos.coords.latitude,
           lon: pos.coords.longitude,
           accuracy: Number(pos.coords.accuracy)
         };
+        hideErrorBanner();
         if (state.currentView === 'map') {
           centerMapOnUser();
           state.mapHasFit = true;
@@ -1869,27 +1642,28 @@
         render();
       }, (err)=>{
         console.warn('Geoloc error', err);
-        alert("Impossible de récupérer la position.");
+        let msg = "Impossible de récupérer la position.";
+        if (err && err.code === 1) msg = "Localisation refusée. Autorise l'accès à ta position dans les réglages du navigateur.";
+        else if (err && err.code === 2) msg = "Position indisponible pour le moment. Réessaie dans un instant.";
+        else if (err && err.code === 3) msg = "La localisation a pris trop de temps. Réessaie.";
+        setErrorBanner(msg);
       }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 30_000 });
     }
 
     // ====== Rendu ======
     function render(){
-      // Dernière maj (header)
-      el('#lastUpdate').textContent = `⏱︎ Maj — ${state.lastFetch ? fmtTime(state.lastFetch) : '—'}`;
+      // Fraîcheur des données : portée par la pastille « Live HH:MM » du hero.
       const availabilityPill = el('#availabilityPill');
       if (availabilityPill) {
         availabilityPill.textContent = state.lastFetch ? `Live ${fmtTime(state.lastFetch)}` : 'Disponibilités';
       }
 
       const searchInput = el('#search');
-      const subSearch = el('#subSearch');
       const clearSearch = el('#clearSearch');
       const sortSelect = el('#sortSelect');
       const browseMeta = el('#browseMeta');
       const favHint = el('#favHint');
       const rawQuery = searchInput?.value.trim() || '';
-      if (subSearch && subSearch.value !== searchInput.value) subSearch.value = searchInput.value;
       if (clearSearch) clearSearch.hidden = rawQuery.length === 0;
       if (sortSelect) {
         const currentMode = currentDisplayMode();
@@ -1950,9 +1724,25 @@
         browseMeta.textContent = parts.join(' · ');
         browseMeta.hidden = state.stations.length === 0;
       }
-      if (state.currentView === 'map' || state.map) renderMap(visible, rawQuery);
-      updateHeaderHeight();
-      // No-op placeholder: sticky search already uses --header-h; filters are stacked visually.
+      // On ne redessine la carte que lorsqu'elle est visible (évite la reconstruction des marqueurs toutes les 60 s hors vue carte).
+      if (state.currentView === 'map') renderMap(visible, rawQuery);
+    }
+
+    // Icônes SVG inline (Bootstrap Icons, jeu unique cohérent — zéro emoji).
+    const ICON_PATHS = {
+      bicycle: '<path d="M4 4.5a.5.5 0 0 1 .5-.5H6a.5.5 0 0 1 0 1v.5h4.14l.386-1.158A.5.5 0 0 1 11 4h1a.5.5 0 0 1 0 1h-.64l-.311.935.807 1.29a3 3 0 1 1-.848.53l-.508-.812-2.076 3.322A.5.5 0 0 1 8 10.5H5.959a3 3 0 1 1-1.815-3.274L5 5.856V5h-.5a.5.5 0 0 1-.5-.5m1.5 2.443-.508.814c.5.444.85 1.054.967 1.743h1.139zM8 9.057 9.598 6.5H6.402zM4.937 9.5a2 2 0 0 0-.487-.877l-.548.877zM3.603 8.092A2 2 0 1 0 4.937 10.5H3a.5.5 0 0 1-.424-.765zm7.947.53a2 2 0 1 0 .848-.53l1.026 1.643a.5.5 0 1 1-.848.53z"/>',
+      parking: '<path d="M5.5 4.002h2.962C10.045 4.002 11 5.104 11 6.586c0 1.494-.967 2.578-2.55 2.578H6.784V12H5.5zm2.77 4.072c.893 0 1.419-.545 1.419-1.488s-.526-1.482-1.42-1.482H6.778v2.97z"/><path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm15 0a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1z"/>',
+      star: '<path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z"/>',
+      'star-fill': '<path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>',
+      'geo-alt-fill': '<path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>',
+      'caret-up-fill': '<path d="m7.247 4.86-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/>',
+      'caret-down-fill': '<path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>',
+    };
+    function iconSvg(name, opts){
+      const o = opts || {};
+      const size = o.size || '1em';
+      const path = ICON_PATHS[name] || '';
+      return `<svg class="ic${o.cls ? ' ' + o.cls : ''}" width="${size}" height="${size}" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false">${path}</svg>`;
     }
 
     function stationCard(s){
@@ -1969,7 +1759,7 @@
       const isFav = state.favorites.has(s.id);
       star.setAttribute('aria-pressed', String(isFav));
       star.setAttribute('aria-label', isFav ? 'Retirer des favoris' : 'Ajouter aux favoris');
-      star.textContent = isFav ? '★' : '☆';
+      star.innerHTML = iconSvg(isFav ? 'star-fill' : 'star', { size: '1.25rem' });
       star.addEventListener('click', () => {
         if (state.favorites.has(s.id)) state.favorites.delete(s.id); else state.favorites.add(s.id);
         saveFavorites();
@@ -2022,7 +1812,7 @@
       bikes.className = `metric ${metricTone(s.bikes, state.thr.empty)}`;
       const bikesIcon = document.createElement('span');
       bikesIcon.className = 'metric-icon';
-      bikesIcon.textContent = '🚲';
+      bikesIcon.innerHTML = iconSvg('bicycle', { size: '1.3rem' });
       const bikesCopy = document.createElement('div');
       bikesCopy.className = 'metric-copy';
       const bikesValue = document.createElement('p');
@@ -2030,12 +1820,12 @@
       bikesValue.textContent = String(s.bikes);
       const bikesLabel = document.createElement('p');
       bikesLabel.className = 'metric-label';
-      bikesLabel.textContent = 'Vélos dispo';
+      bikesLabel.textContent = 'Vélos';
       const tb = state.trend[s.id]?.bikes || 0;
       if (tb !== 0){
         const arrow = document.createElement('span');
-        arrow.style.marginLeft = '.25rem';
-        arrow.textContent = tb > 0 ? '↑' : '↓';
+        arrow.className = 'metric-trend';
+        arrow.innerHTML = iconSvg(tb > 0 ? 'caret-up-fill' : 'caret-down-fill', { size: '.7em' });
         bikesValue.appendChild(arrow);
       }
       bikesCopy.append(bikesValue, bikesLabel);
@@ -2045,7 +1835,7 @@
       docks.className = `metric ${metricTone(s.docks, state.thr.full)}`;
       const docksIcon = document.createElement('span');
       docksIcon.className = 'metric-icon';
-      docksIcon.textContent = '🅿️';
+      docksIcon.innerHTML = iconSvg('parking', { size: '1.3rem' });
       const docksCopy = document.createElement('div');
       docksCopy.className = 'metric-copy';
       const docksValue = document.createElement('p');
@@ -2053,28 +1843,24 @@
       docksValue.textContent = String(s.docks);
       const docksLabel = document.createElement('p');
       docksLabel.className = 'metric-label';
-      docksLabel.textContent = 'Places libres';
+      docksLabel.textContent = 'Places';
       const td = state.trend[s.id]?.docks || 0;
       if (td !== 0){
         const arrow = document.createElement('span');
-        arrow.style.marginLeft = '.25rem';
-        arrow.textContent = td > 0 ? '↑' : '↓';
+        arrow.className = 'metric-trend';
+        arrow.innerHTML = iconSvg(td > 0 ? 'caret-up-fill' : 'caret-down-fill', { size: '.7em' });
         docksValue.appendChild(arrow);
       }
       docksCopy.append(docksValue, docksLabel);
       docks.append(docksIcon, docksCopy);
       metricsRow.append(bikes, docks);
 
-      const upd = document.createElement('div');
-      upd.className = 'station-updated';
-      upd.textContent = `Mis à jour : ${fmtTime(s.updatedAt)}`;
-
-      card.append(metricsRow, upd);
+      card.append(metricsRow);
       return card;
     }
 
     // ====== Navigation de vues ======
-    function setView(which){
+    function setView(which, options = {}){
       state.currentView = which;
       const isFavView = which === 'fav';
       const isBrowseView = which === 'browse';
@@ -2082,16 +1868,21 @@
       el('#view-fav').classList.toggle('active', isFavView);
       el('#view-browse').classList.toggle('active', isBrowseView);
       el('#view-map').classList.toggle('active', isMapView);
-      el('#mbHome')?.classList.toggle('is-active', isFavView);
-      el('#mbSearch')?.classList.toggle('is-active', isBrowseView);
-      el('#mbMap')?.classList.toggle('is-active', isMapView);
-      el('#subFav')?.classList.toggle('is-active', isFavView);
-      el('#subMap')?.classList.toggle('is-active', isMapView);
+      [['#mbHome', isFavView], ['#mbSearch', isBrowseView], ['#mbMap', isMapView]].forEach(([sel, on])=>{
+        const b = el(sel);
+        if (!b) return;
+        b.classList.toggle('is-active', on);
+        if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+      });
       const heroMapLocateBtn = el('#heroMapLocateBtn');
       if (heroMapLocateBtn) heroMapLocateBtn.hidden = !isMapView;
-      if (isBrowseView) {
-        el('#search').focus({ preventScroll: true });
-        el('#search').select();
+      if (options.focus !== false) {
+        if (isBrowseView) {
+          el('#search').focus({ preventScroll: true });
+          el('#search').select();
+        } else {
+          el(isMapView ? '#view-map-title' : '#view-fav-title')?.focus({ preventScroll: true });
+        }
       }
       if (isMapView) {
         const visible = getVisibleStations(el('#search')?.value.trim() || '');
@@ -2102,6 +1893,8 @@
 
     // ====== GBFS: récupération fusionnée ======
     async function fetchStations(){
+      if (state.fetchInFlight) return;
+      state.fetchInFlight = true;
       try {
         const idx = await fetchJson(GBFS_INDEX, 'Index GBFS');
         const feedsByLang = idx?.data || {};
@@ -2158,22 +1951,39 @@
         state.stations = out;
         updateTrends(out);
         state.lastFetch = new Date().toISOString();
+        state.fetchFailures = 0;
         hideErrorBanner();
         render();
       } catch (err){
         console.error('Erreur GBFS', err);
+        state.fetchFailures++;
         const hasStations = state.stations.length > 0;
         setErrorBanner(hasStations
           ? 'Impossible d’actualiser les données pour le moment. Les dernières infos restent affichées.'
           : 'Impossible de charger les disponibilités V’Lille pour le moment. Réessaie dans un instant.');
         if (!hasStations) render();
+      } finally {
+        state.fetchInFlight = false;
+        scheduleNextRefresh();
       }
     }
 
-    // ====== Auto-refresh ======
+    // ====== Auto-refresh (60 s, backoff exponentiel plafonné à 5 min sur échecs répétés) ======
+    function scheduleNextRefresh(){
+      if (state.refreshTimer) { clearTimeout(state.refreshTimer); state.refreshTimer = null; }
+      if (!state.autoRefreshOn) return;
+      const delay = state.fetchFailures > 0
+        ? Math.min(60_000 * (2 ** state.fetchFailures), 300_000)
+        : 60_000;
+      state.refreshTimer = setTimeout(fetchStations, delay);
+    }
     function startAutoRefresh(){
-      if (state.timer) clearInterval(state.timer);
-      state.timer = setInterval(fetchStations, 60_000); // 60s
+      state.autoRefreshOn = true;
+      scheduleNextRefresh();
+    }
+    function stopAutoRefresh(){
+      state.autoRefreshOn = false;
+      if (state.refreshTimer) { clearTimeout(state.refreshTimer); state.refreshTimer = null; }
     }
 
     // ====== Pull-to-refresh (mobile) ======
@@ -2198,40 +2008,97 @@
         });
       }
 
+      // Combobox accessible (clavier + ARIA), partagé par les deux champs de recherche.
+      function makeCombobox(input, list, onPick){
+        if (!input || !list) return;
+        let active = -1;
+        const opts = () => Array.from(list.querySelectorAll('li'));
+        const isOpen = () => !list.hidden && opts().length > 0;
+        const syncExpanded = () => input.setAttribute('aria-expanded', isOpen() ? 'true' : 'false');
+        function clearActive(){
+          active = -1;
+          input.removeAttribute('aria-activedescendant');
+          opts().forEach(li => { li.classList.remove('is-active'); li.setAttribute('aria-selected', 'false'); });
+        }
+        function setActive(i){
+          const its = opts();
+          if (!its.length) { clearActive(); return; }
+          active = (i + its.length) % its.length;
+          its.forEach((li, idx) => {
+            const on = idx === active;
+            li.classList.toggle('is-active', on);
+            li.setAttribute('aria-selected', on ? 'true' : 'false');
+            if (on) { input.setAttribute('aria-activedescendant', li.id); li.scrollIntoView({ block: 'nearest' }); }
+          });
+        }
+        new MutationObserver(() => {
+          opts().forEach((li, i) => {
+            li.id = list.id + '-opt-' + i;
+            li.setAttribute('role', 'option');
+            li.setAttribute('aria-selected', 'false');
+          });
+          active = -1;
+          input.removeAttribute('aria-activedescendant');
+          syncExpanded();
+        }).observe(list, { childList: true, attributes: true, attributeFilter: ['hidden'] });
+        list.addEventListener('mousedown', (e) => {
+          const li = e.target.closest('li');
+          if (!li) return;
+          e.preventDefault();
+          onPick(li);
+        });
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'ArrowDown') { if (!isOpen()) return; e.preventDefault(); setActive(active + 1); }
+          else if (e.key === 'ArrowUp') { if (!isOpen()) return; e.preventDefault(); setActive(active - 1); }
+          else if (e.key === 'Home') { if (!isOpen()) return; e.preventDefault(); setActive(0); }
+          else if (e.key === 'End') { if (!isOpen()) return; e.preventDefault(); setActive(opts().length - 1); }
+          else if (e.key === 'Enter') { const its = opts(); if (isOpen() && active >= 0 && its[active]) { e.preventDefault(); onPick(its[active]); } }
+          else if (e.key === 'Escape') { if (isOpen()) { e.preventDefault(); list.hidden = true; clearActive(); syncExpanded(); } }
+        });
+        syncExpanded();
+      }
+
       // Recherche + suggestions
       const searchInput = el('#search');
       const clearSearch = el('#clearSearch');
-      const subSearch = el('#subSearch');
       const sugg = el('#suggestions');
+      let searchRenderTimer = null;
+      const scheduleSearchRender = ()=>{
+        if (searchRenderTimer) clearTimeout(searchRenderTimer);
+        searchRenderTimer = setTimeout(render, 120);
+      };
       const onSearchInput = ()=>{
         const raw = searchInput.value.trim();
         const q = normalizeSearch(raw);
-        if (subSearch && subSearch.value !== searchInput.value) subSearch.value = searchInput.value;
         if (clearSearch) clearSearch.hidden = raw.length === 0;
-        if (!q) { sugg.hidden = true; sugg.textContent = ''; render(); return; }
-        const names = state.stations
-          .map(s => s.name)
-          .filter((v,i,arr)=> arr.indexOf(v)===i)
-          .filter(n => normalizeSearch(n).includes(q))
-          .slice(0, 8);
-        sugg.textContent = '';
-        for (const n of names) {
-          const li = document.createElement('li');
-          li.setAttribute('role', 'option');
-          li.textContent = n;
-          sugg.appendChild(li);
+        // Suggestions (léger) : immédiat.
+        if (!q) {
+          sugg.hidden = true;
+          sugg.textContent = '';
+        } else {
+          const names = state.stations
+            .map(s => s.name)
+            .filter((v,i,arr)=> arr.indexOf(v)===i)
+            .filter(n => normalizeSearch(n).includes(q))
+            .slice(0, 8);
+          sugg.textContent = '';
+          for (const n of names) {
+            const li = document.createElement('li');
+            li.setAttribute('role', 'option');
+            li.textContent = n;
+            sugg.appendChild(li);
+          }
+          sugg.hidden = names.length === 0;
         }
-        sugg.hidden = names.length === 0;
-        render();
+        // Rendu de la liste (lourd) : débounce pour ne pas jank le clavier.
+        scheduleSearchRender();
       };
       searchInput.addEventListener('input', onSearchInput);
-      el('#suggestions').addEventListener('mousedown', (e)=>{
-        const li = e.target.closest('li');
-        if (!li) return;
+      makeCombobox(searchInput, sugg, (li)=>{
         searchInput.value = li.textContent;
-        if (subSearch) subSearch.value = li.textContent;
-        el('#suggestions').hidden = true;
+        sugg.hidden = true;
         render();
+        searchInput.focus({ preventScroll: true });
       });
       searchInput.addEventListener('blur', ()=> setTimeout(()=> el('#suggestions').hidden = true, 150));
       searchInput.addEventListener('focus', ()=>{
@@ -2240,7 +2107,6 @@
       });
       clearSearch?.addEventListener('click', ()=>{
         searchInput.value = '';
-        if (subSearch) subSearch.value = '';
         sugg.hidden = true;
         sugg.textContent = '';
         render();
@@ -2275,9 +2141,7 @@
         mapAddressInput.addEventListener('blur', ()=> setTimeout(closeMapAddressSuggestions, 150));
       }
       if (mapAddressSuggestions) {
-        mapAddressSuggestions.addEventListener('mousedown', (e)=>{
-          const li = e.target.closest('li[data-idx]');
-          if (!li) return;
+        makeCombobox(mapAddressInput, mapAddressSuggestions, (li)=>{
           const idx = Number(li.dataset.idx);
           if (!Number.isInteger(idx) || !state.mapAddressSuggestions[idx]) return;
           selectMapAddressTarget(state.mapAddressSuggestions[idx]);
@@ -2336,36 +2200,29 @@
       });
 
       // Premier rendu + données
-      setView('fav');
+      // Vue par défaut : Favoris seulement si on en a, sinon on tombe sur la liste (Recherche).
+      const initialView = state.favorites.size > 0 ? 'fav' : 'browse';
+      setView(initialView, { focus: false });
       render();
       fetchStations();
       startAutoRefresh();
+
+      // Économie data/batterie : on suspend le rafraîchissement quand l'onglet est masqué,
+      // et on relance (avec un fetch immédiat) au retour au premier plan ou de la connexion.
+      document.addEventListener('visibilitychange', ()=>{
+        if (document.hidden) { stopAutoRefresh(); }
+        else { fetchStations(); startAutoRefresh(); }
+      });
+      window.addEventListener('online', ()=> fetchStations());
     })();
   </script>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
   <script>
-    if (window.TempoCommon) window.TempoCommon.bindMobileNavCollapse();
-
-    // Sous-menu V'Lille : actions
-    (function(){
-      const btnFav = document.getElementById('subFav');
-      const btnNear = document.getElementById('subNear');
-      const btnMap = document.getElementById('subMap');
-      const subSearch = document.getElementById('subSearch');
-      if (btnFav) btnFav.addEventListener('click', ()=> { if (typeof setView==='function') setView('fav'); });
-      if (btnNear) btnNear.addEventListener('click', ()=> { window.requestVLilleLocation?.(); });
-      if (btnMap) btnMap.addEventListener('click', ()=> { if (typeof setView==='function') setView('map'); });
-      if (subSearch) {
-        const mainSearch = document.getElementById('search');
-        subSearch.addEventListener('input', ()=> {
-          if (!mainSearch) return;
-          mainSearch.value = subSearch.value;
-          if (typeof setView==='function') setView('browse');
-          mainSearch.dispatchEvent(new Event('input', { bubbles: true }));
-        });
-      }
-    })();
+    // PWA : enregistrement du service worker (precache du shell + hors-ligne). Échec silencieux (http://, navigateurs sans SW).
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+      });
+    }
   </script>
 </body>
 </html>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Tempo Lille — V'Lille">
+  <rect width="512" height="512" rx="112" fill="#1F5FE0"/>
+  <g transform="translate(106 106) scale(12.5)" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="6" cy="17" r="4"/>
+    <circle cx="18" cy="17" r="4"/>
+    <path d="M6 17 L10 9 L12 13 L18 13"/>
+    <path d="M12 13 L14 17"/>
+  </g>
+</svg>
