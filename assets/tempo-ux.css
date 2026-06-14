@@ -107,8 +107,7 @@ html[data-bs-theme="dark"] {
 .tempo-app > main,
 .tempo-app > .container,
 .tempo-app main.container,
-.tempo-app .tl-navbar > .container,
-.tempo-app .tl-subnav > .container {
+.tempo-app .tl-navbar > .container {
   width: min(var(--tempo-content-max), calc(100% - clamp(1rem, 4vw, 3.2rem)));
   max-width: none;
   margin-inline: auto;
@@ -232,21 +231,6 @@ html[data-bs-theme="dark"] {
   }
 }
 
-.tempo-app .btn,
-.tempo-app .btn-link,
-.tempo-app .seg,
-.tempo-app .btn-comp,
-.tempo-app .navbar-toggler {
-  min-height: 44px;
-  font-weight: 700;
-}
-
-.tempo-app .btn,
-.tempo-app .btn-link,
-.tempo-app .seg {
-  border-radius: 0.82rem;
-}
-
 .tempo-app .card,
 .tempo-app .card-line,
 .tempo-app .weather-card {
@@ -256,31 +240,6 @@ html[data-bs-theme="dark"] {
 
 .tempo-app .list {
   gap: clamp(0.68rem, 1vw, 1rem);
-}
-
-.tempo-app .filters {
-  background: color-mix(in oklab, var(--tempo-bg) 84%, transparent);
-  border-bottom: 1px solid var(--tempo-border-soft);
-  backdrop-filter: blur(11px) saturate(135%);
-  justify-content: flex-start;
-  overflow-x: auto;
-  gap: 0.55rem;
-  padding-inline: clamp(0.65rem, 2vw, 1.2rem);
-}
-
-.tempo-app .filters::-webkit-scrollbar {
-  display: none;
-}
-
-.tempo-app .seg {
-  white-space: nowrap;
-  border: 1px solid var(--tempo-border);
-  box-shadow: var(--tempo-shadow-xs);
-}
-
-.tempo-app .seg[aria-selected="true"] {
-  background: color-mix(in oklab, var(--tempo-accent) 14%, var(--tempo-surface-strong));
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--tempo-accent) 38%, transparent);
 }
 
 .tempo-app .bottom-bar {
@@ -302,65 +261,7 @@ html[data-bs-theme="dark"] {
   font-size: 0.9rem;
 }
 
-.tempo-home header {
-  width: min(var(--tempo-content-max), calc(100% - clamp(1rem, 4vw, 3.2rem)));
-  margin-top: clamp(0.68rem, 2vw, 1.2rem);
-  margin-inline: auto;
-  border-radius: var(--tempo-radius-lg);
-  border: 1px solid color-mix(in oklab, var(--tempo-accent) 28%, transparent);
-  background:
-    linear-gradient(145deg, color-mix(in oklab, var(--tempo-accent) 68%, #5db8ff), color-mix(in oklab, var(--tempo-accent-2) 46%, #91dfff));
-  box-shadow: var(--tempo-shadow-md);
-}
-
-.tempo-home header h1,
-.tempo-home header p {
-  color: #f7fbff !important;
-}
-
-.tempo-home .card {
-  border-radius: var(--tempo-radius-lg);
-  overflow: hidden;
-  background: color-mix(in oklab, var(--tempo-surface-strong) 92%, transparent);
-  transform-origin: 50% 85%;
-}
-
-.tempo-home .card:hover,
-.tempo-home .card:focus-within {
-  transform: translateY(-5px);
-}
-
-.tempo-home .card-title {
-  font-size: clamp(1.05rem, 0.75vw + 0.88rem, 1.28rem);
-  color: var(--tempo-accent) !important;
-}
-
-.tempo-home .card-text {
-  font-size: clamp(0.96rem, 0.38vw + 0.86rem, 1.03rem);
-}
-
-.tempo-home .feature-icon {
-  border: 1px solid color-mix(in oklab, #ffffff 75%, transparent);
-  box-shadow: 0 8px 16px rgba(13, 110, 253, 0.22);
-}
-
-.tempo-home .btn-comp {
-  border-radius: 999px !important;
-  background: linear-gradient(115deg, var(--tempo-accent), var(--tempo-accent-2)) !important;
-  box-shadow: var(--tempo-shadow-sm);
-}
-
-.tempo-home .btn-comp:hover,
-.tempo-home .btn-comp:focus-visible {
-  filter: brightness(1.04);
-}
-
-/* Styles .tl-subnav retirés (sous-nav supprimée, étape 4). */
-
-.tempo-vlille .pill {
-  border: 1px solid var(--tempo-border);
-  background: color-mix(in oklab, var(--tempo-surface-strong) 88%, transparent);
-}
+/* Styles .tl-subnav et .tempo-home retirés (sous-nav + page d'accueil inexistante). */
 
 .tempo-vlille .search {
   top: var(--header-h, 56px);
@@ -384,82 +285,12 @@ html[data-bs-theme="dark"] {
 
 /* Barre dégradée décorative en haut des cartes retirée (étape 3a). */
 
-.tempo-vlille .chip {
-  border: 1px solid var(--tempo-border);
-}
-
-.tempo-vlille .btn-link {
-  border-radius: 999px;
-}
-
 .tempo-page-head {
   border: 1px solid var(--tempo-border-soft);
   border-radius: var(--tempo-radius-lg);
   background: color-mix(in oklab, var(--tempo-surface-strong) 90%, transparent);
   box-shadow: var(--tempo-shadow-sm);
   padding: clamp(0.9rem, 2vw, 1.25rem);
-}
-
-.tempo-page-head .eyebrow {
-  margin-bottom: 0.24rem;
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--tempo-text-muted);
-}
-
-.tempo-air {
-  font-family: var(--tempo-font-body);
-}
-
-.tempo-air .weather-card {
-  border-radius: clamp(14px, 2.2vw, 24px);
-  overflow: clip;
-}
-
-.tempo-air .loading p {
-  color: #eef5ff;
-}
-
-.tempo-air #weatherContent {
-  padding-bottom: calc(4.6rem + env(safe-area-inset-bottom));
-}
-
-.tempo-air .weather-detail,
-.tempo-air .air-quality,
-.tempo-air #forecast,
-.tempo-air .alert {
-  border: 1px solid var(--tempo-border-soft);
-  border-radius: 0.9rem;
-  background: color-mix(in oklab, var(--tempo-surface-strong) 90%, transparent);
-  box-shadow: var(--tempo-shadow-xs);
-}
-
-.tempo-air .aqi-main {
-  border-radius: 0.9rem;
-}
-
-.tempo-air .refresh-btn {
-  right: clamp(0.85rem, 2.5vw, 1.4rem);
-  bottom: calc(0.9rem + env(safe-area-inset-bottom));
-  z-index: 1060;
-  box-shadow: var(--tempo-shadow-md);
-}
-
-.tempo-air .detail-value {
-  color: color-mix(in oklab, var(--tempo-accent) 75%, #3f8cff);
-  font-size: clamp(1.2rem, 2.8vw, 1.62rem);
-}
-
-.tempo-air .rain-bar {
-  min-height: 62px;
-}
-
-.tempo-air .pollutants .pollutant-item {
-  border: 1px solid var(--tempo-border-soft);
-  border-radius: 0.75rem;
-  padding: 0.5rem 0.45rem;
 }
 
 @media (max-width: 860px) {
@@ -480,17 +311,12 @@ html[data-bs-theme="dark"] {
   .tempo-app > main,
   .tempo-app > .container,
   .tempo-app main.container,
-  .tempo-app .tl-navbar > .container,
-  .tempo-app .tl-subnav > .container {
+  .tempo-app .tl-navbar > .container {
     width: calc(100% - 1rem);
   }
 
   .tempo-app .tl-navbar .navbar-brand {
     font-size: 1rem;
-  }
-
-  .tempo-home header h1 {
-    font-size: clamp(1.6rem, 5.3vw, 2rem);
   }
 }
 
@@ -506,38 +332,14 @@ html[data-bs-theme="dark"] {
 }
 
 /* =====================================================================
-   Remplacement natif minimal de Bootstrap (Bootstrap CSS retiré, étape 3b).
-   Seules les classes réellement utilisées dans le markup sont réimplémentées.
+   Remplacement natif minimal de Bootstrap (Bootstrap CSS retiré).
+   Seules les classes encore présentes dans le markup sont réimplémentées.
    ===================================================================== */
 .navbar { position: relative; display: flex; flex-wrap: wrap; align-items: center; padding-block: 0.5rem; }
 .sticky-top { position: sticky; top: 0; z-index: 1020; }
 .container { width: 100%; margin-inline: auto; }
 .navbar-brand { display: inline-flex; align-items: center; text-decoration: none; }
-.nav { display: flex; flex-wrap: wrap; align-items: center; list-style: none; margin: 0; padding: 0; }
-.nav-item { display: flex; align-items: center; }
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
-  padding: 0.375rem 0.75rem; border: 1px solid transparent; border-radius: var(--radius-md);
-  background: transparent; color: var(--text); font: inherit; line-height: 1.2; cursor: pointer; text-decoration: none;
-}
-.btn-sm { padding: 0.3rem 0.6rem; font-size: var(--fs-sm); }
-.btn-outline-primary { color: var(--accent); border-color: color-mix(in oklab, var(--accent) 45%, transparent); background: var(--surface); }
-.btn-outline-primary:hover, .btn-outline-primary:focus-visible { color: var(--on-accent); background: var(--accent); border-color: var(--accent); }
-.form-control {
-  display: block; width: 100%; padding: 0.4rem 0.75rem; border: 1px solid var(--border);
-  border-radius: var(--radius-md); background: var(--surface); color: var(--text); font: inherit; line-height: 1.4;
-}
-.form-control-sm { padding: 0.3rem 0.6rem; font-size: var(--fs-sm); }
-.form-control::placeholder { color: var(--text-faint); }
-.form-control:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 .h5 { font-size: var(--fs-lg); font-weight: 700; line-height: 1.2; }
-.d-flex { display: flex !important; }
-.align-items-center { align-items: center !important; }
-.flex-wrap { flex-wrap: wrap !important; }
-.gap-2 { gap: 0.5rem !important; }
-.py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
-.ms-auto { margin-left: auto !important; }
-.me-2 { margin-right: 0.5rem !important; }
 .mt-2 { margin-top: 0.5rem !important; }
 .mb-0 { margin-bottom: 0 !important; }
 .mb-3 { margin-bottom: 1rem !important; }

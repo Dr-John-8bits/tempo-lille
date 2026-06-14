@@ -818,8 +818,8 @@
 
     <!-- Vue 2 : Recherche / Ajout -->
     <section id="view-browse" data-view aria-labelledby="view-browse-title">
-      <h2 id="view-browse-title" class="visually-hidden" tabindex="-1">Recherche de stations</h2>
-      <p class="section-label">RECHERCHE</p>
+      <h2 id="view-browse-title" class="visually-hidden" tabindex="-1">Stations à proximité</h2>
+      <p class="section-label">STATIONS</p>
       <div class="search">
         <div class="wrap">
           <input id="search" type="search" placeholder="Rechercher une station… (filtre en direct)" aria-label="Rechercher une station" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="suggestions" aria-autocomplete="list" aria-haspopup="listbox" />
@@ -862,19 +862,19 @@
     <div>Source données : <a href="https://transport.data.gouv.fr/datasets/vlille-disponibilite-en-temps-reel-3" target="_blank" rel="noopener" aria-label="GBFS Ilévia (V'Lille) — ouvre un nouvel onglet">GBFS Ilévia (V'Lille)</a>. Actualisation ~ 60 s. | Build publié le 31/05/2026 à 16:46 (Europe/Paris) - Version 2026-05-31-1646</div>
   </footer>
 
-  <nav class="bottom-bar" aria-label="Actions rapides">
+  <nav class="bottom-bar" aria-label="Navigation principale">
     <div class="wrap">
-      <button id="mbHome" class="item" title="Favoris">
-        <span class="icon"><svg class="ic" width="1.4rem" height="1.4rem" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z"/></svg></span>
-        <span class="label">Favoris</span>
+      <button id="mbSearch" class="item" title="Stations proches">
+        <span class="icon"><svg class="ic" width="1.4rem" height="1.4rem" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/></svg></span>
+        <span class="label">Proche</span>
       </button>
       <button id="mbMap" class="item" title="Carte">
         <span class="icon"><svg class="ic" width="1.4rem" height="1.4rem" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M15.817.113A.5.5 0 0 1 16 .5v14a.5.5 0 0 1-.402.49l-5 1a.5.5 0 0 1-.196 0L5.5 15.01l-4.902.98A.5.5 0 0 1 0 15.5v-14a.5.5 0 0 1 .402-.49l5-1a.5.5 0 0 1 .196 0L10.5.99l4.902-.98a.5.5 0 0 1 .415.103M10 1.91l-4-.8v12.98l4 .8zm1 12.98 4-.8V1.11l-4 .8zm-6-.8V1.11l-4 .8v12.98z"/></svg></span>
         <span class="label">Carte</span>
       </button>
-      <button id="mbSearch" class="item" title="Rechercher">
-        <span class="icon"><svg class="ic" width="1.4rem" height="1.4rem" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/></svg></span>
-        <span class="label">Recherche</span>
+      <button id="mbHome" class="item" title="Favoris">
+        <span class="icon"><svg class="ic" width="1.4rem" height="1.4rem" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z"/></svg></span>
+        <span class="label">Favoris</span>
       </button>
     </div>
   </nav>
@@ -2186,7 +2186,11 @@
 
       if (mbHome)   mbHome.addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); setView('fav'); });
       if (mbMap)    mbMap.addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); setView('map'); });
-      if (mbSearch) mbSearch.addEventListener('click', ()=> { if (typeof haptic==='function') haptic(); setView('browse'); });
+      if (mbSearch) mbSearch.addEventListener('click', ()=> {
+        if (typeof haptic==='function') haptic();
+        setView('browse', { focus: false });           // n'ouvre pas le clavier d'office
+        if (!state.userLoc) window.requestVLilleLocation?.();  // « Proche » : géoloc au besoin
+      });
       if (heroLocateBtn) heroLocateBtn.addEventListener('click', ()=> { if (typeof haptic==='function') haptic(18); window.requestVLilleLocation?.(); });
       if (heroMapLocateBtn) heroMapLocateBtn.addEventListener('click', ()=> {
         if (typeof haptic==='function') haptic(14);
