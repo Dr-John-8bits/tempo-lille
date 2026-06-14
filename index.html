@@ -1482,10 +1482,29 @@
       if (!withGeo.length && !state.userLoc && !hasAddressTarget) return;
       if (state.mapHasFit && !force) return;
 
+      // Vue par défaut : se centrer sur l'adresse choisie ou sur la position de l'utilisateur,
+      // à un zoom de quartier (on voit les stations proches) — pas toute la ville.
+      // Le bouton « Voir toute la carte » (force = true) garde la vue d'ensemble.
+      if (!force) {
+        if (hasAddressTarget) {
+          map.setView([state.mapAddressTarget.lat, state.mapAddressTarget.lon], 15);
+          state.mapHasFit = true;
+          return;
+        }
+        if (state.userLoc) {
+          map.setView([state.userLoc.lat, state.userLoc.lon], 15);
+          state.mapHasFit = true;
+          return;
+        }
+      }
+
+      // Pas de position connue, ou vue d'ensemble demandée : ajuster sur l'ensemble des points.
       const points = withGeo.map(s => [s.lat, s.lon]);
       if (state.userLoc) points.push([state.userLoc.lat, state.userLoc.lon]);
       if (hasAddressTarget) points.push([state.mapAddressTarget.lat, state.mapAddressTarget.lon]);
-      if (points.length === 1) {
+      if (!points.length) {
+        map.setView([50.62925, 3.057256], 13);
+      } else if (points.length === 1) {
         map.setView(points[0], 15);
       } else {
         map.fitBounds(points, { padding: [24, 24], maxZoom: 16 });
